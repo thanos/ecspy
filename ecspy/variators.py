@@ -126,6 +126,11 @@ def gaussian_mutation(random, candidates, args):
         mut_rate = 0.1
         args['mutation_rate'] = mut_rate
     try:
+        mut_rate = args['mutation_range']
+    except KeyError:
+        mut_range = 1.0
+        args['mutation_range'] = mut_range
+    try:
         lower_bound = args['lower_bound']
     except KeyError:
         lower_bound = 0
@@ -139,9 +144,10 @@ def gaussian_mutation(random, candidates, args):
     cs_copy = list(candidates)
     for i, cs in enumerate(cs_copy):
         for j, c in enumerate(cs):
-            c += random.gauss(0, mut_rate) * (upper_bound - lower_bound)
-            c = max(min(c, upper_bound), lower_bound)
-            cs_copy[i][j] = c
+            if random.random() < mut_rate:
+                c += random.gauss(0, mut_range) * (upper_bound - lower_bound)
+                c = max(min(c, upper_bound), lower_bound)
+                cs_copy[i][j] = c
     return cs_copy
 
 
