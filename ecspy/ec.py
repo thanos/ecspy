@@ -86,6 +86,10 @@ class EvolutionEngine(object):
         while not self._should_terminate(terminator, population, num_generations, num_fun_evals):
             pop_copy = list(population)
             parents = self.selector(random=self._random, population=pop_copy, args=self._kwargs)
+            
+            # Sort the parents just before taking out the candidate so that relative fitness
+            # can be determined in the variators (e.g., differential crossover).
+            parents.sort(key=lambda x: x.fitness, reverse=True)
             parent_cs = [list(i.candidate) for i in parents]
             offspring_cs = parent_cs
             if isinstance(self.variator, types.ListType):

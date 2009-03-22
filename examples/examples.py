@@ -8,14 +8,14 @@ from ecspy import variators
 from ecspy import observers
 
 
-def generate(random, args):
+def generate_binary(random, args):
     try:
         bits = args['num_bits']
     except KeyError:
         bits = 8
     return [random.choice([0, 1]) for i in xrange(bits)]
         
-def evaluate(candidates, args):
+def evaluate_binary(candidates, args):
     fitness = []
     try:
         base = args['base']
@@ -29,7 +29,20 @@ def evaluate(candidates, args):
             exp -= 1
         fitness.append(num)
     return fitness
-    
+
+def generate_real(random, args):
+    try:
+        size = args['chrom_size']
+    except KeyError:
+        size = 4
+    return [random.random() for i in xrange(size)]
+
+def evaluate_real(candidates, args):
+    fitness = []
+    for cand in candidates:
+        num = sum(cand)
+        fitness.append(num)
+    return fitness
 
     
 if __name__ == '__main__': 
@@ -37,18 +50,18 @@ if __name__ == '__main__':
     for i in xrange(1):
         rand = Random()
         rand.seed(1324567)
-        ga = ec.GA(rand)
-        ga.observer = observers.screen_observer
-#        ga.variator = [variators.uniform_crossover, variators.bit_flip_mutation]
-        start = time()
-        final_pop = ga.evolve(evaluator=evaluate,
-                              generator=generate,
-                              terminator=terminators.fun_eval_termination,
-                              max_fun_evals=100,
-                              num_elites=1,
-                              pop_size=10,
-                              num_bits=10)
-        stop = time()
+        # ga = ec.GA(rand)
+        # ga.observer = observers.screen_observer
+# #        ga.variator = [variators.uniform_crossover, variators.bit_flip_mutation]
+        # start = time()
+        # final_pop = ga.evolve(evaluator=evaluate_real,
+                              # generator=generate_real,
+                              # terminator=terminators.fun_eval_termination,
+                              # max_fun_evals=100,
+                              # num_elites=1,
+                              # pop_size=10,
+                              # num_bits=10)
+        # stop = time()
         
         # es = ec.ES(rand)
         # es.observer = observers.screen_observer
@@ -64,25 +77,25 @@ if __name__ == '__main__':
                                   # num_bits=10)
         # stop = time()
         
-        # engine = ec.EvolutionEngine(rand)
-        # engine.selector = selectors.roulette_wheel_selection
-        # engine.variator = [variators.uniform_crossover, variators.bit_flip_mutation]
-        # engine.replacer = replacers.comma_replacement
-        # engine.observer = observers.screen_observer
+        engine = ec.EvolutionEngine(rand)
+        engine.selector = selectors.roulette_wheel_selection
+        engine.variator = [variators.differential_crossover, variators.gaussian_mutation]
+        engine.replacer = replacers.steady_state_replacement
+        engine.observer = observers.screen_observer
         
-        # start = time()
-        # final_pop = engine.evolve(evaluator=evaluate, 
-                                  # generator=generate, 
-                                  # terminator=[terminators.fun_eval_termination], #, terminators.diversity_termination, terminators.fun_eval_termination, terminators.num_gen_termination],
-                                  # pop_size=10, 
-                                  # num_selected=10, 
-                                  # num_elites=1, 
-                                  # max_fun_evals=50,
-                                  # max_generations=5,
-                                  # mutation_rate=0.5,
-                                  # use_one_fifth_rule=True,
-                                  # num_bits=10)
-        # stop = time()
+        start = time()
+        final_pop = engine.evolve(evaluator=evaluate_real, 
+                                  generator=generate_real, 
+                                  terminator=[terminators.fun_eval_termination], #, terminators.diversity_termination, terminators.fun_eval_termination, terminators.num_gen_termination],
+                                  pop_size=10, 
+                                  num_selected=2, 
+                                  num_elites=2, 
+                                  max_fun_evals=50,
+                                  max_generations=5,
+                                  mutation_rate=0.5,
+                                  use_one_fifth_rule=True,
+                                  num_bits=10)
+        stop = time()
         
         print('***********************************')
         print('Total Execution Time: %0.5f seconds' % (stop - start))

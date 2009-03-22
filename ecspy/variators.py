@@ -1,4 +1,5 @@
 from itertools import izip
+import types
 
 
 def default_variation(random, candidates, args):
@@ -95,6 +96,15 @@ def blend_crossover(random, candidates, args):
         upper_bound = args['upper_bound']
     except KeyError:
         upper_bound = 1
+        
+    if not isinstance(lower_bound, types.ListType):
+        clen = max([len(x) for x in candidates])
+        lower_bound = [lower_bound] * clen
+        
+    if not isinstance(upper_bound, types.ListType):
+        clen = max([len(x) for x in candidates])
+        upper_bound = [upper_bound] * clen
+        
     cand = list(candidates)
     if len(cand) % 2 == 1:
         cand = cand[:-1]
@@ -104,21 +114,80 @@ def blend_crossover(random, candidates, args):
     children = []
     for mom, dad in izip(moms, dads):
         if random.random() < crossover_rate:
-            child = []
-            for m, d in izip(mom, dad):
+            bro = []
+            sis = []
+            for index, (m, d) in enumerate(izip(mom, dad)):
                 smallest = min(m, d)
                 largest = max(m, d)
                 delta = blx_alpha * (largest - smallest)
-                value = smallest - delta + random.random() * (largest - smallest + 2 * delta)
-                value = max(min(value, upper_bound), lower_bound)
-                child.append(value)
-            children.append(child)
+                bro_val = smallest - delta + random.random() * (largest - smallest + 2 * delta)
+                sis_val = smallest - delta + random.random() * (largest - smallest + 2 * delta)
+                bro_val = max(min(bro_val, upper_bound[index]), lower_bound[index])
+                sis_val = max(min(sis_val, upper_bound[index]), lower_bound[index])
+                bro.append(bro_val)
+                sis.append(sis_val)
+            children.append(bro)
+            children.append(sis)
         else:
-            children.append(random.sample([mom, dad], 1))
+            children.append(mom)
+            children.append(dad)
     return children
 
     
-
+def differential_crossover(random, candidates, args):
+    try:
+        differential_phi = args['differential_phi']
+    except KeyError:
+        differential_phi = 0.1
+    try:
+        crossover_rate = args['crossover_rate']
+    except KeyError:
+        crossover_rate = 1.0
+    try:
+        lower_bound = args['lower_bound']
+    except KeyError:
+        lower_bound = 0
+    try:
+        upper_bound = args['upper_bound']
+    except KeyError:
+        upper_bound = 1
+        
+    if not isinstance(lower_bound, types.ListType):
+        clen = max([len(x) for x in candidates])
+        lower_bound = [lower_bound] * clen
+        
+    if not isinstance(upper_bound, types.ListType):
+        clen = max([len(x) for x in candidates])
+        upper_bound = [upper_bound] * clen
+        
+    # Don't shuffle the candidates so that we will know
+    # which is better. In this case, moms will always
+    # be better than dads.
+    cand = list(candidates)
+    if len(cand) % 2 == 1:
+        cand = cand[:-1]
+    moms = cand[::2]
+    dads = cand[1::2]
+    children = []
+    for mom, dad in izip(moms, dads):
+        if random.random() < crossover_rate:
+            bro = []
+            sis = []
+            for index, (m, d) in enumerate(izip(mom, dad)):
+                bro_val = d + differential_phi * random.random() * (m - d)
+                sis_val = d + differential_phi * random.random() * (m - d)
+                bro_val = max(min(bro_val, upper_bound[index]), lower_bound[index])
+                sis_val = max(min(sis_val, upper_bound[index]), lower_bound[index])
+                bro.append(bro_val)
+                sis.append(sis_val)
+            children.append(bro)
+            children.append(sis)
+        else:
+            children.append(mom)
+            children.append(dad)
+    return children
+    
+    
 def gaussian_mutation(random, candidates, args):
     try:
         mut_rate = args['mutation_rate']
@@ -126,7 +195,7 @@ def gaussian_mutation(random, candidates, args):
         mut_rate = 0.1
         args['mutation_rate'] = mut_rate
     try:
-        mut_rate = args['mutation_range']
+        mut_range = args['mutation_range']
     except KeyError:
         mut_range = 1.0
         args['mutation_range'] = mut_range
@@ -141,12 +210,20 @@ def gaussian_mutation(random, candidates, args):
         upper_bound = 1
         args['upper_bound'] = upper_bound
         
+    if not isinstance(lower_bound, types.ListType):
+        clen = max([len(x) for x in candidates])
+        lower_bound = [lower_bound] * clen
+        
+    if not isinstance(upper_bound, types.ListType):
+        clen = max([len(x) for x in candidates])
+        upper_bound = [upper_bound] * clen
+        
     cs_copy = list(candidates)
     for i, cs in enumerate(cs_copy):
         for j, c in enumerate(cs):
             if random.random() < mut_rate:
-                c += random.gauss(0, mut_range) * (upper_bound - lower_bound)
-                c = max(min(c, upper_bound), lower_bound)
+                c += random.gauss(0, mut_range) * (upper_bound[j] - lower_bound[j])
+                c = max(min(c, upper_bound[j]), lower_bound[j])
                 cs_copy[i][j] = c
     return cs_copy
 
