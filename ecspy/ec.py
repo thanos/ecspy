@@ -6,6 +6,7 @@
 
 import time
 import types
+import copy
 import terminators
 import selectors
 import replacers
@@ -71,8 +72,8 @@ class EvolutionEngine(object):
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
         
         population = []
-        for i in xrange(len(initial_cs)):
-            ind = Individual(initial_cs[i])
+        for i, cs in enumerate(initial_cs):
+            ind = Individual(cs)
             ind.fitness = initial_fit[i]
             population.append(ind)
             
@@ -81,8 +82,11 @@ class EvolutionEngine(object):
         
         population.sort(key=lambda x: x.fitness, reverse=True)
         
-        self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
-        
+        if isinstance(self.observer, types.ListType):
+            for obs in self.observer:
+                obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
+        else:
+            self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
         while not self._should_terminate(terminator, population, num_generations, num_fun_evals):
             pop_copy = list(population)
             parents = self.selector(random=self._random, population=pop_copy, args=self._kwargs)
@@ -90,7 +94,7 @@ class EvolutionEngine(object):
             # Sort the parents just before taking out the candidate so that relative fitness
             # can be determined in the variators (e.g., differential crossover).
             parents.sort(key=lambda x: x.fitness, reverse=True)
-            parent_cs = [list(i.candidate) for i in parents]
+            parent_cs = [copy.deepcopy(i.candidate) for i in parents]
             offspring_cs = parent_cs
             if isinstance(self.variator, types.ListType):
                 for op in self.variator:
@@ -108,8 +112,11 @@ class EvolutionEngine(object):
             population = self.replacer(random=self._random, population=pop_copy, parents=parents, offspring=offspring, args=self._kwargs)
             population.sort(key=lambda x: x.fitness, reverse=True)
             num_generations += 1
-            self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
-        
+            if isinstance(self.observer, types.ListType):
+                for obs in self.observer:
+                    obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
+            else:
+                self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)        
         return population
         
 
