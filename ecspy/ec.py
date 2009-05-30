@@ -1,8 +1,3 @@
-# TO DO
-# Add additional selection/replacement/variation schemes
-# Create off-the-shelf ECs (like GA, EDA, etc.) that can be used
-# Add the comment strings to all functions/methods/classes
-
 
 import time
 import types

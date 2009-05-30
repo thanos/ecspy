@@ -1,9 +1,33 @@
 
 def default_selection(random, population, args):
+    """Return the population.
+    
+    This function acts as a default selection scheme for an EC.
+    It simply returns the entire population as having been 
+    selected.
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    args -- a dictionary of keyword arguments
+    
+    """
     return population
 
     
 def uniform_selection(random, population, args):
+    """Return a uniform sampling of individuals from the population.
+    
+    This function performs uniform selection by randomly choosing
+    members of the population with replacement.
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    num_selected -- the number of individuals to be selected (default 1)
+    
+    """
     try:
         num_selected = args['num_selected']
     except KeyError:
@@ -17,6 +41,17 @@ def uniform_selection(random, population, args):
 
 
 def roulette_wheel_selection(random, population, args):
+    """Return fitness proportional sampling of individuals from the population.
+
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    num_selected -- the number of individuals to be selected (default 1)
+    
+    """
     try:
         num_selected = args['num_selected']
     except KeyError:
@@ -61,6 +96,17 @@ def roulette_wheel_selection(random, population, args):
 
 
 def rank_selection(random, population, args):
+    """Return a rank-based sampling of individuals from the population.
+
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    num_selected -- the number of individuals to be selected (default 1)
+    
+    """
     try:
         num_selected = args['num_selected']
     except KeyError:
@@ -94,6 +140,18 @@ def rank_selection(random, population, args):
 
 
 def tournament_selection(random, population, args):
+    """Return a tournament sampling of individuals from the population.
+
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    num_selected -- the number of individuals to be selected (default 1)
+    tourn_size -- the tournament size (default 2)
+    
+    """
     try:
         num_selected = args['num_selected']
     except KeyError:

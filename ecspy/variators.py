@@ -3,10 +3,33 @@ import types
 
 
 def default_variation(random, candidates, args):
+    """Return the set of candidates without variation.
+
+    Arguments:
+    random -- the random number generator object
+    candidates -- the candidate solutions
+    args -- a dictionary of keyword arguments
+    
+    """
     return candidates
 
 
 def n_point_crossover(random, candidates, args):
+    """Return the offspring of n-point crossover on the candidates.
+
+    This function assumes that the candidate solutions are sliceable.
+    It selects n random points without replacement at which to 'cut'
+    the candidate solutions and recombine them.
+    Arguments:
+    random -- the random number generator object
+    candidates -- the candidate solutions
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    crossover_rate -- the rate at which crossover is performed (default 1.0)
+    num_crossover_points -- the n crossover points used (default 1)
+    
+    """
     try:
         crossover_rate = args['crossover_rate']
     except KeyError:
@@ -43,6 +66,24 @@ def n_point_crossover(random, candidates, args):
 
 
 def uniform_crossover(random, candidates, args):
+    """Return the offspring of uniform crossover on the candidates.
+
+    This function assumes that the candidate solutions are iterable.
+    It chooses every odd candidate as a 'mom' and every even as a 'dad'.
+    For each mom-dad pair, two offspring are produced. For each element
+    of the parents, a biased coin is flipped to determine whether the 
+    first offspring gets the 'mom' or the 'dad' element. An optional
+    keyword argument in args, pux_bias, determines the bias.
+    Arguments:
+    random -- the random number generator object
+    candidates -- the candidate solutions
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    crossover_rate -- the rate at which crossover is performed (default 1.0)
+    pux_bias -- the bias toward the first candidate in the crossover (default 0.5)
+    
+    """
     try:
         pux_bias = args['pux_bias']
     except KeyError:
@@ -80,6 +121,27 @@ def uniform_crossover(random, candidates, args):
 
     
 def blend_crossover(random, candidates, args):
+    """Return the offspring of blend crossover on the candidates.
+
+    This function assumes that the candidate solutions are iterable
+    and composed of values on which arithmetic operations are defined.
+    It performs blend crossover, which is similar to a generalized 
+    averaging of the candidate elements.
+    Arguments:
+    random -- the random number generator object
+    candidates -- the candidate solutions
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    crossover_rate -- the rate at which crossover is performed (default 1.0)
+    blx_alpha -- the blending rate (default 0.1)
+    lower_bound -- the lower bounds of the chromosome elements (default 0)
+    upper_bound -- the upper bounds of the chromosome elements (default 1)
+    The lower and upper bounds can either be single values, which will
+    be applied to all elements of a chromosome, or lists of values of 
+    the same length as the chromosome.
+    
+    """
     try:
         blx_alpha = args['blx_alpha']
     except KeyError:
@@ -135,6 +197,27 @@ def blend_crossover(random, candidates, args):
 
     
 def differential_crossover(random, candidates, args):
+    """Return the offspring of differential crossover on the candidates.
+
+    This function assumes that the candidate solutions are iterable
+    and composed of values on which arithmetic operations are defined.
+    It performs differential crossover, which is similar to the update
+    rule used in particle swarm optimization.
+    Arguments:
+    random -- the random number generator object
+    candidates -- the candidate solutions
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    crossover_rate -- the rate at which crossover is performed (default 1.0)
+    differential_phi -- the amount of random change in the crossover (default 0.1)
+    lower_bound -- the lower bounds of the chromosome elements (default 0)
+    upper_bound -- the upper bounds of the chromosome elements (default 1)
+    The lower and upper bounds can either be single values, which will
+    be applied to all elements of a chromosome, or lists of values of 
+    the same length as the chromosome.
+    
+    """
     try:
         differential_phi = args['differential_phi']
     except KeyError:
@@ -189,6 +272,25 @@ def differential_crossover(random, candidates, args):
     
     
 def gaussian_mutation(random, candidates, args):
+    """Return the mutants created by Gaussian mutation on the candidates.
+
+    This function assumes that the candidate solutions are indexable
+    and numeric. It performs Gaussian mutation.
+    Arguments:
+    random -- the random number generator object
+    candidates -- the candidate solutions
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    mutation_rate -- the rate at which mutation is performed (default 0.1)
+    mutation_range -- the variance used in the Gaussian function (default 1.0)
+    lower_bound -- the lower bounds of the chromosome elements (default 0)
+    upper_bound -- the upper bounds of the chromosome elements (default 1)
+    The lower and upper bounds can either be single values, which will
+    be applied to all elements of a chromosome, or lists of values of 
+    the same length as the chromosome.
+    
+    """
     try:
         mut_rate = args['mutation_rate']
     except KeyError:
@@ -229,6 +331,20 @@ def gaussian_mutation(random, candidates, args):
 
 
 def bit_flip_mutation(random, candidates, args):
+    """Return the mutants produced by bit-flip mutation on the candidates.
+
+    This function assumes that the candidate solutions are binary values.
+    It performs bit-flip mutation. 
+    Arguments:
+    random -- the random number generator object
+    candidates -- the candidate solutions
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    mutation_rate -- the rate at which mutation is performed (default 0.1)
+    The mutation rate is applied on a bit by bit basis.
+    
+    """
     try:
         rate = args['mutation_rate']
     except KeyError:
