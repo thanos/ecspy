@@ -75,7 +75,7 @@ def plus_replacement(random, population, parents, offspring, args):
     try:
         use_one_fifth_rule = args['use_one_fifth_rule']
     except KeyError:
-        use_one_fifth = False
+        use_one_fifth_rule = False
         args['use_one_fifth_rule'] = use_one_fifth_rule
     pool = list(parents)
     pool.extend(list(offspring))
