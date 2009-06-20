@@ -59,6 +59,8 @@ class EvolutionEngine(object):
     
     def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
         self._kwargs = args
+        if not isinstance(seeds, types.ListType):
+            seeds = [seeds]
         initial_cs = list(seeds)
         num_generated = max(pop_size - len(seeds), 0)
         for i in xrange(num_generated):
