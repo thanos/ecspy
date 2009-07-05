@@ -1,6 +1,5 @@
 
 import time
-import types
 import copy
 import terminators
 import selectors
@@ -49,17 +48,19 @@ class EvolutionEngine(object):
         
     def _should_terminate(self, terminator, pop, ng, fe):
         terminate = False
-        if isinstance(terminator, types.ListType):
+        try:
             for clause in terminator:
                 terminate = terminate or clause(population=pop, num_generations=ng, num_fun_evals=fe, args=self._kwargs)
-        else:
+        except TypeError:
             terminate = terminator(population=pop, num_generations=ng, num_fun_evals=fe, args=self._kwargs)
         return terminate
         
     
     def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
         self._kwargs = args
-        if not isinstance(seeds, types.ListType):
+        try:
+            iter(seeds)
+        except TypeError:
             seeds = [seeds]
         initial_cs = list(seeds)
         num_generated = max(pop_size - len(seeds), 0)
@@ -79,10 +80,10 @@ class EvolutionEngine(object):
         
         population.sort(key=lambda x: x.fitness, reverse=True)
         
-        if isinstance(self.observer, types.ListType):
+        try:
             for obs in self.observer:
                 obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
-        else:
+        except TypeError:
             self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
         while not self._should_terminate(terminator, population, num_generations, num_fun_evals):
             pop_copy = list(population)
@@ -93,10 +94,10 @@ class EvolutionEngine(object):
             parents.sort(key=lambda x: x.fitness, reverse=True)
             parent_cs = [copy.deepcopy(i.candidate) for i in parents]
             offspring_cs = parent_cs
-            if isinstance(self.variator, types.ListType):
+            try:
                 for op in self.variator:
                     offspring_cs = op(random=self._random, candidates=offspring_cs, args=self._kwargs)
-            else:
+            except TypeError:
                 offspring_cs = self.variator(random=self._random, candidates=offspring_cs, args=self._kwargs)
             offspring_fit = evaluator(candidates=offspring_cs, args=self._kwargs)
             offspring = []
@@ -109,10 +110,10 @@ class EvolutionEngine(object):
             population = self.replacer(random=self._random, population=pop_copy, parents=parents, offspring=offspring, args=self._kwargs)
             population.sort(key=lambda x: x.fitness, reverse=True)
             num_generations += 1
-            if isinstance(self.observer, types.ListType):
+            try:
                 for obs in self.observer:
                     obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
-            else:
+            except TypeError:
                 self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)        
         return population
         

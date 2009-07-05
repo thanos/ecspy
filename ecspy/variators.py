@@ -1,5 +1,4 @@
 from itertools import izip
-import types
 
 
 def default_variation(random, candidates, args):
@@ -158,12 +157,16 @@ def blend_crossover(random, candidates, args):
         upper_bound = args['upper_bound']
     except KeyError:
         upper_bound = 1
-        
-    if not isinstance(lower_bound, types.ListType):
+    
+    try:
+        iter(lower_bound)
+    except TypeError:
         clen = max([len(x) for x in candidates])
         lower_bound = [lower_bound] * clen
         
-    if not isinstance(upper_bound, types.ListType):
+    try:
+        iter(upper_bound)
+    except TypeError:
         clen = max([len(x) for x in candidates])
         upper_bound = [upper_bound] * clen
         
@@ -234,12 +237,16 @@ def differential_crossover(random, candidates, args):
         upper_bound = args['upper_bound']
     except KeyError:
         upper_bound = 1
-        
-    if not isinstance(lower_bound, types.ListType):
+    
+    try:
+        iter(lower_bound)
+    except TypeError:
         clen = max([len(x) for x in candidates])
         lower_bound = [lower_bound] * clen
         
-    if not isinstance(upper_bound, types.ListType):
+    try:
+        iter(upper_bound)
+    except TypeError:
         clen = max([len(x) for x in candidates])
         upper_bound = [upper_bound] * clen
         
@@ -312,11 +319,15 @@ def gaussian_mutation(random, candidates, args):
         upper_bound = 1
         args['upper_bound'] = upper_bound
         
-    if not isinstance(lower_bound, types.ListType):
+    try:
+        iter(lower_bound)
+    except TypeError:
         clen = max([len(x) for x in candidates])
         lower_bound = [lower_bound] * clen
         
-    if not isinstance(upper_bound, types.ListType):
+    try:
+        iter(upper_bound)
+    except TypeError:
         clen = max([len(x) for x in candidates])
         upper_bound = [upper_bound] * clen
         
