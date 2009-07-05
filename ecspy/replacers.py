@@ -1,9 +1,37 @@
 
 def default_replacement(random, population, parents, offspring, args):
+    """Replaces entire population with offspring.
+    
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    parents -- the list of parent individuals
+    offspring -- the list of offspring individuals
+    args -- a dictionary of keyword arguments
+    
+    """
     return offspring
 
     
 def truncation_replacement(random, population, parents, offspring, args):
+    """Replaces population with the best of the population and offspring.
+    
+    This function performs truncation replacement, which means that
+    the entire existing population is replaced by the best from among
+    the current population and offspring, keeping the existing population
+    size fixed. This is similar to so called 'plus' replacement in the 
+    evolution strategies literature, except that 'plus' replacement 
+    considers only parents and offspring for survival. However, if the
+    entire population are parents (which is often the case in ES), then
+    truncation replacement and plus-replacement are equivalent approaches.
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    parents -- the list of parent individuals
+    offspring -- the list of offspring individuals
+    args -- a dictionary of keyword arguments
+    
+    """
     pool = list(population)
     pool.extend(list(offspring))
     pool.sort(key=lambda x: x.fitness, reverse=True)
@@ -11,6 +39,20 @@ def truncation_replacement(random, population, parents, offspring, args):
 
     
 def steady_state_replacement(random, population, parents, offspring, args):    
+    """Performs steady-state replacement for the offspring.
+    
+    This function performs steady-state replacement, which means that
+    the offspring replace the least fit individuals in the existing
+    population, even if those offspring are less fit than the individuals
+    that they replace.
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    parents -- the list of parent individuals
+    offspring -- the list of offspring individuals
+    args -- a dictionary of keyword arguments
+    
+    """
     off = list(offspring)
     pop = list(population)
     pop.sort(key=lambda x: x.fitness)
@@ -55,6 +97,26 @@ def generational_replacement(random, population, parents, offspring, args):
 
 
 def random_replacement(random, population, parents, offspring, args):
+    """Performs random replacement with optional weak elitism.
+    
+    This function performs random replacement, which means that
+    the offspring replace random members of the population, keeping
+    the population size constant. Weak elitism may also be specified 
+    through the num_elites keyword argument in args. If this is used, 
+    the best num_elites individuals in the current population are 
+    allowed to survive if they are better than the worst num_elites 
+    offspring.
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    parents -- the list of parent individuals
+    offspring -- the list of offspring individuals
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    num_elites -- number of elites to consider (default 0)
+    
+    """
     try:
         num_elites = args['num_elites']
     except KeyError:
@@ -72,6 +134,29 @@ def random_replacement(random, population, parents, offspring, args):
 
 
 def plus_replacement(random, population, parents, offspring, args):
+    """Performs 'plus' replacement with optional adaptive mutation.
+    
+    This function performs 'plus' replacement, which means that
+    the entire existing population is replaced by the best
+    population-many elements from the combined set of parents and 
+    offspring. Adaptive mutation can also be specified here through 
+    the use_one_fifth_rule keyword argument in args. This adaptive
+    mutation attempts to keep the rate of viable offspring near 20%.
+    If the number of successful offspring is below 20%, the mutation
+    rate is reduced by 20% (to allow more exploitation). If the 
+    number of successful offspring is above 20%, the mutation rate
+    is increased by 20% (to allow more exploration).
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    parents -- the list of parent individuals
+    offspring -- the list of offspring individuals
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    use_one_fifth_rule -- whether the 1/5 rule should be used (default False)
+    
+    """
     try:
         use_one_fifth_rule = args['use_one_fifth_rule']
     except KeyError:
@@ -98,6 +183,22 @@ def plus_replacement(random, population, parents, offspring, args):
 
 
 def comma_replacement(random, population, parents, offspring, args):
+    """Performs 'comma' replacement.
+    
+    This function performs 'comma' replacement, which means that
+    the entire existing population is replaced by the best
+    population-many elements from the offspring. This function
+    makes the assumption that the size of the offspring is at 
+    least as large as the original population. Otherwise, the
+    population size will not be constant.
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    parents -- the list of parent individuals
+    offspring -- the list of offspring individuals
+    args -- a dictionary of keyword arguments
+    
+    """
     pool = list(offspring)
     pool.sort(key=lambda x: x.fitness, reverse=True)
     survivors = pool[:len(population)]

@@ -22,10 +22,10 @@ class Individual(object):
             self.__dict__[name] = val
     
     def __str__(self):
-        return str(self.candidate) + " : " + str(self.fitness)
+        return "%s : %s" % (str(self.candidate), str(self.fitness))
         
     def __repr__(self):
-        return str(self.candidate) + " : " + str(self.fitness)
+        return "%s : %s" % (str(self.candidate), str(self.fitness))
         
     def __cmp__(self, other):
         if self.fitness is not None and other.fitness is not None:
@@ -35,8 +35,8 @@ class Individual(object):
 
 
 class EvolutionEngine(object):
-    def __init__(self, prng):
-        self._random = prng
+    def __init__(self, random):
+        self._random = random
         self.selector = selectors.default_selection
         self.variator = variators.default_variation
         self.replacer = replacers.default_replacement
@@ -64,18 +64,18 @@ class EvolutionEngine(object):
             seeds = [seeds]
         initial_cs = list(seeds)
         num_generated = max(pop_size - len(seeds), 0)
-        for i in xrange(num_generated):
+        for _ in xrange(num_generated):
             cs = generator(random=self._random, args=self._kwargs)
             initial_cs.append(cs)
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
         
         population = []
-        for i, cs in enumerate(initial_cs):
+        for cs, fit in zip(initial_cs, initial_fit):
             ind = Individual(cs)
-            ind.fitness = initial_fit[i]
+            ind.fitness = fit
             population.append(ind)
             
-        num_fun_evals = len(population)
+        num_fun_evals = len(initial_fit)
         num_generations = 0
         
         population.sort(key=lambda x: x.fitness, reverse=True)
@@ -101,12 +101,12 @@ class EvolutionEngine(object):
                 offspring_cs = self.variator(random=self._random, candidates=offspring_cs, args=self._kwargs)
             offspring_fit = evaluator(candidates=offspring_cs, args=self._kwargs)
             offspring = []
-            for i in xrange(len(offspring_cs)):
-                off = Individual(offspring_cs[i])
-                off.fitness = offspring_fit[i]
+            for cs, fit in zip(offspring_cs, offspring_fit):
+                off = Individual(cs)
+                off.fitness = fit
                 offspring.append(off)
             
-            num_fun_evals += len(offspring)
+            num_fun_evals += len(offspring_fit)
             population = self.replacer(random=self._random, population=pop_copy, parents=parents, offspring=offspring, args=self._kwargs)
             population.sort(key=lambda x: x.fitness, reverse=True)
             num_generations += 1
@@ -119,8 +119,8 @@ class EvolutionEngine(object):
         
 
 class GA(EvolutionEngine):
-    def __init__(self, prng):
-        EvolutionEngine.__init__(self, prng)
+    def __init__(self, random):
+        EvolutionEngine.__init__(self, random)
         self.selector = selectors.roulette_wheel_selection
         self.variator = [variators.n_point_crossover, variators.bit_flip_mutation]
         self.replacer = replacers.generational_replacement
@@ -138,8 +138,8 @@ class GA(EvolutionEngine):
 
 
 class ES(EvolutionEngine):
-    def __init__(self, prng):
-        EvolutionEngine.__init__(self, prng)
+    def __init__(self, random):
+        EvolutionEngine.__init__(self, random)
         self.selector = selectors.default_selection
         self.variator = variators.gaussian_mutation
         self.replacer = replacers.plus_replacement
