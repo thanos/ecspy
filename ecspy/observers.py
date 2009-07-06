@@ -57,7 +57,7 @@ def file_observer(population, num_generations, num_fun_evals, args):
     observer_file.write('Generation Number: %d \n' % num_generations)
     observer_file.write('Function Evaluations: %d \n' % num_fun_evals)
     avg_fit = sum([x.fitness for x in population]) / float(len(population))
-    observer_file.write('Average Fitness: %0.5f     Maximum Fitness: %0.5f' % (avg_fit, population[0].fitness))
+    observer_file.write('Average Fitness: %0.5f     Maximum Fitness: %0.5f \n' % (avg_fit, population[0].fitness))
     for ind in population:
         observer_file.write(str(ind) + '\n')
     observer_file.write('\n')
