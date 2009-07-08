@@ -1,13 +1,6 @@
-from setuptools import setup
+``ecspy`` -- A framework for creating evolutionary computations in Python.
+--------------------------------------------------------------------------
 
-setup(name='ecspy',
-      version='0.1',
-      packages=['ecspy'],
-
-      description="A framework for creating evolutionary computations "\
-        "in Python.",
-
-      long_description="""
 ECsPy (pronounced "easy as pie") provides a framework for creating 
 evolutionary computations in Python. Additionally, ECsPy provides an
 easy-to-use canonical genetic algorithm (GA), evolution strategy (ES), 
@@ -54,23 +47,3 @@ Resources
   
   * Email: aaron.lee.garrett@gmail.com
   
-""",
-
-      author='Aaron Garrett',
-      author_email='aaron.lee.garrett@gmail.com',
-      url='http://ecspy.googlecode.com',
-      license='GPLv3+',
-      keywords='evolutionary computation genetic algorithm optimization',
-
-      classifiers=[
-          'Development Status :: 4 - Beta',
-          'Environment :: Console',
-          'Intended Audience :: Science/Research',
-          'License :: OSI Approved :: GNU General Public License (GPL)',
-          'Operating System :: OS Independent',
-          'Programming Language :: Python :: 2.6',
-          'Topic :: Scientific/Engineering :: Artificial Intelligence'
-          ]
-
-     )
-

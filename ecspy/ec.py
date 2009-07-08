@@ -176,7 +176,7 @@ class Particle(Individual):
 
 class PSO(EvolutionEngine):
     def __init__(self, random):
-        self._random = random
+        EvolutionEngine.__init__(self, random)
         self.selector = []
         self.variator = []
         self.replacer = []
