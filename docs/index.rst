@@ -11,7 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
-   introduction
+   ec_intro
+   tutorial
 
 Indices and tables
 ==================

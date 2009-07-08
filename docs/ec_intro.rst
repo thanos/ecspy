@@ -1,7 +1,6 @@
-   
-************
-Introduction
-************
+*****************************************
+Evolutionary Computation: An Introduction
+*****************************************
 
 The beginnings of evolutionary computation (EC) can be traced back as far as the late 1950's, but it was the last two decades that saw truly exponential increases in the amount of attention given to the field [Back1997]_. EC can be thought of more as a problem solving strategy than a one-size-fits-all tool [Back1997]_ [Michalewicz2004]_. At its core, an EC attempts to mimic the biological process of evolution in order to solve a given problem [Fogel2000]_. This, consequently, suggests that there should be a simulated analog to the biological process of reproduction and some measure of or mechanism for survivability. Indeed, these must be defined for any EC. However, before these processes can be defined, it is necessary first to define what makes up an *individual*.
 
