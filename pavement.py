@@ -17,7 +17,7 @@ except:
 
 
 PROJECT = 'ecspy'
-VERSION = '0.1'
+VERSION = '0.1.1'
 
 # The sphinx templates expect the VERSION in the shell environment
 os.environ['VERSION'] = VERSION
