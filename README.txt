@@ -28,12 +28,16 @@ Package Structure
 ECsPy consists of the following 6 modules:
 
   * ec.py -- provides the basic framework for the EvolutionEngine and specific ECs
+  
+  * migrators.py -- defines a basic default migration which does nothing
              
   * observers.py -- defines a few built-in (screen and file) observers  
   
   * replacers.py -- defines standard replacement schemes such as generational and steady-state replacement
                     
   * selectors.py -- defines standard selectors (e.g., tournament)
+  
+  * swarm.py -- provides a basic particle swarm optimizer
   
   * terminators.py -- defines standard terminators (e.g., exceeding a maximum number of generations)
                       

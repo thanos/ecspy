@@ -30,7 +30,7 @@ README = path('README.txt').text()
 # associated with sub-packages.
 PACKAGE_DATA = paver.setuputils.find_package_data(PROJECT, 
                                                   package=PROJECT,
-                                                  only_in_packages=True,
+                                                  only_in_packages=False,
                                                   )
 
 options(
@@ -58,7 +58,6 @@ options(
           'Topic :: Scientific/Engineering :: Artificial Intelligence'
           ],
         
-        # It seems wrong to have to list recursive packages explicitly.
         packages = [PROJECT],
         package_data=PACKAGE_DATA,
     ),
@@ -86,13 +85,8 @@ options(
         beginspec='{{{cog',
         endspec='}}}',
         endoutput='{{{end}}}',
-#        includedir='PyMOTW',
     ),
 )
-
-# Stuff commonly used symbols into the builtins so we don't have to
-# import them in all of the cog blocks where we want to use them.
-# __builtins__['path'] = path
 
 def remake_directories(*dirnames):
     """Remove the directories and recreate them.
@@ -120,7 +114,7 @@ def html(options):
 def sdist(options):
     """Create a source distribution.
     """
-    return
+    pass
 
 @task
 def html_clean(options):
