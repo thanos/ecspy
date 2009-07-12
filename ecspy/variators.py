@@ -270,22 +270,29 @@ def differential_crossover(random, candidates, args):
         clen = max([len(x) for x in candidates])
         upper_bound = [upper_bound] * clen
         
-    # Don't shuffle the candidates so that we will know
-    # which is better. In this case, moms will always
-    # be better than dads.
+    # Be careful shuffling the candidates so that 
+    # we will know which is better. 
     cand = list(candidates)
     if len(cand) % 2 == 1:
         cand = cand[:-1]
-    moms = cand[::2]
-    dads = cand[1::2]
+    cand_pair = [(pos, ind) for pos, ind in enumerate(cand)]
+    random.shuffle(cand_pair)
+    moms = cand_pair[::2]
+    dads = cand_pair[1::2]
     children = []
     for mom, dad in izip(moms, dads):
         if random.random() < crossover_rate:
             bro = []
             sis = []
-            for index, (m, d) in enumerate(izip(mom, dad)):
-                bro_val = d + differential_phi * random.random() * (m - d)
-                sis_val = d + differential_phi * random.random() * (m - d)
+            for index, (m, d) in enumerate(izip(mom[1], dad[1])):
+                if mom[0] > dad[0]:
+                    negpos = 1
+                    val = d
+                else:
+                    negpos = -1
+                    val = m
+                bro_val = val + differential_phi * random.random() * negpos * (m - d)
+                sis_val = val + differential_phi * random.random() * negpos * (m - d)
                 bro_val = max(min(bro_val, upper_bound[index]), lower_bound[index])
                 sis_val = max(min(sis_val, upper_bound[index]), lower_bound[index])
                 bro.append(bro_val)
@@ -293,8 +300,8 @@ def differential_crossover(random, candidates, args):
             children.append(bro)
             children.append(sis)
         else:
-            children.append(mom)
-            children.append(dad)
+            children.append(mom[1])
+            children.append(dad[1])
     return children
     
     

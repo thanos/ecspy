@@ -59,8 +59,8 @@ def uniform_selection(random, population, args):
     return selected
 
 
-def roulette_wheel_selection(random, population, args):
-    """Return fitness proportional sampling of individuals from the population.
+def fitness_proportionate_selection(random, population, args):
+    """Return fitness proportionate sampling of individuals from the population.
 
     Arguments:
     random -- the random number generator object

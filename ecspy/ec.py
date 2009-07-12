@@ -143,7 +143,7 @@ class EvolutionEngine(object):
 class GA(EvolutionEngine):
     def __init__(self, random):
         EvolutionEngine.__init__(self, random)
-        self.selector = selectors.roulette_wheel_selection
+        self.selector = selectors.fitness_proportionate_selection
         self.variator = [variators.n_point_crossover, variators.bit_flip_mutation]
         self.replacer = replacers.generational_replacement
         self.operators = [self.selector,

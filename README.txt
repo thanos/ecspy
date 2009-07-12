@@ -25,7 +25,7 @@ http://www.opensource.org/licenses/gpl-3.0.html.
 Package Structure
 =================
   
-ECsPy consists of the following 6 modules:
+ECsPy consists of the following modules:
 
   * ec.py -- provides the basic framework for the EvolutionEngine and specific ECs
   
