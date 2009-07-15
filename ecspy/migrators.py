@@ -19,4 +19,5 @@
 
 
 def default_migration(random, population, args):
+    """Do nothing."""
     return population

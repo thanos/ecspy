@@ -32,6 +32,31 @@ def default_selection(random, population, args):
     """
     return population
 
+
+def truncation_selection(random, population, args):
+    """Selects the best individuals from the population.
+    
+    This function performs truncation selection, which means that only
+    the best individuals from the current population are selected. This
+    is a completely deterministic selection mechanism.
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    num_selected -- the number of individuals to be selected (default len(population))
+    
+    """
+    try:
+        num_selected = args['num_selected']
+    except KeyError:
+        num_selected = len(population)
+        args['num_selected'] = num_selected
+    pool = list(population)
+    pool.sort(key=lambda x: x.fitness, reverse=True)
+    return pool[:num_selected]
+
     
 def uniform_selection(random, population, args):
     """Return a uniform sampling of individuals from the population.

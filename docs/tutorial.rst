@@ -33,7 +33,7 @@ The Generator
 
 First, we import all the necessary libraries. ``random`` and ``time`` are needed for the random number generation; ``math`` is needed for the evaluation function; and ``ecspy`` is, of course, needed for the evolutionary computation.    
 
-This function must take the random number generator object along with the keyword arguments. Notice that we can use the ``args`` variable to pass anything we like to our functions. There is nothing special about the ``num_inputs`` key. But, as we'll see, we can pass in that value as a keyword argument to the ``evolve`` method of our evolution strategy [#]_. In contrast, there is something a bit special about the ``lower_bound`` and ``upper_bound`` keys. Those keys are used by some of the evolutionary operators (e.g., Gaussian mutation) that are distributed with ECsPy. 
+This function must take the random number generator object along with the keyword arguments. Notice that we can use the ``args`` variable to pass anything we like to our functions. There is nothing special about the ``num_inputs`` key. But, as we'll see, we can pass in that value as a keyword argument to the ``evolve`` method of our evolution strategy. In contrast, there is something a bit special about the ``lower_bound`` and ``upper_bound`` keys. Those keys are used by some of the evolutionary operators (e.g., Gaussian mutation) that are distributed with ECsPy. 
 
 This code is pretty straightforward. We're simply generating a list of ``num_inputs`` uniform random values between ``lower_bound`` and ``upper_bound``. If ``num_inputs`` has not been specified, then we will default to generating 10 values. Likewise the bounds would default to 0 and 1, respectively. 
 
@@ -75,13 +75,28 @@ The script outputs the best individual in the final generation, which will alway
 
 .. rubric:: Footnotes
 
-.. [#] We also could have created keys for the lower and upper bounds if our problem permitted those values to change, rather than remaining fixed at -5.12 and 5.12.
-
 .. [#] The evaluator was designed to evaluate all candidates, rather than a single candidate (with iteration happening inside the evolution engine), because this allows more complex evaluation functions that make use of the current set of individuals. Of course, such a function would also rely heavily on the choice of selector, as well.
 
 .. [#] We can also certainly create real-coded genetic algorithms, among many other choices for our EC. However, for this discussion we are attempting to use the canonical versions to which most people would be accustomed.
 
 
-=============================
-Some Cooler Example Goes Here
-=============================
+=================
+Evolving Polygons
+=================
+
+In this example, we will attempt to create a polygon of *n* vertices that has a maximum area. We'll also create a custom observer that allows us to display the polygon as it evolves.
+
+"""""""""""""
+The Generator
+"""""""""""""
+
+.. literalinclude:: polyarea.py
+    :start-after: #start_imports
+    :end-before: #end_imports
+    
+.. literalinclude:: polyarea.py
+    :pyobject: generate_polygon
+
+Once again, we import the necessary libraries. In this case, we'll also need to tailor elements of the EC, as well as provide graphical output.
+
+After the libraries have been imported, we define our generator function. 

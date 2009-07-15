@@ -12,7 +12,7 @@ def generate_rastrigin(random, args):
     try:
         size = args['num_inputs']
     except KeyError:
-        size = 10
+        size = 1
     try:
         lower = args['lower_bound']
     except KeyError:

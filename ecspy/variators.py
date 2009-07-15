@@ -395,3 +395,69 @@ def bit_flip_mutation(random, candidates, args):
                 if random.random() < rate:
                     cs_copy[i][j] = (c + 1) % 2
     return cs_copy
+
+    
+def estimation_of_distribution_variation(random, candidates, args):
+    """Return the offspring produced using estimation of distribution.
+
+    This function assumes that the candidate solutions are iterable 
+    objects containing real values. It creates a statistical model 
+    based on the set of candidates. The offspring are then generated 
+    from this model.
+    Arguments:
+    random -- the random number generator object
+    candidates -- the candidate solutions
+    args -- a dictionary of keyword arguments
+    
+    Optional keyword arguments in args:
+    num_offspring -- the number of offspring to create (default 1)
+    lower_bound -- the lower bounds of the chromosome elements (default 0)
+    upper_bound -- the upper bounds of the chromosome elements (default 1)
+    The lower and upper bounds can either be single values, which will
+    be applied to all elements of a chromosome, or lists of values of 
+    the same length as the chromosome.
+    
+    """
+    try:
+        num_offspring = args['num_offspring']
+    except KeyError:
+        num_offspring = 1
+        args['num_offspring'] = num_offspring
+    try:
+        lower_bound = args['lower_bound']
+    except KeyError:
+        lower_bound = 0
+        args['lower_bound'] = lower_bound
+    try:
+        upper_bound = args['upper_bound']
+    except KeyError:
+        upper_bound = 1
+        args['upper_bound'] = upper_bound
+    
+    try:
+        iter(lower_bound)
+    except TypeError:
+        clen = max([len(x) for x in candidates])
+        lower_bound = [lower_bound] * clen
+        
+    try:
+        iter(upper_bound)
+    except TypeError:
+        clen = max([len(x) for x in candidates])
+        upper_bound = [upper_bound] * clen
+        
+    cs_copy = list(candidates)
+    num_genes = max([len(x) for x in cs_copy])
+    genes = [[x[i] for x in cs_copy] for i in xrange(num_genes)] 
+    mean = [float(sum(x)) / float(len(x)) for x in genes]
+    stdev = [max(sum([(x - m)**2 for x in g]) / float(len(g) - 1), 0.001) for g, m in zip(genes, mean)]
+    offspring = []
+    for _ in xrange(num_offspring):
+        child = []
+        for m, s, hi, lo in zip(mean, stdev, upper_bound, lower_bound):
+            value = m + random.gauss(0, s);
+            value = max(min(value, hi), lo)
+            child.append(value)
+        offspring.append(child)
+        
+    return offspring

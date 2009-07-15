@@ -28,6 +28,17 @@ import observers
 
 
 class Individual(object):
+    """Represents an individual in an evolutionary computation.
+    
+    An individual is defined by its candidate solution and the
+    fitness (or value) of that candidate solution.
+    
+    Public Attributes:
+    candidate -- the candidate solution
+    fitness -- the value of the candidate solution
+    birthdate -- the system time at which the individual was created
+    
+    """
     def __init__(self, candidate = None):
         self.candidate = candidate
         self.fitness = None
@@ -53,17 +64,32 @@ class Individual(object):
             raise Exception("fitness is not defined")
 
 
-class EvolutionEngine(object):
+class EvolutionaryComputation(object):
+    """Represents a basic evolutionary computation.
+    
+    This class encapsulates the components of a generic evolutionary
+    computation. These components are the selection mechanism, the
+    variation operators, the replacement mechanism, the migration
+    scheme, and the observers.
+    
+    Public Attributes:
+    selector -- the selection operator
+    variator -- the (possibly list of) variation operator(s)
+    replacer -- the replacement operator
+    migrator -- the migration operator
+    observer -- the (possibly list of) observer(s)
+    
+    Public Methods:
+    evolve -- performs the evolution and returns the final
+              population of individuals
+    
+    """
     def __init__(self, random):
         self._random = random
         self.selector = selectors.default_selection
         self.variator = variators.default_variation
         self.replacer = replacers.default_replacement
         self.migrator = migrators.default_migration
-        self.operators = [self.selector,
-                          self.variator, 
-                          self.replacer,
-                          self.migrator]
         self.observer = observers.default_observer
         self._kwargs = dict()
         
@@ -140,33 +166,91 @@ class EvolutionEngine(object):
         return population
         
 
-class GA(EvolutionEngine):
+class GA(EvolutionaryComputation):
+    """Evolutionary computation representing a canonical genetic algorithm.
+    
+    This class represents a genetic algorithm which uses, by 
+    default, fitness proportionate selection, n-point crossover,
+    bit-flip mutation, and generational replacement. In the case
+    of bit-flip mutation, it is expected that the candidate 
+    solution is an iterable object of binary values. 
+    
+    """
     def __init__(self, random):
-        EvolutionEngine.__init__(self, random)
+        EvolutionaryComputation.__init__(self, random)
         self.selector = selectors.fitness_proportionate_selection
         self.variator = [variators.n_point_crossover, variators.bit_flip_mutation]
         self.replacer = replacers.generational_replacement
-        self.operators = [self.selector,
-                          self.variator,
-                          self.replacer]
-        self.observer = observers.default_observer
         
     def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
         try:
             args['num_selected']
         except KeyError:
             args['num_selected'] = pop_size
-        return EvolutionEngine.evolve(self, pop_size, seeds, generator, evaluator, terminator, **args)
+        return EvolutionaryComputation.evolve(self, pop_size, seeds, generator, evaluator, terminator, **args)
 
 
-class ES(EvolutionEngine):
+class ES(EvolutionaryComputation):
+    """Evolutionary computation representing a canonical evolution strategy.
+    
+    This class represents an evolution strategy which uses, by 
+    default, the default selection (i.e., all individuals are selected), 
+    Gaussian mutation, and "plus" replacement. It is assumed that the
+    candidate solution is an iterable object of real values. 
+    
+    """
     def __init__(self, random):
-        EvolutionEngine.__init__(self, random)
+        EvolutionaryComputation.__init__(self, random)
         self.selector = selectors.default_selection
         self.variator = variators.gaussian_mutation
         self.replacer = replacers.plus_replacement
-        self.operators = [self.selector,
-                          self.variator,
-                          self.replacer]
-        self.observer = observers.default_observer
         
+
+class EDA(EvolutionaryComputation):
+    """Evolutionary computation representing a canonical estimation of distribution algorithm.
+    
+    This class represents an estimation of distribution algorithm which
+    uses, by default, truncation selection, estimation of distribution 
+    variation, and generational replacement. It is assumed that the
+    candidate solution is an iterable object of real values. 
+    
+    """
+    def __init__(self, random):
+        EvolutionaryComputation.__init__(self, random)
+        self.selector = selectors.truncation_selection
+        self.variator = variators.estimation_of_distribution_variation
+        self.replacer = replacers.generational_replacement
+        
+    def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
+        try:
+            args['num_selected']
+        except KeyError:
+            args['num_selected'] = pop_size / 2
+        try:
+            args['num_offspring']
+        except KeyError:
+            args['num_offspring'] = pop_size
+        return EvolutionaryComputation.evolve(self, pop_size, seeds, generator, evaluator, terminator, **args)
+
+
+class DEA(EvolutionaryComputation):
+    """Evolutionary computation representing a differential evolutionary algorithm.
+    
+    This class represents a differential evolutionary algorithm which uses, by 
+    default, tournament selection, differential crossover, Gaussian mutation,
+    and steady-state replacement. It is expected that the candidate solution 
+    is an iterable object of real values. 
+    
+    """
+    def __init__(self, random):
+        EvolutionaryComputation.__init__(self, random)
+        self.selector = selectors.tournament_selection
+        self.variator = [variators.differential_crossover, variators.gaussian_mutation]
+        self.replacer = replacers.steady_state_replacement
+        
+    def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
+        try:
+            args['num_selected']
+        except KeyError:
+            args['num_selected'] = 2
+        return EvolutionaryComputation.evolve(self, pop_size, seeds, generator, evaluator, terminator, **args)

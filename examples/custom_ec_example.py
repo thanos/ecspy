@@ -25,21 +25,21 @@ def evaluate_real(candidates, args):
     
 rand = Random()
 rand.seed(int(time()))
-engine = ec.EvolutionEngine(rand)
-engine.selector = selectors.tournament_selection
-engine.variator = [variators.uniform_crossover, variators.gaussian_mutation]
-engine.replacer = replacers.steady_state_replacement
-engine.observer = observers.screen_observer
+evocomp = ec.EvolutionaryComputation(rand)
+evocomp.selector = selectors.tournament_selection
+evocomp.variator = [variators.uniform_crossover, variators.gaussian_mutation]
+evocomp.replacer = replacers.steady_state_replacement
+evocomp.observer = observers.screen_observer
 
 start = time()
-final_pop = engine.evolve(evaluator=evaluate_real, 
-                          generator=generate_real, 
-                          terminator=terminators.num_gen_termination,
-                          pop_size=100, 
-                          tourn_size=7,
-                          num_selected=2, 
-                          max_generations=100,
-                          mutation_rate=0.2)
+final_pop = evocomp.evolve(evaluator=evaluate_real, 
+                           generator=generate_real, 
+                           terminator=terminators.num_gen_termination,
+                           pop_size=100, 
+                           tourn_size=7,
+                           num_selected=2, 
+                           max_generations=100,
+                           mutation_rate=0.2)
 stop = time()
 
 print('***********************************')
