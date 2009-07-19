@@ -17,7 +17,7 @@ except:
 
 
 PROJECT = 'ecspy'
-VERSION = '0.1.1'
+VERSION = '0.2'
 
 # The sphinx templates expect the VERSION in the shell environment
 os.environ['VERSION'] = VERSION
@@ -45,7 +45,8 @@ options(
         download_url = 'http://%s.googlecode.com/files/%s-%s.zip' % (PROJECT, PROJECT, VERSION),
         license='GPLv3+',
         platforms=('Any'),
-        keywords=('python', 'optimization', 'evolutionary', 'computation', 'genetic', 'algorithm', 'particle', 'swarm'),
+        keywords=('python', 'optimization', 'evolutionary', 'computation', 'genetic algorithm', 
+                  'particle swarm', 'estimation of distribution', 'differential evolution'),
 
         classifiers=[
           'Development Status :: 4 - Beta',
