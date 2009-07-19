@@ -65,7 +65,7 @@ Now that we have decided upon our generator and evaluator, we can create the EC.
 ::
 
 	$ python rastrigin.py
-	[1.0038130589501075, 0.99382749748153509, 0.98657434925731635] : -0.0461808251818
+	[1.0038586458497158, 0.98735967905046562, 0.98381086090935399] : -0.0865874430247
 
 .. {{{end}}}
 
@@ -84,7 +84,7 @@ The script outputs the best individual in the final generation, which will alway
 Evolving Polygons
 =================
 
-In this example, we will attempt to create a polygon of *n* vertices that has a maximum area. We'll also create a custom observer that allows us to display the polygon as it evolves.
+In this example, we will attempt to create a polygon of *n* vertices that has maximal area. We'll also create a custom observer that allows us to display the polygon as it evolves.
 
 """""""""""""
 The Generator
@@ -99,4 +99,51 @@ The Generator
 
 Once again, we import the necessary libraries. In this case, we'll also need to tailor elements of the EC, as well as provide graphical output.
 
-After the libraries have been imported, we define our generator function. 
+After the libraries have been imported, we define our generator function. It looks for keyword arguments ``num_vertices``, ``lower_bound``, and ``upper_bound``, and it creates a list of ``num_vertices`` ordered pairs (tuples) where each coordinate is in the range ``[lower_bound, upper_bound]``.
+
+"""""""""""""
+The Evaluator
+"""""""""""""
+
+.. literalinclude:: polyarea.py
+    :pyobject: segments
+
+.. literalinclude:: polyarea.py
+    :pyobject: area
+
+.. literalinclude:: polyarea.py
+    :pyobject: evaluate_polygon
+
+In order to evaluate the polygon, we need to calculate its area. The ``segments`` and ``area`` functions do this for us. Therefore, the ``evaluate_polygon`` function simply needs to assign the fitness to be the value returned as the area.
+
+""""""""""""
+The Observer
+""""""""""""
+
+.. literalinclude:: polyarea.py
+    :pyobject: polygon_observer
+
+Since we are evolving a two-dimensional shape, it makes sense to use a graphical approach to observing the current best polygon during each iteration. The ``polygon_observer`` accomplishes this by drawing the best polygon in the population to a Tk canvas. Notice that the canvas is passed in via the keyword arguments parameter ``args``.
+
+""""""""""""""""""""""""""""
+The Evolutionary Computation
+""""""""""""""""""""""""""""
+
+For this task, we'll create a custom evolutionary computation by selecting the operators to be used. First, we will need to create a custom mutation operator since none of the pre-defined operators deal particularly well with a list of tuples.
+
+.. literalinclude:: polyarea.py
+    :pyobject: mutate_polygon
+
+Notice that this is essentially a Gaussian mutation on each coordinate of each tuple. Now we can create our custom EC.
+    
+.. literalinclude:: polyarea.py
+    :start-after: #start_main
+    :end-before: #end_main
+
+This EC uses tournament selection, uniform crossover, our custom mutation operator, and steady-state replacement. We also set up the custom observer and create the canvas, which is passed into the ``evolve`` method as a keyword argument.
+
+
+
+
+
+

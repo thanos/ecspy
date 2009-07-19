@@ -57,7 +57,7 @@ def truncation_replacement(random, population, parents, offspring, args):
     return pool[:len(population)]
 
     
-def steady_state_replacement(random, population, parents, offspring, args):    
+def steady_state_replacement(random, population, parents, offspring, args):
     """Performs steady-state replacement for the offspring.
     
     This function performs steady-state replacement, which means that

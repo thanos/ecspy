@@ -119,7 +119,7 @@ def polygon_observer(population, num_generations, num_fun_evals, args):
     canvas.update()
     print('%d function evaluations' % num_fun_evals)
     sleep(0.05)
-    
+
 
 #start_main
 rand = Random()
@@ -141,7 +141,7 @@ final_pop = my_ec.evolve(generator=generate_polygon,
                          num_selected=2,
                          mutation_rate=0.25,
                          pop_size=100,
-                         num_vertices=4,
+                         num_vertices=3,
                          lower_bound=-1,
                          upper_bound=1,
                          canvas=can)
