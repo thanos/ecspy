@@ -124,6 +124,8 @@ class EvolutionaryComputation(object):
             
         num_fun_evals = len(initial_fit)
         num_generations = 0
+        self._kwargs['num_generations'] = num_generations
+        self._kwargs['num_fun_evals'] = num_fun_evals
         
         population.sort(key=lambda x: x.fitness, reverse=True)
         
@@ -153,11 +155,14 @@ class EvolutionaryComputation(object):
                 off.fitness = fit
                 offspring.append(off)
             
-            num_fun_evals += len(offspring_fit)
+            num_fun_evals += len(offspring_fit)        
+            self._kwargs['num_fun_evals'] = num_fun_evals
+
             pop_copy = self.replacer(random=self._random, population=pop_copy, parents=parents, offspring=offspring, args=self._kwargs)
             population = self.migrator(random=self._random, population=pop_copy, args=self._kwargs)
             population.sort(key=lambda x: x.fitness, reverse=True)
             num_generations += 1
+            self._kwargs['num_generations'] = num_generations
             try:
                 for obs in self.observer:
                     obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
