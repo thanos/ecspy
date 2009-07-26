@@ -89,7 +89,7 @@ def mutate_polygon(random, candidates, args):
     return cs_copy
         
 
-def polygon_observer(population, num_generations, num_fun_evals, args):
+def polygon_observer(population, num_generations, num_evaluations, args):
     try:
         canvas = args['canvas']
     except KeyError:
@@ -117,7 +117,7 @@ def polygon_observer(population, num_generations, num_fun_evals, args):
         canvas.create_oval(x-vert_radius, y-vert_radius, x+vert_radius, y+vert_radius, fill='blue', tags='vert')
     canvas.pack()
     canvas.update()
-    print('%d function evaluations' % num_fun_evals)
+    print('%d evaluations' % num_evaluations)
     sleep(0.05)
 
 
@@ -136,8 +136,8 @@ can.pack()
 
 final_pop = my_ec.evolve(generator=generate_polygon,
                          evaluator=evaluate_polygon,
-                         terminator=[terminators.fun_eval_termination, terminators.avg_fitness_termination],
-                         max_fun_evals=5000,
+                         terminator=[terminators.evaluation_termination, terminators.avg_fitness_termination],
+                         max_evaluations=5000,
                          num_selected=2,
                          mutation_rate=0.25,
                          pop_size=100,

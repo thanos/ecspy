@@ -94,7 +94,7 @@ def run_script(input_file, script_name, interpreter='python'):
     return the text output formatted to be included as an rst
     literal text block.
     """
-    from paver.runtime import sh
+    from paver.easy import sh
     from paver.path import path
     rundir = path(input_file).dirname()
     output_text = sh('cd %(rundir)s && %(interpreter)s %(script_name)s 2>&1' % vars(), capture=True)

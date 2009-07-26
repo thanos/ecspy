@@ -11,7 +11,10 @@ customization.
 Requirements
 ============
 
-Requires at least Python 2.6.
+  * Requires at least Python 2.6.
+  * Matplotlib is required if the line plot observer is used.
+  * Parallel Python (pp) is required if parallel evaluation is used.
+
 
 
 License
@@ -29,9 +32,11 @@ ECsPy consists of the following modules:
 
   * ec.py -- provides the basic framework for the EvolutionEngine and specific ECs
   
+  * evaluators.py -- defines useful evaluation schemes, such as parallel evaluation
+  
   * migrators.py -- defines a basic default migration which does nothing
              
-  * observers.py -- defines a few built-in (screen and file) observers  
+  * observers.py -- defines a few built-in observers, including screen, file, and plotting observers
   
   * replacers.py -- defines standard replacement schemes such as generational and steady-state replacement
                     

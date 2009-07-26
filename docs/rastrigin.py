@@ -38,8 +38,8 @@ rand.seed(int(time()))
 es = ec.ES(rand)
 final_pop = es.evolve(generator=generate_rastrigin,
                       evaluator=evaluate_rastrigin,
-                      terminator=terminators.fun_eval_termination,
-                      max_fun_evals=20000,
+                      terminator=terminators.evaluation_termination,
+                      max_evaluations=20000,
                       mutation_rate=0.25,
                       lower_bound=-5.12,
                       upper_bound=5.12,
