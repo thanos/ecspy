@@ -1,5 +1,5 @@
 """
-    This package allows the creation of evolutionary computations.
+    This module provides pre-defined archivers for evolutionary computations.
     
     Copyright (C) 2009  Inspired Intelligence Initiative
 
@@ -18,7 +18,9 @@
 """
 
 
-__all__ = ['archivers', 'ec', 'evaluators', 'migrators', 'observers', 'replacers', 'selectors', 'swarm', 'terminators', 'variators']
-__version__ = '0.3'
-__author__ = 'Aaron Garrett <aaron.lee.garrett@gmail.com>'
-__url__ = 'http://ecspy.googlecode.com'
+def default_archiver(random, population, archive, args):
+    """Archive the current population."""
+    new_archive = []
+    for ind in population:
+        new_archive.append(ind)
+    return new_archive

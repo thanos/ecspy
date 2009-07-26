@@ -36,8 +36,8 @@ ga.observer = [observers.screen_observer, observers.file_observer]
 start = time()
 final_pop = ga.evolve(evaluator=evaluate_binary,
                       generator=generate_binary,
-                      terminator=terminators.fun_eval_termination,
-                      max_fun_evals=1000,
+                      terminator=terminators.evaluation_termination,
+                      max_evaluations=1000,
                       num_elites=1,
                       pop_size=100,
                       num_bits=10,

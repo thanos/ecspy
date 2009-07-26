@@ -56,13 +56,13 @@ class PSO(object):
         self.observer = observers.default_observer
         self._kwargs = dict()
 
-    def _should_terminate(self, terminator, pop, ng, fe):
+    def _should_terminate(self, terminator, pop, ng, ne):
         terminate = False
         try:
             for clause in terminator:
-                terminate = terminate or clause(population=pop, num_generations=ng, num_fun_evals=fe, args=self._kwargs)
+                terminate = terminate or clause(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
         except TypeError:
-            terminate = terminator(population=pop, num_generations=ng, num_fun_evals=fe, args=self._kwargs)
+            terminate = terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
         return terminate
 
     def _move(self, population, args):
@@ -137,7 +137,7 @@ class PSO(object):
         
         return population
 
-    def swarm(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
+    def swarm(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
         self._kwargs = args
         try:
             iter(seeds)
@@ -158,18 +158,18 @@ class PSO(object):
             particle.xfitness = fit
             population.append(particle)
             
-        num_fun_evals = len(initial_fit)
+        num_evaluations = len(initial_fit)
         num_generations = 0
         
         population.sort(key=lambda x: x.fitness, reverse=True)
         
         try:
             for obs in self.observer:
-                obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
+                obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
         except TypeError:
-            self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
+            self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
             
-        while not self._should_terminate(terminator, population, num_generations, num_fun_evals):            
+        while not self._should_terminate(terminator, population, num_generations, num_evaluations):
             population = self._move(population, self._kwargs)
 
             updated_candidates = [p.x for p in population]
@@ -181,13 +181,13 @@ class PSO(object):
                     particle.fitness = copy.deepcopy(particle.xfitness)
                     
             population.sort(key=lambda x: x.fitness, reverse=True)
-            num_fun_evals += len(updated_fitness)
+            num_evaluations += len(updated_fitness)
             num_generations += 1
             
-            try:
-                for obs in self.observer:
-                    obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
-            except TypeError:
-                self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)        
+        try:
+            for obs in self.observer:
+                obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
+        except TypeError:
+            self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
             
         return population

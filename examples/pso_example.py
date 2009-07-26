@@ -28,15 +28,15 @@ pso = PSO(rand)
 pso.observer = observers.screen_observer
 
 start = time()
-final_pop = pso.swarm(pop_size=20,
-                       evaluator=evaluate_real, 
-                       generator=generate_real,
-                       terminator=terminators.fun_eval_termination,
-                       max_fun_evals=200,
-                       topology='ring',
-                       neighborhood_size=5,
-                       use_constriction_coefficient=True,
-                       particle_size=6)
+final_pop = pso.swarm(evaluator=evaluate_real, 
+                      generator=generate_real,
+                      pop_size=20,
+                      terminator=terminators.evaluation_termination,
+                      max_evaluations=200,
+                      topology='ring',
+                      neighborhood_size=5,
+                      use_constriction_coefficient=True,
+                      particle_size=6)
 stop = time()
     
 print('***********************************')

@@ -3,6 +3,7 @@ from time import time
 from ecspy import ec
 from ecspy import terminators
 from ecspy import observers
+from ecspy import evaluators
 
 
 def generate_real(random, args):
@@ -12,12 +13,9 @@ def generate_real(random, args):
         size = 4
     return [random.random() for i in xrange(size)]
 
-def evaluate_real(candidates, args):
-    fitness = []
-    for cand in candidates:
-        num = sum(cand)
-        fitness.append(num)
-    return fitness
+def my_serial_evaluator(candidate):
+    num = sum(candidate)
+    return num
 
     
 file = open('es_observer.txt', 'w')
@@ -26,11 +24,12 @@ rand.seed(int(time()))
 es = ec.ES(rand)
 es.observer = [observers.screen_observer, observers.file_observer]
 start = time()
-final_pop = es.evolve(evaluator=evaluate_real, 
+final_pop = es.evolve(evaluator=evaluators.parallel_evaluation, 
                       generator=generate_real, 
-                      terminator=[terminators.fun_eval_termination, terminators.diversity_termination],                                
-                      pop_size=10, 
-                      max_fun_evals=200,
+                      pop_size=100, 
+                      terminator=[terminators.evaluation_termination, terminators.diversity_termination],
+                      serial_evaluator=my_serial_evaluator,
+                      max_evaluations=2000,
                       mutation_rate=0.2,
                       use_one_fifth_rule=True,
                       observer_file=file)

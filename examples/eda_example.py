@@ -27,9 +27,9 @@ eda.observer = observers.screen_observer
 start = time()
 final_pop = eda.evolve(evaluator=evaluate_real, 
                        generator=generate_real, 
-                       terminator=terminators.fun_eval_termination,
+                       terminator=terminators.evaluation_termination,
                        pop_size=10, 
-                       max_fun_evals=5000,
+                       max_evaluations=5000,
                        num_selected=2,
                        num_elites=1)
 stop = time()

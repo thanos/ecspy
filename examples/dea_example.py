@@ -27,9 +27,9 @@ dea.observer = observers.screen_observer
 start = time()
 final_pop = dea.evolve(evaluator=evaluate_real, 
                        generator=generate_real, 
-                       terminator=terminators.fun_eval_termination,
+                       terminator=terminators.evaluation_termination,
                        pop_size=10, 
-                       max_fun_evals=5000)
+                       max_evaluations=5000)
 stop = time()
     
 print('***********************************')

@@ -23,6 +23,7 @@ import selectors
 import variators
 import replacers
 import migrators
+import archivers
 import terminators
 import observers
 
@@ -77,6 +78,7 @@ class EvolutionaryComputation(object):
     variator -- the (possibly list of) variation operator(s)
     replacer -- the replacement operator
     migrator -- the migration operator
+    archiver -- the archival operator
     observer -- the (possibly list of) observer(s)
     
     Public Methods:
@@ -91,20 +93,75 @@ class EvolutionaryComputation(object):
         self.replacer = replacers.default_replacement
         self.migrator = migrators.default_migration
         self.observer = observers.default_observer
+        self.archiver = archivers.default_archiver
         self._kwargs = dict()
         
-    def _should_terminate(self, terminator, pop, ng, fe):
+    def _should_terminate(self, terminator, pop, ng, ne):
         terminate = False
         try:
             for clause in terminator:
-                terminate = terminate or clause(population=pop, num_generations=ng, num_fun_evals=fe, args=self._kwargs)
+                terminate = terminate or clause(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
         except TypeError:
-            terminate = terminator(population=pop, num_generations=ng, num_fun_evals=fe, args=self._kwargs)
+            terminate = terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
         return terminate
         
     
-    def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
+        """Perform the evolution.
+        
+        This function creates a population and then runs it through a series
+        of evolutionary epochs until the terminator is satisfied. The general
+        outline of an epoch is selection, variation, evaluation, replacement,
+        migration, archival, and observation. 
+        
+        Arguments:
+        generator -- the function to be used to generate candidate solutions 
+        evaluator -- the function to be used to evaluate candidate solutions
+        pop_size -- the number of Individuals in the population (default 100)
+        seeds -- an iterable collection of candidate solutions to include
+                 in the initial population (default [])
+        terminator -- the terminator (or iterable collection of terminators)
+                      to be used to determine whether the evolutionary process
+                      has finished (default terminators.default_termination)
+        args -- a dictionary of keyword arguments
+
+        Note that this method will fail if the generator and evaluator 
+        parameters are left with their default values. Note also that the
+        _kwargs class variable will be initialized to the args parameter here.
+        It will also be modified to include the following 'built-in' keyword
+        arguments (each preceded by an underscore) unless these arguments are
+        already present (which shouldn't be the case):
+        _generator -- the generator used for creating candidate solutions
+        _evaluator -- the evaluator used for evaluating solutions
+        _terminator -- the particular terminator(s) used
+        _population_size -- the size of the population
+        _num_generations -- the number of generations that have elapsed
+        _num_evaluations -- the number of evaluations that have been completed
+        _population -- the current population
+        _archive -- the current archive
+        
+        """
         self._kwargs = args
+        # Add entries to the keyword arguments dictionary
+        # if they're not already present.
+        try:
+            self._kwargs['_generator']
+        except KeyError:
+            self._kwargs['_generator'] = generator
+        try:
+            self._kwargs['_evaluator']
+        except KeyError:
+            self._kwargs['_evaluator'] = evaluator
+        try:
+            self._kwargs['_terminator']
+        except KeyError:
+            self._kwargs['_terminator'] = terminator
+        try:
+            self._kwargs['_population_size']
+        except KeyError:
+            self._kwargs['_population_size'] = pop_size
+        
+        # Create the initial population.
         try:
             iter(seeds)
         except TypeError:
@@ -117,24 +174,31 @@ class EvolutionaryComputation(object):
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
         
         population = []
+        archive = []
         for cs, fit in zip(initial_cs, initial_fit):
             ind = Individual(cs)
             ind.fitness = fit
             population.append(ind)
             
-        num_fun_evals = len(initial_fit)
+        num_evaluations = len(initial_fit)
         num_generations = 0
-        self._kwargs['num_generations'] = num_generations
-        self._kwargs['num_fun_evals'] = num_fun_evals
+        self._kwargs['_num_generations'] = num_generations
+        self._kwargs['_num_evaluations'] = num_evaluations
         
         population.sort(key=lambda x: x.fitness, reverse=True)
+        self._kwargs['_population'] = population
+        
+        pop_copy = list(population)
+        archive = self.archiver(random=self._random, population=pop_copy, archive=archive, args=self._kwargs)
+        self._kwargs['_archive'] = archive
         
         try:
             for obs in self.observer:
-                obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
+                obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
         except TypeError:
-            self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
-        while not self._should_terminate(terminator, population, num_generations, num_fun_evals):
+            self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
+        while not self._should_terminate(terminator, population, num_generations, num_evaluations):
+            # Select individuals.
             pop_copy = list(population)
             parents = self.selector(random=self._random, population=pop_copy, args=self._kwargs)
             
@@ -148,6 +212,8 @@ class EvolutionaryComputation(object):
                     offspring_cs = op(random=self._random, candidates=offspring_cs, args=self._kwargs)
             except TypeError:
                 offspring_cs = self.variator(random=self._random, candidates=offspring_cs, args=self._kwargs)
+            
+            # Evaluate offspring.
             offspring_fit = evaluator(candidates=offspring_cs, args=self._kwargs)
             offspring = []
             for cs, fit in zip(offspring_cs, offspring_fit):
@@ -155,20 +221,30 @@ class EvolutionaryComputation(object):
                 off.fitness = fit
                 offspring.append(off)
             
-            num_fun_evals += len(offspring_fit)        
-            self._kwargs['num_fun_evals'] = num_fun_evals
+            num_evaluations += len(offspring_fit)        
+            self._kwargs['_num_evaluations'] = num_evaluations
 
+            # Replace individuals.
             pop_copy = self.replacer(random=self._random, population=pop_copy, parents=parents, offspring=offspring, args=self._kwargs)
+            
+            # Migrate individuals.
             population = self.migrator(random=self._random, population=pop_copy, args=self._kwargs)
             population.sort(key=lambda x: x.fitness, reverse=True)
+            self._kwargs['_population'] = population
+            
+            # Archive individuals.
+            pop_copy = list(population)
+            archive = self.archiver(random=self._random, archive=archive, population=pop_copy, args=self._kwargs)
+            self._kwargs['_archive'] = archive
+            
             num_generations += 1
-            self._kwargs['num_generations'] = num_generations
+            self._kwargs['_num_generations'] = num_generations
             try:
                 for obs in self.observer:
-                    obs(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)
+                    obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
             except TypeError:
-                self.observer(population=population, num_generations=num_generations, num_fun_evals=num_fun_evals, args=self._kwargs)        
-        return population
+                self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)        
+        return archive
         
 
 class GA(EvolutionaryComputation):
@@ -187,12 +263,12 @@ class GA(EvolutionaryComputation):
         self.variator = [variators.n_point_crossover, variators.bit_flip_mutation]
         self.replacer = replacers.generational_replacement
         
-    def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
         try:
             args['num_selected']
         except KeyError:
             args['num_selected'] = pop_size
-        return EvolutionaryComputation.evolve(self, pop_size, seeds, generator, evaluator, terminator, **args)
+        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)
 
 
 class ES(EvolutionaryComputation):
@@ -226,7 +302,7 @@ class EDA(EvolutionaryComputation):
         self.variator = variators.estimation_of_distribution_variation
         self.replacer = replacers.generational_replacement
         
-    def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
         try:
             args['num_selected']
         except KeyError:
@@ -235,7 +311,7 @@ class EDA(EvolutionaryComputation):
             args['num_offspring']
         except KeyError:
             args['num_offspring'] = pop_size
-        return EvolutionaryComputation.evolve(self, pop_size, seeds, generator, evaluator, terminator, **args)
+        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)
 
 
 class DEA(EvolutionaryComputation):
@@ -253,9 +329,9 @@ class DEA(EvolutionaryComputation):
         self.variator = [variators.differential_crossover, variators.gaussian_mutation]
         self.replacer = replacers.steady_state_replacement
         
-    def evolve(self, pop_size=100, seeds=[], generator=None, evaluator=None, terminator=terminators.default_termination, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
         try:
             args['num_selected']
         except KeyError:
             args['num_selected'] = 2
-        return EvolutionaryComputation.evolve(self, pop_size, seeds, generator, evaluator, terminator, **args)
+        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)

@@ -21,21 +21,21 @@
 import math
 import itertools
 
-def default_termination(population, num_generations, num_fun_evals, args):
+def default_termination(population, num_generations, num_evaluations, args):
     """Return True.
     
     This function acts as a default termination criterion for an EC.
     Arguments:
     population -- the population of Individuals
     num_generations -- the number of elapsed generations
-    num_fun_evals -- the number of of used function evaluations
+    num_evaluations -- the number of candidate solution evaluations
     args -- a dictionary of keyword arguments
     
     """
     return True
     
 
-def diversity_termination(population, num_generations, num_fun_evals, args):
+def diversity_termination(population, num_generations, num_evaluations, args):
     """Return True if population diversity is less than a minimum diversity.
     
     This function calculates the Euclidean distance between every pair of
@@ -46,7 +46,7 @@ def diversity_termination(population, num_generations, num_fun_evals, args):
     Arguments:
     population -- the population of Individuals
     num_generations -- the number of elapsed generations
-    num_fun_evals -- the number of of used function evaluations
+    num_evaluations -- the number of candidate solution evaluations
     args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
@@ -67,7 +67,7 @@ def diversity_termination(population, num_generations, num_fun_evals, args):
     return max(distance) < min_diversity
 
     
-def avg_fitness_termination(population, num_generations, num_fun_evals, args):
+def avg_fitness_termination(population, num_generations, num_evaluations, args):
     """Return True if the population's average fitness is near its maximum fitness.
     
     This function calculates the average fitness of the population as well
@@ -76,7 +76,7 @@ def avg_fitness_termination(population, num_generations, num_fun_evals, args):
     Arguments:
     population -- the population of Individuals
     num_generations -- the number of elapsed generations
-    num_fun_evals -- the number of of used function evaluations
+    num_evaluations -- the number of candidate solution evaluations
     args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
@@ -93,7 +93,7 @@ def avg_fitness_termination(population, num_generations, num_fun_evals, args):
     return (max_fit - avg_fit) < min_fitness_diff
 
 
-def fun_eval_termination(population, num_generations, num_fun_evals, args):
+def evaluation_termination(population, num_generations, num_evaluations, args):
     """Return True if the number of function evaluations meets or exceeds a maximum.
     
     This function compares the number of function evaluations that have been 
@@ -102,21 +102,21 @@ def fun_eval_termination(population, num_generations, num_fun_evals, args):
     Arguments:
     population -- the population of Individuals
     num_generations -- the number of elapsed generations
-    num_fun_evals -- the number of of used function evaluations
+    num_evaluations -- the number of candidate solution evaluations
     args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
-    max_fun_evals -- the maximum function evaluations (default len(population)) 
+    max_evaluations -- the maximum candidate solution evaluations (default len(population)) 
     
     """
     try:
-        max_fun_evals = args['max_fun_evals']
+        max_evaluations = args['max_evaluations']
     except KeyError:
-        max_fun_evals = len(population)
-    return num_fun_evals >= max_fun_evals
+        max_evaluations = len(population)
+    return num_evaluations >= max_evaluations
 
 
-def num_gen_termination(population, num_generations, num_fun_evals, args):
+def generation_termination(population, num_generations, num_evaluations, args):
     """Return True if the number of generations meets or exceeds a maximum.
     
     This function compares the number of generations with a specified 
@@ -124,7 +124,7 @@ def num_gen_termination(population, num_generations, num_fun_evals, args):
     Arguments:
     population -- the population of Individuals
     num_generations -- the number of elapsed generations
-    num_fun_evals -- the number of of used function evaluations
+    num_evaluations -- the number of candidate solution evaluations
     args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
