@@ -67,12 +67,13 @@ def parallel_evaluation(candidates, args):
     func_template = pp.Template(job_server, serial_eval, serial_depend, serial_mod)
     jobs = [func_template.submit(cand) for cand in candidates]
     
-    all_jobs = []
+    results = []
     for job in jobs:
-        all_jobs.append(job())
+        results.append(job())
+    job_server.destroy()
     
     fitness = []
-    for result in all_jobs:
+    for result in results:
         fitness.append(result)
     return fitness
     

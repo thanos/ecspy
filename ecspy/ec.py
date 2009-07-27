@@ -56,13 +56,28 @@ class Individual(object):
         return "%s : %s" % (str(self.candidate), str(self.fitness))
         
     def __repr__(self):
-        return "%s : %s" % (str(self.candidate), str(self.fitness))
+        return "<Individual: candidate = %s, fitness = %s, birthdate = %d>" % (str(self.candidate), str(self.fitness), self.birthdate)
         
-    def __cmp__(self, other):
+    def __lt__(self, other):
         if self.fitness is not None and other.fitness is not None:
-            return cmp(self.fitness, other.fitness)
+            return self.fitness < other.fitness
         else:
             raise Exception("fitness is not defined")
+
+    def __le__(self, other):
+        return self < other or not other < self
+            
+    def __gt__(self, other):
+        return other < self
+
+    def __ge__(self, other):
+        return other < self or not self < other
+        
+    def __eq__(self, other):
+        return self.candidate == other.candidate
+        
+    def __ne__(self, other):
+        return self.candidate != other.candidate
 
 
 class EvolutionaryComputation(object):
@@ -189,7 +204,8 @@ class EvolutionaryComputation(object):
         self._kwargs['_population'] = population
         
         pop_copy = list(population)
-        archive = self.archiver(random=self._random, population=pop_copy, archive=archive, args=self._kwargs)
+        arc_copy = list(archive)
+        archive = self.archiver(random=self._random, population=pop_copy, archive=arc_copy, args=self._kwargs)
         self._kwargs['_archive'] = archive
         
         try:
@@ -234,7 +250,8 @@ class EvolutionaryComputation(object):
             
             # Archive individuals.
             pop_copy = list(population)
-            archive = self.archiver(random=self._random, archive=archive, population=pop_copy, args=self._kwargs)
+            arc_copy = list(archive)
+            archive = self.archiver(random=self._random, archive=arc_copy, population=pop_copy, args=self._kwargs)
             self._kwargs['_archive'] = archive
             
             num_generations += 1

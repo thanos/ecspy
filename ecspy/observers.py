@@ -111,6 +111,7 @@ def plot_observer(population, num_generations, num_evaluations, args):
     average_fitness = sum([x.fitness for x in population]) / float(len(population))
     median_fitness = population[len(population)/2].fitness
     colors = ['blue', 'green', 'red']
+    labels = ['best', 'average', 'median']
     data = []
     if num_generations == 0:
         pylab.ion()
@@ -125,4 +126,8 @@ def plot_observer(population, num_generations, num_evaluations, args):
         args['plot_data'] = data
 
     for i in xrange(3):
-        pylab.plot(data[0], data[i+1], color=colors[i])
+        pylab.plot(data[0], data[i+1], color=colors[i], label=labels[i])
+        
+    # Add the legend when the first data is added.
+    if len(data[0]) == 1:
+        pylab.legend(loc='lower right')
