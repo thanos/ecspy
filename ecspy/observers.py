@@ -19,6 +19,7 @@
 
 import time
 import pylab
+import numpy
 
 
 def default_observer(population, num_generations, num_evaluations, args):
@@ -116,18 +117,28 @@ def plot_observer(population, num_generations, num_evaluations, args):
     if num_generations == 0:
         pylab.ion()
         data = [[num_evaluations], [best_fitness], [average_fitness], [median_fitness]]
+        lines = []
+        for i in xrange(3):
+            line, = pylab.plot(data[0], data[i+1], color=colors[i], label=labels[i])
+            lines.append(line)
+        # Add the legend when the first data is added.
+        pylab.legend(loc='lower right')
         args['plot_data'] = data
+        args['plot_lines'] = lines
     else:
         data = args['plot_data']
         data[0].append(num_evaluations)
         data[1].append(best_fitness)
         data[2].append(average_fitness)
         data[3].append(median_fitness)
+        lines = args['plot_lines']
+        for i, line in enumerate(lines):
+            line.set_xdata(numpy.array(data[0]))
+            line.set_ydata(numpy.array(data[i+1]))
         args['plot_data'] = data
-
-    for i in xrange(3):
-        pylab.plot(data[0], data[i+1], color=colors[i], label=labels[i])
-        
-    # Add the legend when the first data is added.
-    if len(data[0]) == 1:
-        pylab.legend(loc='lower right')
+        args['plot_lines'] = lines
+    ymin = min(min(data[1]), min(data[2]), min(data[3]))
+    ymax = max(max(data[1]), max(data[2]), max(data[3]))
+    yrange = ymax - ymin
+    pylab.xlim((0, num_evaluations))
+    pylab.ylim((ymin - 0.1*yrange, ymax + 0.1*yrange))

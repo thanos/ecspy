@@ -24,3 +24,27 @@ def default_archiver(random, population, archive, args):
     for ind in population:
         new_archive.append(ind)
     return new_archive
+    
+
+def best_archiver(random, population, archive, args):
+    """Archive only the best individual(s)."""
+    new_archive = archive
+    for ind in population:
+        if len(new_archive) == 0:
+            new_archive.append(ind)
+        else:
+            should_remove = []
+            should_add = True
+            for a in new_archive:
+                if ind == a:
+                    should_add = False
+                    break
+                elif ind < a:
+                    should_add = False
+                elif ind > a:
+                    should_remove.append(a)
+            for r in should_remove:
+                new_archive.remove(r)
+            if should_add:
+                new_archive.append(ind)
+    return new_archive

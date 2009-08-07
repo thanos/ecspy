@@ -59,18 +59,21 @@ def parallel_evaluation(candidates, args):
     except KeyError:
         serial_mod = ()
     try:
-        parallel_servers = args['parallel_servers']
+        job_server = args['_job_server']
     except KeyError:
-        parallel_servers = ("*",)
-
-    job_server = pp.Server(ppservers=parallel_servers)
+        try:
+            parallel_servers = args['parallel_servers']
+        except KeyError:
+            parallel_servers = ("*",)
+        job_server = pp.Server(ppservers=parallel_servers)
+        args['_job_server'] = job_server
+        
     func_template = pp.Template(job_server, serial_eval, serial_depend, serial_mod)
     jobs = [func_template.submit(cand) for cand in candidates]
     
     results = []
     for job in jobs:
         results.append(job())
-    job_server.destroy()
     
     fitness = []
     for result in results:
