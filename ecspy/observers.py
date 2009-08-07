@@ -18,8 +18,6 @@
 """
 
 import time
-import pylab
-import numpy
 
 
 def default_observer(population, num_generations, num_evaluations, args):
@@ -108,6 +106,11 @@ def plot_observer(population, num_generations, num_evaluations, args):
     args -- a dictionary of keyword arguments
     
     """
+    # Import the necessary libraries here. Otherwise, they would have to be
+    # installed even if this function is not called.
+    import pylab
+    import numpy
+    
     best_fitness = population[0].fitness
     average_fitness = sum([x.fitness for x in population]) / float(len(population))
     median_fitness = population[len(population)/2].fitness

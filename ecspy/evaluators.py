@@ -18,7 +18,6 @@
 """
 
 
-import pp
 
 
 def parallel_evaluation(candidates, args):
@@ -46,6 +45,10 @@ def parallel_evaluation(candidates, args):
                         parallel processing (default ("*",))
     
     """
+    # Import the necessary library here. Otherwise, it would have to be
+    # installed even if this function is not called.
+    import pp
+    
     try:
         serial_eval = args['serial_evaluator']
     except KeyError:
