@@ -82,7 +82,17 @@ def file_observer(population, num_generations, num_evaluations, args):
         observer_file.write(str(ind) + '\n')
     observer_file.write('\n')
     
-    
+
+def archive_observer(population, num_generations, num_evaluations, args):
+    """Print the current archive to the screen."""
+    try:
+        archive = args['_archive']
+    except KeyError:
+        archive = []
+    for a in archive:
+        print(a.candidate)
+
+        
 def plot_observer(population, num_generations, num_evaluations, args):    
     """Plot the output of the EC as a graph.
     
