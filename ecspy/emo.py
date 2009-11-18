@@ -19,6 +19,9 @@
 
 from ecspy import ec
 from ecspy import archivers
+from ecspy import selectors
+from ecspy import replacers
+from ecspy import terminators
 
 
 class Pareto(object):
@@ -68,16 +71,34 @@ class Pareto(object):
     def __str__(self):
         return str(self.values)
         
+        
+class NSGA2(ec.EvolutionaryComputation):
+    """Evolutionary computation representing the nondominated sorting genetic algorithm.
     
-class EMO(ec.EvolutionaryComputation):
-    """Evolutionary computation representing an evolutionary multiobjective optimization.
-    
-    This class represents a basic evolutionary multiobjective optimization
-    algorithm. It only specifies that the Pareto archiver should be used.
-    The remaining specifications (e.g., selection, variation, etc.) are 
-    left for the designer to choose.
+    This class represents the nondominated sorting genetic algorithm (NSGA2)
+    of Kalyanmoy Deb et al. It uses nondominated sorting with crowding for 
+    replacement, binary tournament selection to produce <population size>
+    children, and a Pareto archival strategy. The remaining operators take 
+    on the typical default values but they may be specified by the designer.
     
     """
     def __init__(self, random):
         ec.EvolutionaryComputation.__init__(self, random)
         self.archiver = archivers.pareto_archiver
+        self.replacer = replacers.nsga_replacement
+        self.selector = selectors.tournament_selection
+    
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
+        try:
+            args['num_selected']
+        except KeyError:
+            args['num_selected'] = pop_size
+        try:
+            args['tourn_size']
+        except KeyError:
+            args['tourn_size'] = 2
+        return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)
+
+    
+    
+

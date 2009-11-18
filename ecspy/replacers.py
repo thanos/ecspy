@@ -222,3 +222,66 @@ def comma_replacement(random, population, parents, offspring, args):
     pool.sort(key=lambda x: x.fitness, reverse=True)
     survivors = pool[:len(population)]
     return survivors
+
+    
+    
+def nsga_replacement(random, population, parents, offspring, args):
+    survivors = []
+    combined = population[:]
+    combined.extend(offspring[:])
+    
+    # Perform the non-dominated sorting to determine the fronts.
+    fronts = []
+    pop = set(range(len(combined)))
+    while len(pop) > 0:
+        front = []
+        for p in pop:
+            dominated = False
+            for q in pop:
+                if combined[p].fitness < combined[q].fitness:
+                    dominated = True
+                    break
+            if not dominated:
+                front.append(p)
+        fronts.append([dict(individual=combined[f], index=f) for f in front])
+        pop = pop - set(front)
+    
+    # Go through each front and add all the elements until doing so
+    # would put you above the population limit. At that point, fall
+    # back to the crowding distance to determine who to put into the
+    # next population. Individuals with higher crowding distances
+    # (i.e., more distance between neighbors) are preferred.
+    for i, front in enumerate(fronts):
+        if len(survivors) + len(front) > len(population):
+            # Determine the crowding distance.
+            distance = [0 for _ in xrange(len(combined))]
+            individuals = front[:]
+            num_individuals = len(individuals)
+            num_objectives = len(individuals[0]['individual'].fitness)
+            for obj in xrange(num_objectives):
+                individuals.sort(key=lambda x: x['individual'].fitness[obj])
+                distance[individuals[0]['index']] = float('inf')
+                distance[individuals[-1]['index']] = float('inf')
+                for i in xrange(1, num_individuals-1):
+                    distance[individuals[i]['index']] = distance[individuals[i]['index']] + (individuals[i+1]['individual'].fitness[obj] - individuals[i-1]['individual'].fitness[obj])
+                
+            crowd = [dict(dist=distance[f['index']], index=f['index']) for f in front]
+            crowd.sort(key=lambda x: x['dist'], reverse=True)
+            last_rank = [combined[c['index']] for c in crowd]
+            r = 0
+            num_added = 0
+            num_left_to_add = len(population) - len(survivors)
+            while r < len(last_rank) and num_added < num_left_to_add:
+                if last_rank[r] not in survivors:
+                    survivors.append(last_rank[r])
+                    num_added += 1
+                r += 1
+            # If we've filled out our survivor list, then stop.
+            # Otherwise, process the next front in the list.
+            if len(survivors) == len(population):
+                break
+        else:
+            for f in front:
+                if f['individual'] not in survivors:
+                    survivors.append(f['individual'])
+    return survivors

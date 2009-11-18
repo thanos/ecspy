@@ -183,9 +183,12 @@ class EvolutionaryComputation(object):
             seeds = [seeds]
         initial_cs = list(seeds)
         num_generated = max(pop_size - len(seeds), 0)
-        for _ in xrange(num_generated):
+        i = 0
+        while i < num_generated:
             cs = generator(random=self._random, args=self._kwargs)
-            initial_cs.append(cs)
+            if cs not in initial_cs:
+                initial_cs.append(cs)
+                i += 1
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
         
         population = []
