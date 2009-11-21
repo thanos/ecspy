@@ -355,3 +355,16 @@ class DEA(EvolutionaryComputation):
         except KeyError:
             args['num_selected'] = 2
         return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)
+
+
+class SA(EvolutionaryComputation):
+    """Evolutionary computation representing simulated annealing."""
+    def __init__(self, random):
+        EvolutionaryComputation.__init__(self, random)
+        self.selector = selectors.default_selection
+        self.variator = variators.gaussian_mutation
+        self.replacer = replacers.simulated_annealing_replacement
+    
+    def evolve(self, generator, evaluator, pop_size=1, seeds=[], terminator=terminators.default_termination, **args):
+        pop_size=1
+        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)

@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+import math
 
 
 def default_replacement(random, population, parents, offspring, args):
@@ -224,8 +225,72 @@ def comma_replacement(random, population, parents, offspring, args):
     return survivors
 
     
+def simulated_annealing_replacement(random, population, parents, offspring, args):
+    """Replaces population using the simulated annealing schedule.
+    
+    This function performs simulated annealing replacement based
+    on a temperature and a cooling rate. These can be specified
+    by the keyword arguments 'temperature', which should be the
+    initial temperature, and 'cooling_rate', which should be the
+    coefficient by which the temperature is reduced. If these
+    keyword arguments are not present, then the function will
+    attempt to base the cooling schedule either on the ratio of 
+    evaluations to the maximum allowed evaluations or on the 
+    ratio of generations to the maximum allowed generations. 
+    Each of these rations is of the form (max - current)/max
+    so that the cooling schedule moves smoothly from 1 to 0.
+    
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    parents -- the list of parent individuals
+    offspring -- the list of offspring individuals
+    args -- a dictionary of keyword arguments
+    
+    Optional keyword arguments in args:
+    temperature -- the initial temperature
+    cooling_rate -- a real-valued coefficient in the range (0, 1) 
+                    by which the temperature should be reduced 
+    
+    """
+    try:
+        temp = args['temperature']
+        cooling_rate = args['cooling_rate']
+        temp = temp * cooling_rate
+        args['temperature'] = temp
+    except KeyError:
+        try:
+            num_evals = args['_num_evaluations']
+            max_evals = args['max_evaluations']
+            temp = float(max_evals - num_evals) / float(max_evals)
+        except KeyError:
+            num_gens = args['_num_generations']
+            max_gens = args['max_generations']
+            temp = 1 - float(max_gens - num_gens) / float(max_gens)
+        
+    new_pop = []
+    for p, o in zip(parents, offspring):
+        if o.fitness >= p.fitness:
+            new_pop.append(o)
+        elif random.random() < math.exp(-(p.fitness - o.fitness) / temp):
+            new_pop.append(o)
+        else:
+            new_pop.append(p)
+            
+    return new_pop
+
     
 def nsga_replacement(random, population, parents, offspring, args):
+    """Replaces population using the non-dominated sorting technique from NSGA-II.
+    
+    Arguments:
+    random -- the random number generator object
+    population -- the population of Individuals
+    parents -- the list of parent individuals
+    offspring -- the list of offspring individuals
+    args -- a dictionary of keyword arguments
+    
+    """
     survivors = []
     combined = population[:]
     combined.extend(offspring[:])
