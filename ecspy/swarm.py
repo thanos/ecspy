@@ -23,10 +23,26 @@ import copy
 from ecspy import ec
 from ecspy import observers
 from ecspy import terminators
+from ecspy import archivers
 
 
 
 class Particle(ec.Individual):
+    """Represents a particle in a swarm.
+    
+    An particle is an Individual that also contains a current location,
+    with an associated fitness, and a velocity.
+    
+    Public Attributes:
+    
+    - *candidate* -- the candidate solution (the particle's personal best)
+    - *fitness* -- the value of the candidate solution (personal best fitness)
+    - *birthdate* -- the system time at which the individual was created
+    - *x* -- the particle's current location
+    - *xfitness* -- the fitness of the current location
+    - *v* -- the particle's velocity
+    
+    """
     def __init__(self, candidate = None):
         ec.Individual.__init__(self, candidate)
         self.x = candidate
@@ -51,9 +67,34 @@ class Particle(ec.Individual):
         
 
 class PSO(object):
+    """Represents a basic particle swarm optimization algorithm.
+    
+    This class encapsulates the components of a particle swarm
+    optimization. These components are the selection mechanism, the
+    variation operators, the replacement mechanism, the migration
+    scheme, and the observers.
+    
+    Public Attributes:
+    
+    - *archiver* -- the archival operator
+    - *observer* -- the (possibly list of) observer(s)
+    
+    Protected Attributes:
+    
+    - *_random* -- the random number generator object
+    - *_kwargs* -- the dictionary of keyword arguments initialized
+      from the *args* parameter in the *swarm* method
+    
+    Public Methods:
+    
+    - ``swarm`` -- performs the swarming and returns the final
+      population of particles
+    
+    """
     def __init__(self, random):
         self._random = random
         self.observer = observers.default_observer
+        self.archiver = archivers.default_archiver
         self._kwargs = dict()
 
     def _should_terminate(self, terminator, pop, ng, ne):
@@ -138,7 +179,76 @@ class PSO(object):
         return population
 
     def swarm(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
+        """Perform the swarming.
+        
+        This function creates a swarm and allows the particles to fly around
+        the search space until the terminator is satisfied. 
+        
+        Arguments:
+        
+        - *generator* -- the function to be used to generate candidate solutions 
+        - *evaluator* -- the function to be used to evaluate candidate solutions
+        - *pop_size* -- the number of Individuals in the population (default 100)
+        - *seeds* -- an iterable collection of candidate solutions to include
+          in the initial population (default [])
+        - *terminator* -- the terminator (or iterable collection of terminators)
+          to be used to determine whether the evolutionary process
+          has finished (default terminators.default_termination)
+        - *args* -- a dictionary of keyword arguments
+
+        Optional keyword arguments in args:
+        
+        - *lower_bound* -- the lower bounds of the chromosome elements 
+          (default 0)
+        - *upper_bound* -- the upper bounds of the chromosome elements 
+          (default 1)
+        - *cognitive_rate* -- the rate at which the particle's current 
+          position influences its movement (default 2.1)
+        - *social_rate* -- the rate at which the particle's neighbors 
+          influence its movement (default 2.1)
+        - *topology* -- the neighborhood topology; can be either 'ring' or 
+          'star' (default 'star')
+        - *neighborhood_size* -- the size of the neighborhood (default None)
+        - *use_constriction_coefficient* -- whether Clerc's constriction 
+          coefficient should be used (default False)
+        
+        Note that this method will fail if the generator and evaluator 
+        parameters are left with their default values. Note also that the
+        *_kwargs* class variable will be initialized to the args parameter here.
+        It will also be modified to include the following 'built-in' keyword
+        arguments (each preceded by an underscore) unless these arguments are
+        already present (which shouldn't be the case):
+        
+        - *_generator* -- the generator used for creating candidate solutions
+        - *_evaluator* -- the evaluator used for evaluating solutions
+        - *_terminator* -- the particular terminator(s) used
+        - *_population_size* -- the size of the population
+        - *_num_generations* -- the number of generations that have elapsed
+        - *_num_evaluations* -- the number of evaluations that have been completed
+        - *_population* -- the current population
+        - *_archive* -- the current archive
+        
+        """
         self._kwargs = args
+        # Add entries to the keyword arguments dictionary
+        # if they're not already present.
+        try:
+            self._kwargs['_generator']
+        except KeyError:
+            self._kwargs['_generator'] = generator
+        try:
+            self._kwargs['_evaluator']
+        except KeyError:
+            self._kwargs['_evaluator'] = evaluator
+        try:
+            self._kwargs['_terminator']
+        except KeyError:
+            self._kwargs['_terminator'] = terminator
+        try:
+            self._kwargs['_population_size']
+        except KeyError:
+            self._kwargs['_population_size'] = pop_size
+
         try:
             iter(seeds)
         except TypeError:
@@ -160,8 +270,16 @@ class PSO(object):
             
         num_evaluations = len(initial_fit)
         num_generations = 0
+        self._kwargs['_num_generations'] = num_generations
+        self._kwargs['_num_evaluations'] = num_evaluations
         
         population.sort(key=lambda x: x.fitness, reverse=True)
+        self._kwargs['_population'] = population
+        
+        pop_copy = list(population)
+        arc_copy = list(archive)
+        archive = self.archiver(random=self._random, population=pop_copy, archive=arc_copy, args=self._kwargs)
+        self._kwargs['_archive'] = archive
         
         try:
             for obs in self.observer:
@@ -183,6 +301,14 @@ class PSO(object):
             population.sort(key=lambda x: x.fitness, reverse=True)
             num_evaluations += len(updated_fitness)
             num_generations += 1
+            self._kwargs['_population'] = population
+            self._kwargs['_num_evaluations'] = num_evaluations
+            self._kwargs['_num_generations'] = num_generations
+            # Archive individuals.
+            pop_copy = list(population)
+            arc_copy = list(archive)
+            archive = self.archiver(random=self._random, archive=arc_copy, population=pop_copy, args=self._kwargs)
+            self._kwargs['_archive'] = archive
             
         try:
             for obs in self.observer:

@@ -66,7 +66,7 @@ Now that we have decided upon our generator and evaluator, we can create the EC.
 ::
 
 	$ python rastrigin.py
-	[1.0002548233125421, 1.0064272054573149, 0.99803526867814107] : -0.00897296464116
+	[1.0028815273242042, 1.0017692127126272, 0.99673323800953528] : -0.00438534138974
 
 .. {{{end}}}
 
