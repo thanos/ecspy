@@ -398,7 +398,8 @@ def bit_flip_mutation(random, candidates, args):
     """Return the mutants produced by bit-flip mutation on the candidates.
 
     This function assumes that the candidate solutions are binary values.
-    It performs bit-flip mutation. 
+    It performs bit-flip mutation. If a candidate solution contains
+    non-binary values, this function leaves it unchanged.
 
     .. Arguments:
        random -- the random number generator object
