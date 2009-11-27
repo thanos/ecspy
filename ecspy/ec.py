@@ -1,31 +1,31 @@
 """
     This module provides the framework for making evolutionary computations.
     
-    Copyright (C) 2009  Inspired Intelligence Initiative
+    .. Copyright (C) 2009  Inspired Intelligence Initiative
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    .. This program is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    .. This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    .. You should have received a copy of the GNU General Public License
+       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time
 import copy
-import selectors
-import variators
-import replacers
-import migrators
-import archivers
-import terminators
-import observers
+from ecspy import selectors
+from ecspy import variators
+from ecspy import replacers
+from ecspy import migrators
+from ecspy import archivers
+from ecspy import terminators
+from ecspy import observers
 
 
 class Individual(object):
@@ -35,9 +35,10 @@ class Individual(object):
     fitness (or value) of that candidate solution.
     
     Public Attributes:
-    candidate -- the candidate solution
-    fitness -- the value of the candidate solution
-    birthdate -- the system time at which the individual was created
+    
+    - *candidate* -- the candidate solution
+    - *fitness* -- the value of the candidate solution
+    - *birthdate* -- the system time at which the individual was created
     
     """
     def __init__(self, candidate = None):
@@ -89,16 +90,24 @@ class EvolutionaryComputation(object):
     scheme, and the observers.
     
     Public Attributes:
-    selector -- the selection operator
-    variator -- the (possibly list of) variation operator(s)
-    replacer -- the replacement operator
-    migrator -- the migration operator
-    archiver -- the archival operator
-    observer -- the (possibly list of) observer(s)
+    
+    - *selector* -- the selection operator
+    - *variator* -- the (possibly list of) variation operator(s)
+    - *replacer* -- the replacement operator
+    - *migrator* -- the migration operator
+    - *archiver* -- the archival operator
+    - *observer* -- the (possibly list of) observer(s)
+    
+    Protected Attributes:
+    
+    - *_random* -- the random number generator object
+    - *_kwargs* -- the dictionary of keyword arguments initialized
+      from the *args* parameter in the *evolve* method
     
     Public Methods:
-    evolve -- performs the evolution and returns the final
-              population of individuals
+    
+    - ``evolve`` -- performs the evolution and returns the final
+      population of individuals
     
     """
     def __init__(self, random):
@@ -130,30 +139,32 @@ class EvolutionaryComputation(object):
         migration, archival, and observation. 
         
         Arguments:
-        generator -- the function to be used to generate candidate solutions 
-        evaluator -- the function to be used to evaluate candidate solutions
-        pop_size -- the number of Individuals in the population (default 100)
-        seeds -- an iterable collection of candidate solutions to include
-                 in the initial population (default [])
-        terminator -- the terminator (or iterable collection of terminators)
-                      to be used to determine whether the evolutionary process
-                      has finished (default terminators.default_termination)
-        args -- a dictionary of keyword arguments
+        
+        - *generator* -- the function to be used to generate candidate solutions 
+        - *evaluator* -- the function to be used to evaluate candidate solutions
+        - *pop_size* -- the number of Individuals in the population (default 100)
+        - *seeds* -- an iterable collection of candidate solutions to include
+          in the initial population (default [])
+        - *terminator* -- the terminator (or iterable collection of terminators)
+          to be used to determine whether the evolutionary process
+          has finished (default terminators.default_termination)
+        - *args* -- a dictionary of keyword arguments
 
         Note that this method will fail if the generator and evaluator 
         parameters are left with their default values. Note also that the
-        _kwargs class variable will be initialized to the args parameter here.
+        *_kwargs* class variable will be initialized to the args parameter here.
         It will also be modified to include the following 'built-in' keyword
         arguments (each preceded by an underscore) unless these arguments are
         already present (which shouldn't be the case):
-        _generator -- the generator used for creating candidate solutions
-        _evaluator -- the evaluator used for evaluating solutions
-        _terminator -- the particular terminator(s) used
-        _population_size -- the size of the population
-        _num_generations -- the number of generations that have elapsed
-        _num_evaluations -- the number of evaluations that have been completed
-        _population -- the current population
-        _archive -- the current archive
+        
+        - *_generator* -- the generator used for creating candidate solutions
+        - *_evaluator* -- the evaluator used for evaluating solutions
+        - *_terminator* -- the particular terminator(s) used
+        - *_population_size* -- the size of the population
+        - *_num_generations* -- the number of generations that have elapsed
+        - *_num_evaluations* -- the number of evaluations that have been completed
+        - *_population* -- the current population
+        - *_archive* -- the current archive
         
         """
         self._kwargs = args
@@ -296,7 +307,7 @@ class ES(EvolutionaryComputation):
     
     This class represents an evolution strategy which uses, by 
     default, the default selection (i.e., all individuals are selected), 
-    Gaussian mutation, and "plus" replacement. It is assumed that the
+    Gaussian mutation, and 'plus' replacement. It is assumed that the
     candidate solution is an iterable object of real values. 
     
     """

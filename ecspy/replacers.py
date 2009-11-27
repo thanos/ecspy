@@ -1,20 +1,28 @@
 """
     This module provides pre-defined replacers for evolutionary computations.
     
-    Copyright (C) 2009  Inspired Intelligence Initiative
+    All replacer functions have the following arguments:
+    
+    - *random* -- the random number generator object
+    - *population* -- the population of Individuals
+    - *parents* -- the list of parent individuals
+    - *offspring* -- the list of offspring individuals
+    - *args* -- a dictionary of keyword arguments
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    .. Copyright (C) 2009  Inspired Intelligence Initiative
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    .. This program is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    .. This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
+
+    .. You should have received a copy of the GNU General Public License
+       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import math
 
@@ -22,12 +30,12 @@ import math
 def default_replacement(random, population, parents, offspring, args):
     """Replaces entire population with offspring.
     
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
     
     """
     return offspring
@@ -44,12 +52,13 @@ def truncation_replacement(random, population, parents, offspring, args):
     considers only parents and offspring for survival. However, if the
     entire population are parents (which is often the case in ES), then
     truncation replacement and plus-replacement are equivalent approaches.
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
     
     """
     pool = list(population)
@@ -65,12 +74,13 @@ def steady_state_replacement(random, population, parents, offspring, args):
     the offspring replace the least fit individuals in the existing
     population, even if those offspring are less fit than the individuals
     that they replace.
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
     
     """
     off = list(offspring)
@@ -91,15 +101,17 @@ def generational_replacement(random, population, parents, offspring, args):
     keyword argument in args. If this is used, the best num_elites
     individuals in the current population are allowed to survive if
     they are better than the worst num_elites offspring.
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    num_elites -- number of elites to consider (default 0)
+    
+    *num_elites* -- number of elites to consider (default 0)
     
     """
     try:
@@ -126,15 +138,17 @@ def random_replacement(random, population, parents, offspring, args):
     the best num_elites individuals in the current population are 
     allowed to survive if they are better than the worst num_elites 
     offspring.
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    num_elites -- number of elites to consider (default 0)
+    
+    *num_elites* -- number of elites to consider (default 0)
     
     """
     try:
@@ -166,15 +180,17 @@ def plus_replacement(random, population, parents, offspring, args):
     rate is reduced by 20% (to allow more exploitation). If the 
     number of successful offspring is above 20%, the mutation rate
     is increased by 20% (to allow more exploration).
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    use_one_fifth_rule -- whether the 1/5 rule should be used (default False)
+    
+    *use_one_fifth_rule* -- whether the 1/5 rule should be used (default False)
     
     """
     try:
@@ -211,12 +227,13 @@ def comma_replacement(random, population, parents, offspring, args):
     makes the assumption that the size of the offspring is at 
     least as large as the original population. Otherwise, the
     population size will not be constant.
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
     
     """
     pool = list(offspring)
@@ -240,17 +257,18 @@ def simulated_annealing_replacement(random, population, parents, offspring, args
     Each of these rations is of the form (max - current)/max
     so that the cooling schedule moves smoothly from 1 to 0.
     
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
     
-    Optional keyword arguments in args:
-    temperature -- the initial temperature
-    cooling_rate -- a real-valued coefficient in the range (0, 1) 
-                    by which the temperature should be reduced 
+    Optional keyword arguments in args:    
+    
+    - *temperature* -- the initial temperature
+    - *cooling_rate* -- a real-valued coefficient in the range (0, 1) 
+                      by which the temperature should be reduced 
     
     """
     try:
@@ -283,12 +301,12 @@ def simulated_annealing_replacement(random, population, parents, offspring, args
 def nsga_replacement(random, population, parents, offspring, args):
     """Replaces population using the non-dominated sorting technique from NSGA-II.
     
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    parents -- the list of parent individuals
-    offspring -- the list of offspring individuals
-    args -- a dictionary of keyword arguments
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
     
     """
     survivors = []

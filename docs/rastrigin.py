@@ -23,14 +23,12 @@ def generate_rastrigin(random, args):
         upper = 1
     return [random.uniform(lower, upper) for i in xrange(size)]
 
-
 def evaluate_rastrigin(candidates, args):
     fitness = []
     for cs in candidates:
         fit = 10 * len(cs) + sum([((x - 1)**2 - 10 * cos(2 * pi * (x - 1))) for x in cs])
         fitness.append(-fit)
     return fitness
-
 
 #start_main
 rand = Random()

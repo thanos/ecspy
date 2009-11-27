@@ -1,20 +1,26 @@
 """
     This module provides pre-defined selectors for evolutionary computations.
+
+    All selector functions have the following arguments:
     
-    Copyright (C) 2009  Inspired Intelligence Initiative
+    - *random* -- the random number generator object
+    - *population* -- the population of Individuals
+    - *args* -- a dictionary of keyword arguments
+    
+    .. Copyright (C) 2009  Inspired Intelligence Initiative
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    .. This program is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    .. This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    .. You should have received a copy of the GNU General Public License
+       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
@@ -24,10 +30,11 @@ def default_selection(random, population, args):
     This function acts as a default selection scheme for an EC.
     It simply returns the entire population as having been 
     selected.
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       args -- a dictionary of keyword arguments
     
     """
     return population
@@ -39,13 +46,16 @@ def truncation_selection(random, population, args):
     This function performs truncation selection, which means that only
     the best individuals from the current population are selected. This
     is a completely deterministic selection mechanism.
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    num_selected -- the number of individuals to be selected (default len(population))
+    
+    *num_selected* -- the number of individuals to be selected 
+    (default len(population))
     
     """
     try:
@@ -63,13 +73,16 @@ def uniform_selection(random, population, args):
     
     This function performs uniform selection by randomly choosing
     members of the population with replacement.
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    num_selected -- the number of individuals to be selected (default 1)
+    
+    *num_selected* -- the number of individuals to be selected 
+    (default 1)
     
     """
     try:
@@ -87,13 +100,14 @@ def uniform_selection(random, population, args):
 def fitness_proportionate_selection(random, population, args):
     """Return fitness proportionate sampling of individuals from the population.
 
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    args -- a dictionary of keyword arguments
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    num_selected -- the number of individuals to be selected (default 1)
+    
+    *num_selected* -- the number of individuals to be selected (default 1)
     
     """
     try:
@@ -141,14 +155,15 @@ def fitness_proportionate_selection(random, population, args):
 
 def rank_selection(random, population, args):
     """Return a rank-based sampling of individuals from the population.
-
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    num_selected -- the number of individuals to be selected (default 1)
+    
+    *num_selected* -- the number of individuals to be selected (default 1)
     
     """
     try:
@@ -185,15 +200,16 @@ def rank_selection(random, population, args):
 
 def tournament_selection(random, population, args):
     """Return a tournament sampling of individuals from the population.
-
-    Arguments:
-    random -- the random number generator object
-    population -- the population of Individuals
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of Individuals
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    num_selected -- the number of individuals to be selected (default 1)
-    tourn_size -- the tournament size (default 2)
+    
+    - *num_selected* -- the number of individuals to be selected (default 1)
+    - *tourn_size* -- the tournament size (default 2)
     
     """
     try:

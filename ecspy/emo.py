@@ -1,20 +1,20 @@
 """
     This module provides the framework for making multiobjective evolutionary computations.
     
-    Copyright (C) 2009  Inspired Intelligence Initiative
+    .. Copyright (C) 2009  Inspired Intelligence Initiative
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    .. This program is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    .. This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    .. You should have received a copy of the GNU General Public License
+       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from ecspy import ec
@@ -75,16 +75,16 @@ class Pareto(object):
 class NSGA2(ec.EvolutionaryComputation):
     """Evolutionary computation representing the nondominated sorting genetic algorithm.
     
-    This class represents the nondominated sorting genetic algorithm (NSGA2)
+    This class represents the nondominated sorting genetic algorithm (NSGA-II)
     of Kalyanmoy Deb et al. It uses nondominated sorting with crowding for 
-    replacement, binary tournament selection to produce <population size>
+    replacement, binary tournament selection to produce *population size*
     children, and a Pareto archival strategy. The remaining operators take 
     on the typical default values but they may be specified by the designer.
     
     """
     def __init__(self, random):
         ec.EvolutionaryComputation.__init__(self, random)
-        self.archiver = archivers.pareto_archiver
+        self.archiver = archivers.best_archiver
         self.replacer = replacers.nsga_replacement
         self.selector = selectors.tournament_selection
     

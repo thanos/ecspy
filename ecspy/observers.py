@@ -1,20 +1,27 @@
 """
     This module provides pre-defined observers for evolutionary computations.
     
-    Copyright (C) 2009  Inspired Intelligence Initiative
+    All terminator functions have the following arguments:
+    
+    - *population* -- the population of Individuals
+    - *num_generations* -- the number of elapsed generations
+    - *num_evaluations* -- the number of candidate solution evaluations
+    - *args* -- a dictionary of keyword arguments    
+    
+    .. Copyright (C) 2009  Inspired Intelligence Initiative
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    .. This program is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    .. This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    .. You should have received a copy of the GNU General Public License
+       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time
@@ -32,11 +39,12 @@ def screen_observer(population, num_generations, num_evaluations, args):
     to the screen. The output includes the generation number, the current
     number of evaluations, the average fitness, the maximum fitness, and 
     the full population.
-    Arguments:
-    population -- the population of Individuals
-    num_generations -- the number of elapsed generations
-    num_evaluations -- the number of candidate solution evaluations
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
     
     """
     print('Generation: %d' % num_generations)
@@ -55,22 +63,23 @@ def file_observer(population, num_generations, num_evaluations, args):
     to a file. The output includes the generation number, the current
     number of evaluations, the average fitness, the maximum fitness, 
     and the full population. The default action for the file is to
-    create a new file called 'ecspy_observer_file-<timestamp>' in
+    create a new file called 'ecspy-observer-file-<timestamp>' in
     which to write the information.
-    Arguments:
-    population -- the population of Individuals
-    num_generations -- the number of elapsed generations
-    num_evaluations -- the number of candidate solution evaluations
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    observer_file -- a file object (default see text)
+    *observer_file* -- a file object (default; see text)
     
     """
     try:
         observer_file = args['observer_file']
     except KeyError:
-        filename = 'ecspy_observer_file-' + str(time.time())
+        filename = 'ecspy-observer-file-' + str(time.time())
         observer_file = open(filename, 'w')
         args['observer_file'] = observer_file
 
@@ -109,11 +118,12 @@ def plot_observer(population, num_generations, num_evaluations, args):
     pylab.show()
     
     Otherwise, the program may generate a runtime error.
-    Arguments:
-    population -- the population of Individuals
-    num_generations -- the number of elapsed generations
-    num_evaluations -- the number of candidate solution evaluations
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
     
     """
     # Import the necessary libraries here. Otherwise, they would have to be

@@ -14,6 +14,7 @@ Contents:
    ec_intro
    swarm_intro
    tutorial
+   reference
 
 Indices and tables
 ==================

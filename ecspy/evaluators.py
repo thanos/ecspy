@@ -1,20 +1,26 @@
 """
     This module provides pre-defined evaluators for evolutionary computations.
+
+    All evaluator functions have the following arguments:
     
-    Copyright (C) 2009  Inspired Intelligence Initiative
+    - *candidates* -- the candidate solutions
+    - *args* -- a dictionary of keyword arguments
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    
+    .. Copyright (C) 2009  Inspired Intelligence Initiative
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    .. This program is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    .. This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
+
+    .. You should have received a copy of the GNU General Public License
+       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
@@ -29,20 +35,24 @@ def parallel_evaluation(candidates, args):
     to use this function. The function assigns the evaluation of each
     candidate to its own job, all of which are then distributed to the
     available processing units.
-    Arguments:
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
 
+    Required keyword arguments in args:
+    
+    *serial_evaluator* -- the actual evaluation function, which should take a 
+    single argument representing a candidate solution (required)
+    
     Optional keyword arguments in args:
-    serial_evaluator -- the actual evaluation function, which should take a 
-                        single argument representing a candidate solution
-                        (required)
-    serial_dependencies -- tuple of functional dependencies of the serial 
-                           evaluator (default ())
-    serial_modules -- tuple of modules that must be imported for the 
-                      functional dependencies (default ())
-    parallel_servers -- tuple of servers (on a cluster) that will be used for
-                        parallel processing (default ("*",))
+    
+    - *serial_dependencies* -- tuple of functional dependencies of the serial 
+      evaluator (default ())
+    - *serial_modules* -- tuple of modules that must be imported for the 
+      functional dependencies (default ())
+    - *parallel_servers* -- tuple of servers (on a cluster) that will be used 
+      for parallel processing (default ("*",))
     
     """
     # Import the necessary library here. Otherwise, it would have to be

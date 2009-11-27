@@ -1,20 +1,27 @@
 """
     This module provides pre-defined terminators for evolutionary computations.
     
-    Copyright (C) 2009  Inspired Intelligence Initiative
+    All terminator functions have the following arguments:
+    
+    - *population* -- the population of Individuals
+    - *num_generations* -- the number of elapsed generations
+    - *num_evaluations* -- the number of candidate solution evaluations
+    - *args* -- a dictionary of keyword arguments
+    
+    .. Copyright (C) 2009  Inspired Intelligence Initiative
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    .. This program is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    .. This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    .. You should have received a copy of the GNU General Public License
+       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
@@ -25,11 +32,12 @@ def default_termination(population, num_generations, num_evaluations, args):
     """Return True.
     
     This function acts as a default termination criterion for an EC.
-    Arguments:
-    population -- the population of Individuals
-    num_generations -- the number of elapsed generations
-    num_evaluations -- the number of candidate solution evaluations
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
     
     """
     return True
@@ -43,14 +51,16 @@ def diversity_termination(population, num_generations, num_evaluations, args):
     distances with a specified minimum required diversity. This terminator 
     is really only well-defined for candidate solutions which are List 
     types of numeric values. 
-    Arguments:
-    population -- the population of Individuals
-    num_generations -- the number of elapsed generations
-    num_evaluations -- the number of candidate solution evaluations
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
-    min_diversity -- the minimum population diversity allowed (default 0.001)
+    
+    *min_diversity* -- the minimum population diversity allowed (default 0.001)
     
     """
     try:
@@ -73,15 +83,17 @@ def avg_fitness_termination(population, num_generations, num_evaluations, args):
     This function calculates the average fitness of the population as well
     as the maximum (i.e., best) fitness. If the difference between those values
     is less than a specified minimum, the function returns True. 
-    Arguments:
-    population -- the population of Individuals
-    num_generations -- the number of elapsed generations
-    num_evaluations -- the number of candidate solution evaluations
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
-    min_fitness_diff -- the minimum allowable difference between 
-                        average and maximum fitness (default 0.001)
+    
+    *min_fitness_diff* -- the minimum allowable difference between 
+                          average and maximum fitness (default 0.001)
     
     """
     try:
@@ -99,14 +111,16 @@ def evaluation_termination(population, num_generations, num_evaluations, args):
     This function compares the number of function evaluations that have been 
     generated with a specified maximum. It returns True if the maximum is met
     or exceeded.
-    Arguments:
-    population -- the population of Individuals
-    num_generations -- the number of elapsed generations
-    num_evaluations -- the number of candidate solution evaluations
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
-    max_evaluations -- the maximum candidate solution evaluations (default len(population)) 
+    
+    *max_evaluations* -- the maximum candidate solution evaluations (default len(population)) 
     
     """
     try:
@@ -121,14 +135,16 @@ def generation_termination(population, num_generations, num_evaluations, args):
     
     This function compares the number of generations with a specified 
     maximum. It returns True if the maximum is met or exceeded.
-    Arguments:
-    population -- the population of Individuals
-    num_generations -- the number of elapsed generations
-    num_evaluations -- the number of candidate solution evaluations
-    args -- a dictionary of keyword arguments
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
-    max_generations -- the maximum generations (default 1) 
+    
+    *max_generations* -- the maximum generations (default 1) 
     
     """
     try:

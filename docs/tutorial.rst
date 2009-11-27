@@ -45,6 +45,7 @@ The Evaluator
 
 .. literalinclude:: rastrigin.py
     :pyobject: evaluate_rastrigin
+    :end-before: #start_main
 
 This function takes an iterable object containing the candidates along with the keyword arguments. The function should perform the evaluation of each of the candidates and return an iterable object containing each fitness value in the same order as the candidates [#]_. The fitness here is actually the negative of the calculated value. This is because the Rastrigin problem is one of minimization, but the ECsPy algorithms all assume higher fitness values are "better". Therefore, we simply negate this value to accomplish the given task.
 
@@ -65,7 +66,7 @@ Now that we have decided upon our generator and evaluator, we can create the EC.
 ::
 
 	$ python rastrigin.py
-	[0.98562041796771949, 0.99706419479093478, 0.99326407811935613] : -0.0517043673087
+	[1.0002548233125421, 1.0064272054573149, 0.99803526867814107] : -0.00897296464116
 
 .. {{{end}}}
 
@@ -122,6 +123,7 @@ The Observer
 
 .. literalinclude:: polyarea.py
     :pyobject: polygon_observer
+    :end-before: #start_main
 
 Since we are evolving a two-dimensional shape, it makes sense to use a graphical approach to observing the current best polygon during each iteration. The ``polygon_observer`` accomplishes this by drawing the best polygon in the population to a Tk canvas. Notice that the canvas is passed in via the keyword arguments parameter ``args``.
 

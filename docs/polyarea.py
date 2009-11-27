@@ -18,7 +18,6 @@ def area(p):
 def segments(p):
     return zip(p, p[1:] + [p[0]])
 
-
 def generate_polygon(random, args):
     try:
         size = args['num_vertices']
@@ -34,14 +33,12 @@ def generate_polygon(random, args):
         upper = 1
     return [(random.uniform(lower, upper), random.uniform(lower, upper)) for i in xrange(size)]
 
-
 def evaluate_polygon(candidates, args):
     fitness = []
     for cs in candidates:
         fit = area(cs)
         fitness.append(fit)
     return fitness
-
 
 def mutate_polygon(random, candidates, args):
     try:
@@ -88,7 +85,6 @@ def mutate_polygon(random, candidates, args):
                 cs_copy[i][j] = (x, y)
     return cs_copy
         
-
 def polygon_observer(population, num_generations, num_evaluations, args):
     try:
         canvas = args['canvas']
@@ -119,7 +115,6 @@ def polygon_observer(population, num_generations, num_evaluations, args):
     canvas.update()
     print('%d evaluations' % num_evaluations)
     sleep(0.05)
-
 
 #start_main
 rand = Random()

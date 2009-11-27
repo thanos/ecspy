@@ -1,20 +1,26 @@
 """
     This module provides pre-defined variators for evolutionary computations.
     
-    Copyright (C) 2009  Inspired Intelligence Initiative
+    All variator functions have the following arguments:
+    
+    - *random* -- the random number generator object
+    - *candidates* -- the candidate solutions
+    - *args* -- a dictionary of keyword arguments
+    
+    .. Copyright (C) 2009  Inspired Intelligence Initiative
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    .. This program is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    .. This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    .. You should have received a copy of the GNU General Public License
+       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
@@ -24,10 +30,10 @@ from itertools import izip
 def default_variation(random, candidates, args):
     """Return the set of candidates without variation.
 
-    Arguments:
-    random -- the random number generator object
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
     
     """
     return candidates
@@ -39,14 +45,17 @@ def n_point_crossover(random, candidates, args):
     This function assumes that the candidate solutions are sliceable.
     It selects n random points without replacement at which to 'cut'
     the candidate solutions and recombine them.
-    Arguments:
-    random -- the random number generator object
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    crossover_rate -- the rate at which crossover is performed (default 1.0)
-    num_crossover_points -- the n crossover points used (default 1)
+    
+    - *crossover_rate* -- the rate at which crossover is performed 
+      (default 1.0)
+    - *num_crossover_points* -- the n crossover points used (default 1)
     
     """
     try:
@@ -93,14 +102,18 @@ def uniform_crossover(random, candidates, args):
     of the parents, a biased coin is flipped to determine whether the 
     first offspring gets the 'mom' or the 'dad' element. An optional
     keyword argument in args, pux_bias, determines the bias.
-    Arguments:
-    random -- the random number generator object
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    crossover_rate -- the rate at which crossover is performed (default 1.0)
-    pux_bias -- the bias toward the first candidate in the crossover (default 0.5)
+    
+    - *crossover_rate* -- the rate at which crossover is performed 
+      (default 1.0)
+    - *pux_bias* -- the bias toward the first candidate in the crossover 
+      (default 0.5)
     
     """
     try:
@@ -146,16 +159,20 @@ def blend_crossover(random, candidates, args):
     and composed of values on which arithmetic operations are defined.
     It performs blend crossover, which is similar to a generalized 
     averaging of the candidate elements.
-    Arguments:
-    random -- the random number generator object
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    crossover_rate -- the rate at which crossover is performed (default 1.0)
-    blx_alpha -- the blending rate (default 0.1)
-    lower_bound -- the lower bounds of the chromosome elements (default 0)
-    upper_bound -- the upper bounds of the chromosome elements (default 1)
+    
+    - *crossover_rate* -- the rate at which crossover is performed 
+      (default 1.0)
+    - *blx_alpha* -- the blending rate (default 0.1)
+    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
+    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
+    
     The lower and upper bounds can either be single values, which will
     be applied to all elements of a chromosome, or lists of values of 
     the same length as the chromosome.
@@ -226,16 +243,21 @@ def differential_crossover(random, candidates, args):
     and composed of values on which arithmetic operations are defined.
     It performs differential crossover, which is similar to the update
     rule used in particle swarm optimization.
-    Arguments:
-    random -- the random number generator object
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    crossover_rate -- the rate at which crossover is performed (default 1.0)
-    differential_phi -- the amount of random change in the crossover (default 0.1)
-    lower_bound -- the lower bounds of the chromosome elements (default 0)
-    upper_bound -- the upper bounds of the chromosome elements (default 1)
+    
+    - *crossover_rate* -- the rate at which crossover is performed 
+      (default 1.0)
+    - *differential_phi* -- the amount of random change in the crossover 
+      (default 0.1)
+    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
+    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
+    
     The lower and upper bounds can either be single values, which will
     be applied to all elements of a chromosome, or lists of values of 
     the same length as the chromosome.
@@ -310,16 +332,20 @@ def gaussian_mutation(random, candidates, args):
 
     This function assumes that the candidate solutions are indexable
     and numeric. It performs Gaussian mutation.
-    Arguments:
-    random -- the random number generator object
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    mutation_rate -- the rate at which mutation is performed (default 0.1)
-    mutation_range -- the variance used in the Gaussian function (default 1.0)
-    lower_bound -- the lower bounds of the chromosome elements (default 0)
-    upper_bound -- the upper bounds of the chromosome elements (default 1)
+    
+    - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
+    - *mutation_range* -- the variance used in the Gaussian function 
+      (default 1.0)
+    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
+    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
+    
     The lower and upper bounds can either be single values, which will
     be applied to all elements of a chromosome, or lists of values of 
     the same length as the chromosome.
@@ -373,13 +399,16 @@ def bit_flip_mutation(random, candidates, args):
 
     This function assumes that the candidate solutions are binary values.
     It performs bit-flip mutation. 
-    Arguments:
-    random -- the random number generator object
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    mutation_rate -- the rate at which mutation is performed (default 0.1)
+    
+    *mutation_rate* -- the rate at which mutation is performed (default 0.1)
+    
     The mutation rate is applied on a bit by bit basis.
     
     """
@@ -404,15 +433,18 @@ def estimation_of_distribution_variation(random, candidates, args):
     objects containing real values. It creates a statistical model 
     based on the set of candidates. The offspring are then generated 
     from this model.
-    Arguments:
-    random -- the random number generator object
-    candidates -- the candidate solutions
-    args -- a dictionary of keyword arguments
+
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
     
     Optional keyword arguments in args:
-    num_offspring -- the number of offspring to create (default 1)
-    lower_bound -- the lower bounds of the chromosome elements (default 0)
-    upper_bound -- the upper bounds of the chromosome elements (default 1)
+    
+    - *num_offspring* -- the number of offspring to create (default 1)
+    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
+    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
+    
     The lower and upper bounds can either be single values, which will
     be applied to all elements of a chromosome, or lists of values of 
     the same length as the chromosome.
