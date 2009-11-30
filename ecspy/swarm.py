@@ -88,7 +88,7 @@ class PSO(object):
     Public Methods:
     
     - ``swarm`` -- performs the swarming and returns the final
-      population of particles
+      archive of particles
     
     """
     def __init__(self, random):
@@ -182,7 +182,9 @@ class PSO(object):
         """Perform the swarming.
         
         This function creates a swarm and allows the particles to fly around
-        the search space until the terminator is satisfied. 
+        the search space until the terminator is satisfied. The function 
+        returns the particles in the final archive (which, by default, is
+        just the final population).
         
         Arguments:
         
@@ -316,4 +318,4 @@ class PSO(object):
         except TypeError:
             self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
             
-        return population
+        return archive

@@ -107,7 +107,7 @@ class EvolutionaryComputation(object):
     Public Methods:
     
     - ``evolve`` -- performs the evolution and returns the final
-      population of individuals
+      archive of individuals
     
     """
     def __init__(self, random):
@@ -136,7 +136,8 @@ class EvolutionaryComputation(object):
         This function creates a population and then runs it through a series
         of evolutionary epochs until the terminator is satisfied. The general
         outline of an epoch is selection, variation, evaluation, replacement,
-        migration, archival, and observation. 
+        migration, archival, and observation. The function returns the individuals
+        in the final archive (which, by default, will be the final population).
         
         Arguments:
         
