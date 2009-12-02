@@ -22,6 +22,7 @@ from ecspy import archivers
 from ecspy import selectors
 from ecspy import replacers
 from ecspy import terminators
+from ecspy import variators
 
 
 class Pareto(object):
@@ -71,6 +72,9 @@ class Pareto(object):
     def __str__(self):
         return str(self.values)
         
+    def __repr__(self):
+        return str(self.values)
+        
         
 class NSGA2(ec.EvolutionaryComputation):
     """Evolutionary computation representing the nondominated sorting genetic algorithm.
@@ -100,5 +104,35 @@ class NSGA2(ec.EvolutionaryComputation):
         return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)
 
     
+class PAES(ec.EvolutionaryComputation):
+    """Evolutionary computation representing the Pareto Archived Evolution Strategy.
+    
+    This class represents the Pareto Archived Evolution Strategy of Joshua
+    Knowles and David Corne. It is essentially a (1+1)-ES with an adaptive
+    grid archive that is used as a part of the replacement process. 
+    
+    """
+    def __init__(self, random):
+        ec.EvolutionaryComputation.__init__(self, random)
+        self.archiver = archivers.adaptive_grid_archiver
+        self.selector = selectors.default_selection
+        self.variator = variators.gaussian_mutation
+        self.replacer = replacers.paes_replacement  
+
+    def evolve(self, generator, evaluator, pop_size=1, seeds=[], terminator=terminators.default_termination, **args):
+        final_arc = ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)
+        try:
+            del self.archiver.grid_population
+        except AttributeError:
+            pass
+        try:
+            del self.archiver.global_smallest
+        except AttributeError:
+            pass
+        try:
+            del self.archiver.global_largest
+        except AttributeError:
+            pass
+        return final_arc
     
 

@@ -4,7 +4,7 @@
     All selector functions have the following arguments:
     
     - *random* -- the random number generator object
-    - *population* -- the population of Individuals
+    - *population* -- the population of individuals
     - *args* -- a dictionary of keyword arguments
     
     .. Copyright (C) 2009  Inspired Intelligence Initiative
@@ -33,7 +33,7 @@ def default_selection(random, population, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        args -- a dictionary of keyword arguments
     
     """
@@ -49,7 +49,7 @@ def truncation_selection(random, population, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -76,7 +76,7 @@ def uniform_selection(random, population, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -102,7 +102,7 @@ def fitness_proportionate_selection(random, population, args):
 
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -158,7 +158,7 @@ def rank_selection(random, population, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -203,7 +203,7 @@ def tournament_selection(random, population, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:

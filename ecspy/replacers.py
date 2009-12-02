@@ -4,7 +4,7 @@
     All replacer functions have the following arguments:
     
     - *random* -- the random number generator object
-    - *population* -- the population of Individuals
+    - *population* -- the population of individuals
     - *parents* -- the list of parent individuals
     - *offspring* -- the list of offspring individuals
     - *args* -- a dictionary of keyword arguments
@@ -32,7 +32,7 @@ def default_replacement(random, population, parents, offspring, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -55,7 +55,7 @@ def truncation_replacement(random, population, parents, offspring, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -77,7 +77,7 @@ def steady_state_replacement(random, population, parents, offspring, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -104,7 +104,7 @@ def generational_replacement(random, population, parents, offspring, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -141,7 +141,7 @@ def random_replacement(random, population, parents, offspring, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -183,7 +183,7 @@ def plus_replacement(random, population, parents, offspring, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -230,7 +230,7 @@ def comma_replacement(random, population, parents, offspring, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -241,6 +241,11 @@ def comma_replacement(random, population, parents, offspring, args):
     survivors = pool[:len(population)]
     return survivors
 
+
+    
+#-------------------------------------------
+# Algorithm-specific Replacement Strategies
+#-------------------------------------------
     
 def simulated_annealing_replacement(random, population, parents, offspring, args):
     """Replaces population using the simulated annealing schedule.
@@ -259,7 +264,7 @@ def simulated_annealing_replacement(random, population, parents, offspring, args
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -303,7 +308,7 @@ def nsga_replacement(random, population, parents, offspring, args):
     
     .. Arguments:
        random -- the random number generator object
-       population -- the population of Individuals
+       population -- the population of individuals
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
@@ -367,4 +372,47 @@ def nsga_replacement(random, population, parents, offspring, args):
             for f in front:
                 if f['individual'] not in survivors:
                     survivors.append(f['individual'])
+    return survivors
+
+    
+def paes_replacement(random, population, parents, offspring, args):
+    """Replaces population using the Pareto Archived Evolution Strategy method.
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
+    
+    """
+    try:
+        archive = args['_archive']
+    except KeyError:
+        archive = []
+    try:
+        archiver = args['_evolutionary_computation'].archiver
+    except KeyError:
+        archiver = None
+        
+    survivors = []
+    for p, o in zip(parents, offspring):
+        if o == p:
+            survivors.append(p)
+        elif o in archive:
+            survivors.append(p)
+        elif o > p:
+            survivors.append(o)
+        elif o >= p:
+            for a in archive:
+                if o > a or o < a:
+                    break
+            if o >= a:
+                archive = archiver(random, [o], archive, args)
+                if o > a or archiver.grid_population[o.grid_location] <= archiver.grid_population[p.grid_location]:
+                    survivors.append(o)
+                else:
+                    survivors.append(p)
+            else:
+                survivors.append(p)
     return survivors

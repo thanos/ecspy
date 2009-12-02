@@ -166,6 +166,7 @@ class EvolutionaryComputation(object):
         - *_num_evaluations* -- the number of evaluations that have been completed
         - *_population* -- the current population
         - *_archive* -- the current archive
+        - *_evolutionary_computation* -- the evolutionary computation (this object)
         
         """
         self._kwargs = args
@@ -187,6 +188,10 @@ class EvolutionaryComputation(object):
             self._kwargs['_population_size']
         except KeyError:
             self._kwargs['_population_size'] = pop_size
+        try:
+            self._kwargs['_evolutionary_computation']
+        except KeyError:
+            self._kwargs['_evolutionary_computation'] = self
         
         # Create the initial population.
         try:

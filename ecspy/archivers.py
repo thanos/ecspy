@@ -4,7 +4,7 @@
     All archiver functions have the following arguments:
     
     - *random* -- the random number generator object
-    - *population* -- the population of Individuals
+    - *population* -- the population of individuals
     - *archive* -- the current archive of individuals
     - *args* -- a dictionary of keyword arguments
     
@@ -24,9 +24,19 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import math
+
 
 def default_archiver(random, population, archive, args):
-    """Archive the current population."""
+    """Archive the current population.
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of individuals
+       archive -- the current archive of individuals
+       args -- a dictionary of keyword arguments
+    
+    """
     new_archive = []
     for ind in population:
         new_archive.append(ind)
@@ -40,6 +50,12 @@ def best_archiver(random, population, archive, args):
     If the comparison operators have been overloaded to define Pareto
     preference (as in the ``Pareto`` class), then this archiver will form 
     a Pareto archive.
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of individuals
+       archive -- the current archive of individuals
+       args -- a dictionary of keyword arguments
     
     """
     new_archive = archive
@@ -64,3 +80,131 @@ def best_archiver(random, population, archive, args):
     return new_archive
 
     
+def adaptive_grid_archiver(random, population, archive, args):
+    """Archive only the best individual(s) using a fixed size grid.
+    
+    This function archives the best solutions by using a fixed-size grid
+    to determine which existing solutions should be removed in order to
+    make room for new ones. This archiver is designed specifically for
+    use the the Pareto Archived Evolution Strategy (PAES).
+
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of individuals
+       archive -- the current archive of individuals
+       args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
+    
+    - *max_archive_size* -- the maximum number of individuals in the archive
+      (default len(population))
+    - *num_grid_divisions* -- the number of grid divisions (default 1)
+    
+    """
+    def get_grid_location(fitness, num_grid_divisions, global_smallest, global_largest):
+        loc = 0
+        n = 1
+        num_objectives = len(fitness)
+        inc = [0 for _ in xrange(num_objectives)]
+        width = [0 for _ in xrange(num_objectives)]
+        local_smallest = global_smallest[:]
+        for i, f in enumerate(fitness):
+            if f < local_smallest[i] or f > local_smallest[i] + global_largest[i] - global_smallest[i]:
+                return -1
+        for i in xrange(num_objectives):
+            inc[i] = n
+            n *= 2
+            width[i] = global_largest[i] - global_smallest[i]
+        for d in xrange(num_grid_divisions):
+            for i, f in enumerate(fitness):
+                if f < width[i] / 2.0 + local_smallest[i]:
+                    loc += inc[i]
+                else:
+                    local_smallest[i] += width[i] / 2.0
+            for i in xrange(num_objectives):
+                inc[i] *= num_objectives * 2
+                width[i] /= 2.0
+        return loc
+ 
+    def update_grid(archive, num_grid_divisions, global_smallest, global_largest, grid_population):
+        num_objectives = min([len(a.fitness) for a in archive])
+        smallest = [min([a.fitness[o] for a in archive]) for o in xrange(num_objectives)] 
+        largest = [max([a.fitness[o] for a in archive]) for o in xrange(num_objectives)]
+        for i in xrange(num_objectives):
+            global_smallest[i] = smallest[i] - math.fabs(0.2 * smallest[i])
+            global_largest[i] = largest[i] + math.fabs(0.2 * largest[i])
+        for i in xrange(len(grid_population)):
+            grid_population[i] = 0
+        for a in archive:
+            loc = get_grid_location(a.fitness, num_grid_divisions, global_smallest, global_largest)
+            a.grid_location = loc
+            grid_population[a.grid_location] += 1
+
+    try:
+        max_archive_size = args['max_archive_size']
+    except KeyError:
+        max_archive_size = len(population)
+        args['max_archive_size'] = max_archive_size
+    try:
+        num_grid_divisions = args['num_grid_divisions']
+    except KeyError:
+        num_grid_divisions = 1
+        args['num_grid_divisions'] = num_grid_divisions
+        
+    if not 'grid_population' in dir(adaptive_grid_archiver):
+        adaptive_grid_archiver.grid_population = [0 for _ in xrange(2**(min([len(p.fitness) for p in population]) * num_grid_divisions))]
+    if not 'global_smallest' in dir(adaptive_grid_archiver):
+        adaptive_grid_archiver.global_smallest = [0 for _ in xrange(min([len(p.fitness) for p in population]))]
+    if not 'global_largest' in dir(adaptive_grid_archiver):
+        adaptive_grid_archiver.global_largest = [0 for _ in xrange(min([len(p.fitness) for p in population]))]
+     
+    new_archive = archive
+    for ind in population:
+        should_be_added = True
+        for a in new_archive:
+            if ind == a or a > ind:
+                should_be_added = False
+                
+        if should_be_added:
+            if len(new_archive) == 0:
+                new_archive.append(ind)
+            else:
+                join = False
+                nondominated = True
+                removal_set = []
+                for i, a in enumerate(new_archive):
+                    if ind > a and not join:
+                        new_archive[i] = ind
+                        join = True
+                    elif ind > a:
+                        removal_set.add(a)
+                    # Otherwise, the individual is nondominated against this archive member.
+                    
+                new_archive = list(set(new_archive) - set(removal_set))
+                
+                if not join and nondominated:
+                    if len(new_archive) == max_archive_size:
+                        replaced_index = 0
+                        found_replacement = False
+                        loc = get_grid_location(ind.fitness, num_grid_divisions, 
+                                                adaptive_grid_archiver.global_smallest, 
+                                                adaptive_grid_archiver.global_largest)
+                        ind.grid_location = loc
+                        if ind.grid_location >= 0:
+                            most = adaptive_grid_archiver.grid_population[ind.grid_location]
+                        else:
+                            most = -1
+                        for i, a in enumerate(new_archive):
+                            pop_at_a = adaptive_grid_archiver.grid_population[a.grid_location]
+                            if pop_at_a > most:
+                                most = pop_at_a
+                                replaced_index = i
+                                found_replacement = True
+                        if found_replacement:
+                            new_archive[replaced_index] = ind
+                    else:
+                        new_archive.append(ind)
+            update_grid(new_archive, num_grid_divisions, adaptive_grid_archiver.global_smallest, 
+                        adaptive_grid_archiver.global_largest, adaptive_grid_archiver.grid_population)
+
+    return new_archive
