@@ -56,7 +56,7 @@ prng.seed(time.time())
 nsga = emo.NSGA2(prng)
 nsga.variator = variators.gaussian_mutation
 nsga.observer = my_observer
-final_pop = nsga.evolve(generator=generate_candidate, 
+final_arc = nsga.evolve(generator=generate_candidate, 
                         evaluator=evaluate_candidate, 
                         pop_size=100,
                         terminator=terminators.evaluation_termination, 
@@ -67,10 +67,10 @@ final_pop = nsga.evolve(generator=generate_candidate,
 print('*******************************')
 x = []
 y = []
-for p in final_pop:
-    print(p)
-    x.append(p.fitness[0])
-    y.append(p.fitness[1])
+for f in final_arc:
+    print(f)
+    x.append(f.fitness[0])
+    y.append(f.fitness[1])
 pylab.scatter(x, y, color='b')
 #pylab.show()
 pylab.savefig('nsga2-front.pdf', format='pdf')
