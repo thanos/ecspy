@@ -7,6 +7,8 @@
     - *population* -- the population of Individuals
     - *args* -- a dictionary of keyword arguments
     
+    Each migrator function returns the updated population.
+    
     .. Copyright (C) 2009  Inspired Intelligence Initiative
 
     .. This program is free software: you can redistribute it and/or modify

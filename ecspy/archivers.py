@@ -8,6 +8,8 @@
     - *archive* -- the current archive of individuals
     - *args* -- a dictionary of keyword arguments
     
+    Each archiver function returns the updated archive.
+    
     .. Copyright (C) 2009  Inspired Intelligence Initiative
 
     .. This program is free software: you can redistribute it and/or modify

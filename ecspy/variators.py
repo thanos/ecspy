@@ -7,6 +7,8 @@
     - *candidates* -- the candidate solutions
     - *args* -- a dictionary of keyword arguments
     
+    Each variator function returns the list of modified individuals.
+    
     .. Copyright (C) 2009  Inspired Intelligence Initiative
 
     .. This program is free software: you can redistribute it and/or modify

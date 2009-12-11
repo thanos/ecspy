@@ -8,6 +8,8 @@
     - *parents* -- the list of parent individuals
     - *offspring* -- the list of offspring individuals
     - *args* -- a dictionary of keyword arguments
+    
+    Each replacer function returns the list of surviving individuals.
 
     .. Copyright (C) 2009  Inspired Intelligence Initiative
 

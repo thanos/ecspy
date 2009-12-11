@@ -7,6 +7,8 @@
     - *population* -- the population of individuals
     - *args* -- a dictionary of keyword arguments
     
+    Each selector function returns the list of selected individuals.
+    
     .. Copyright (C) 2009  Inspired Intelligence Initiative
 
     .. This program is free software: you can redistribute it and/or modify
