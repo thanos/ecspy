@@ -19,23 +19,27 @@ def evaluate_real(candidates, args):
         fitness.append(num)
     return fitness
 
-    
-rand = Random()
-rand.seed(int(time()))
-eda = ec.EDA(rand)
-eda.observer = observers.screen_observer
-start = time()
-final_pop = eda.evolve(evaluator=evaluate_real, 
-                       generator=generate_real, 
-                       terminator=terminators.evaluation_termination,
-                       pop_size=10, 
-                       max_evaluations=5000,
-                       num_selected=2,
-                       num_elites=1)
-stop = time()
-    
-print('***********************************')
-print('Total Execution Time: %0.5f seconds' % (stop - start))
-for ind in final_pop:
-    print(str(ind))
+
+def main():
+    rand = Random()
+    rand.seed(int(time()))
+    eda = ec.EDA(rand)
+    eda.observer = observers.screen_observer
+    start = time()
+    final_pop = eda.evolve(evaluator=evaluate_real, 
+                           generator=generate_real, 
+                           terminator=terminators.evaluation_termination,
+                           pop_size=10, 
+                           max_evaluations=5000,
+                           num_selected=2,
+                           num_elites=1)
+    stop = time()
         
+    print('***********************************')
+    print('Total Execution Time: %0.5f seconds' % (stop - start))
+    for ind in final_pop:
+        print(str(ind))
+    return eda
+            
+if __name__ == '__main__':
+    main()

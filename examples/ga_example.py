@@ -27,25 +27,28 @@ def evaluate_binary(candidates, args):
         fitness.append(num)
     return fitness
 
-    
-file = open('ga_observer.txt', 'w')
-rand = Random()
-rand.seed(int(time()))
-ga = ec.GA(rand)
-ga.observer = [observers.screen_observer, observers.file_observer]
-start = time()
-final_pop = ga.evolve(evaluator=evaluate_binary,
-                      generator=generate_binary,
-                      terminator=terminators.evaluation_termination,
-                      max_evaluations=1000,
-                      num_elites=1,
-                      pop_size=100,
-                      num_bits=10,
-                      observer_file=file)
-stop = time()
-        
-print('***********************************')
-print('Total Execution Time: %0.5f seconds' % (stop - start))
-for ind in final_pop:
-    print(str(ind))
-        
+def main(): 
+    file = open('ga_observer.txt', 'w')
+    rand = Random()
+    rand.seed(int(time()))
+    ga = ec.GA(rand)
+    ga.observer = [observers.screen_observer, observers.file_observer]
+    start = time()
+    final_pop = ga.evolve(evaluator=evaluate_binary,
+                          generator=generate_binary,
+                          terminator=terminators.evaluation_termination,
+                          max_evaluations=1000,
+                          num_elites=1,
+                          pop_size=100,
+                          num_bits=10,
+                          observer_file=file)
+    stop = time()
+            
+    print('***********************************')
+    print('Total Execution Time: %0.5f seconds' % (stop - start))
+    for ind in final_pop:
+        print(str(ind))
+    return ga
+            
+if __name__ == '__main__':
+    main()
