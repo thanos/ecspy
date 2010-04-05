@@ -22,12 +22,11 @@ def generate_candidate(random, args):
     return [random.random() * (upper_bound - lower_bound) + lower_bound]
 
 def evaluate_sch(candidates, args):
-    maximize = args['maximize']
     fitness = []
     for cs in candidates:
         x = cs[0]**2
         y = (cs[0]-2)**2 
-        fitness.append(emo.Pareto(maximize, [x, y]))
+        fitness.append(emo.Pareto([x, y]))
     return fitness
 
 def converged_sch(population, num_generations, num_evaluations, args):

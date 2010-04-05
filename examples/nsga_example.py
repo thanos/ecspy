@@ -24,7 +24,7 @@ def evaluate_candidate(candidates, args):
     for cs in candidates:
         x = cs[0]**2
         y = (cs[0]-1)**2 
-        fitness.append(emo.Pareto(args['maximize'], [x, y]))
+        fitness.append(emo.Pareto([x, y]))
     return fitness
 
 def my_observer(population, num_generations, num_evaluations, args):
@@ -56,13 +56,14 @@ def main(do_plot=True, prng=None):
     nsga = emo.NSGA2(prng)
     nsga.variator = variators.gaussian_mutation
     nsga.observer = my_observer
-    final_arc = nsga.evolve(generator=generate_candidate, 
+    final_arc = nsga.evolve(maximize=False,
+                            generator=generate_candidate, 
                             evaluator=evaluate_candidate, 
                             pop_size=100,
                             terminator=terminators.evaluation_termination, 
                             max_evaluations=1000,
-                            lower_bound=0,
-                            upper_bound=1)
+                            lower_bound=0.,
+                            upper_bound=1.)
     
     print('*******************************')
     if do_plot:

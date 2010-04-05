@@ -36,8 +36,7 @@ class Pareto(object):
     strictly better in at least one objective.
     
     """
-    def __init__(self, maximize, values=[]):
-        self.maximize = maximize
+    def __init__(self, values=[]):
         self.values = values
         
     def __len__(self):
@@ -56,19 +55,12 @@ class Pareto(object):
             not_worse = True
             strictly_better = False
             
-        if self.maximize:
-            for x, y in zip(self.values, other.values):
-                if x > y:
-                    not_worse = False
-                elif y > x:
-                    strictly_better = True
-        else:
             for x, y in zip(self.values, other.values):
                 if x < y:
                     not_worse = False
                 elif y < x:
                     strictly_better = True
-        
+
         return not_worse and strictly_better
             
     def __le__(self, other):

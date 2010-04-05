@@ -36,14 +36,11 @@ def evaluate_sch(candidates, args):
             result += math.pow(abs(xi), 0.8) + (5.0 * math.sin(math.pow(xi, 3.0)))
         return result  
     
-    maximize = args['maximize']
     fitness = []
     for cs in candidates:
         x = kur1(cs)
         y = kur2(cs) 
-#        x = cs[0]**2
-#        y = (cs[0]-2)**2 
-        fitness.append(emo.Pareto(maximize, [x, y]))
+        fitness.append(emo.Pareto([x, y]))
     return fitness
 
 def converged_kur(population, num_generations, num_evaluations, args):
