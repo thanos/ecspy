@@ -3,15 +3,24 @@
 #    A unittest is an example that asserts
 #    that an example returns a given result
 #    and converges in at a given generation
+#    
+#    TODO:
+#    *   PSO is broken
+#    *   too much rounding going on in DEA_Test
+#    *   too much rounding going on in EDA_Test
+#    *   no guarantee that all test will converge in due time
+#    so expect false alarms, best to run the test 2 or 3 times
+#    before committing changes made to SVN. its a delicate balance between
+#    testing speed and the change of all tests converging. 
+#
 #
 # Mehhh relative imports do not work in python 2.5 if 
 # when a script is run as "__main__"
 # that's why I'm adding to sys.path
 #===============================================================================
 import unittest, sys, os
-sys.path.append( os.path.split( 
-                               os.path.split(__file__)[0] )
-)
+pth = os.path.split( os.path.split( os.path.abspath(__file__) )[0] )[0] 
+sys.path.append( pth )
 
 from examples import dea_example
 from examples import custom_ec_example
@@ -22,14 +31,13 @@ from examples import nsga_example
 from examples import paes_example
 from examples import pso_example
 
-class DEATest(unittest.TestCase):
+class DEA_Test(unittest.TestCase):
     def test(self):
         dea = dea_example.main()
         target = [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0]
         # should I make a property "dea.archive" that returns the archive?
         # perhaps looking it up in the ._kwargs is a little obscure?
 
-        # too much rounding!!!
         result = [round(i.fitness, 0) for i in dea._kwargs['_archive']]
         
         self.assertEqual(result, target,
@@ -79,17 +87,9 @@ class ES_Test(unittest.TestCase):
         if sys.version_info[1] < 6:
             self.fail('evolutionary strategies example requires python >= 2.6')
         
-        raise NotImplementedError
-        #=======================================================================
-        # es = es_example.main()
-        # archive = es._kwargs['_archive']
-        # #import ipdb; ipdb.set_trace()
-        # result = round(archive[0].fitness, 1)
-        # target = 4
-        # self.assertEqual(result, target,
-        #                 'expected a fitness of %s, got %s' % ( result, target)
-        #                )
-        #=======================================================================
+        es = es_example.main()
+        archive = es._kwargs['_archive']
+        self.assertTrue( all([i.fitness==4 for i in archive]), 'not all archive fitness equal to 4' )
         
 
 class GA_Test(unittest.TestCase):
@@ -99,7 +99,7 @@ class GA_Test(unittest.TestCase):
         result = archive[0].candidate
         target = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] 
         self.assertEqual(result, target,
-                         'expected a fitness of %s, got %s' % ( result, target)
+                         'expected a fitness of %s, got %s' % ( target, result )
                         )
 
 
@@ -131,5 +131,3 @@ class PSO_Test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    
-    
