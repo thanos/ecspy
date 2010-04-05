@@ -18,7 +18,7 @@
 # when a script is run as "__main__"
 # that's why I'm adding to sys.path
 #===============================================================================
-import unittest, sys, os
+import unittest, sys, os, random
 pth = os.path.split( os.path.split( os.path.abspath(__file__) )[0] )[0] 
 sys.path.append( pth )
 
@@ -31,9 +31,13 @@ from examples import nsga_example
 from examples import paes_example
 from examples import pso_example
 
+prng = random.Random()
+prng.seed(1000) 
+
+
 class DEA_Test(unittest.TestCase):
     def test(self):
-        dea = dea_example.main()
+        dea = dea_example.main(prng=prng)
         target = [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0]
         # should I make a property "dea.archive" that returns the archive?
         # perhaps looking it up in the ._kwargs is a little obscure?
@@ -56,7 +60,7 @@ class DEA_Test(unittest.TestCase):
 
 class Custom_EC_Test(unittest.TestCase):
     def test(self):
-        custom = custom_ec_example.main(do_plot=False)
+        custom = custom_ec_example.main(do_plot=False,prng=prng)
         archive = custom._kwargs['_archive']
         result = round(archive[0].fitness, 1)
         target = 4
@@ -67,7 +71,7 @@ class Custom_EC_Test(unittest.TestCase):
 
 class EDA_Test(unittest.TestCase):
     def test(self):
-        eda = eda_example.main()
+        eda = eda_example.main(prng=prng)
         archive = eda._kwargs['_archive']
         # too much rounding!!!
         result = round(archive[0].fitness, 0)
@@ -87,14 +91,14 @@ class ES_Test(unittest.TestCase):
         if sys.version_info[1] < 6:
             self.fail('evolutionary strategies example requires python >= 2.6')
         
-        es = es_example.main()
+        es = es_example.main(prng=prng)
         archive = es._kwargs['_archive']
         self.assertTrue( all([i.fitness==4 for i in archive]), 'not all archive fitness equal to 4' )
         
 
 class GA_Test(unittest.TestCase):
     def test(self):
-        ga = ga_example.main()
+        ga = ga_example.main(prng=prng)
         archive = ga._kwargs['_archive']
         result = archive[0].candidate
         target = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] 
@@ -105,7 +109,7 @@ class GA_Test(unittest.TestCase):
 
 class NSGA_Test(unittest.TestCase):
     def test(self):
-        nsga = nsga_example.main(do_plot=False)
+        nsga = nsga_example.main(do_plot=False,prng=prng)
         archive = nsga._kwargs['_archive']
         fitnesses = [[round(j,3) for j in i.fitness] for i in archive]
         self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')
@@ -114,7 +118,7 @@ class NSGA_Test(unittest.TestCase):
 
 class PAES_Test(unittest.TestCase):
     def test(self):
-        paes = paes_example.main(do_plot=False)
+        paes = paes_example.main(do_plot=False,prng=prng)
         archive = paes._kwargs['_archive']
         fitnesses = [[round(j,3) for j in i.fitness] for i in archive]
         self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')
@@ -123,7 +127,7 @@ class PAES_Test(unittest.TestCase):
 class PSO_Test(unittest.TestCase):
     def test(self):
         print 'PSO is broken...'
-        pso = pso_example.main()
+        pso = pso_example.main(prng=prng)
 #        archive = pso._kwargs['_archive']
 #        fitnesses = [[round(j,3) for j in i.fitness] for i in archive]
 #        self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')

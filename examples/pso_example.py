@@ -20,11 +20,12 @@ def evaluate_real(candidates, args):
         fitness.append(num)
     return fitness
 
-def main():
-    rand = Random()
-    rand.seed(int(time()))
+def main(prng=None):
+    if prng is None:
+        prng = Random()
+        prng.seed(time.time()) 
     
-    pso = PSO(rand)
+    pso = PSO(prng)
     pso.observer = observers.screen_observer
     
     start = time()

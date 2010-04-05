@@ -48,10 +48,11 @@ def my_observer(population, num_generations, num_evaluations, args):
     print('-----------')
     
    
-def main(do_plot=True):   
-    prng = random.Random()
-    prng.seed(time.time())
-    
+def main(do_plot=True, prng=None):
+    if prng is None:
+        prng = random.Random()
+        prng.seed(time.time()) 
+
     nsga = emo.NSGA2(prng)
     nsga.variator = variators.gaussian_mutation
     nsga.observer = my_observer

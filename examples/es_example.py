@@ -17,11 +17,12 @@ def my_serial_evaluator(candidate):
     num = sum(candidate)
     return num
 
-def main():    
+def main(prng=None):    
     file = open('es_observer.txt', 'w')
-    rand = Random()
-    rand.seed(int(time()))
-    es = ec.ES(rand)
+    if prng is None:
+        prng = Random()
+        prng.seed(time.time()) 
+    es = ec.ES(prng)
     es.observer = [observers.screen_observer, observers.file_observer]
     start = time()
     final_pop = es.evolve(evaluator=evaluators.parallel_evaluation, 

@@ -27,11 +27,14 @@ def evaluate_binary(candidates, args):
         fitness.append(num)
     return fitness
 
-def main(): 
+def main(prng=None): 
     file = open('ga_observer.txt', 'w')
-    rand = Random()
-    rand.seed(int(time()))
-    ga = ec.GA(rand)
+
+    if prng is None:
+        prng = Random()
+        prng.seed(time.time()) 
+    
+    ga = ec.GA(prng)
     ga.observer = [observers.screen_observer, observers.file_observer]
     start = time()
     final_pop = ga.evolve(evaluator=evaluate_binary,

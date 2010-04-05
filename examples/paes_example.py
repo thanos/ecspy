@@ -26,9 +26,10 @@ def evaluate_candidate(candidates, args):
 def my_observer(population, num_generations, num_evaluations, args):
     print('Gens: %d   Evals: %d' % (num_generations, num_evaluations))
 
-def main(do_plot=True):
-    prng = random.Random()
-    prng.seed(time.time()) 
+def main(do_plot=True, prng=None):
+    if prng is None:
+        prng = random.Random()
+        prng.seed(time.time()) 
     paes = emo.PAES(prng)
     paes.observer = my_observer
     final_arc = paes.evolve(generator=generate_candidate, 

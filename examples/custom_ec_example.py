@@ -23,10 +23,12 @@ def evaluate_real(candidates, args):
         fitness.append(num)
     return fitness
 
-def main(do_plot=True):
-    rand = Random()
-    rand.seed(int(time()))
-    evocomp = ec.EvolutionaryComputation(rand)
+def main(do_plot=True, prng=None):
+    if prng is None:
+        prng = Random()
+        prng.seed(time.time()) 
+    
+    evocomp = ec.EvolutionaryComputation(prng)
     evocomp.selector = selectors.tournament_selection
     evocomp.variator = [variators.uniform_crossover, variators.gaussian_mutation]
     evocomp.replacer = replacers.steady_state_replacement

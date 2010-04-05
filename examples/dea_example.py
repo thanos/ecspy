@@ -19,10 +19,12 @@ def evaluate_real(candidates, args):
         fitness.append(num)
     return fitness
 
-def main():
-    rand = Random()
-    rand.seed(int(time()))
-    dea = ec.DEA(rand)
+def main(prng=None):
+    if prng is None:
+        prng = Random()
+        prng.seed(time.time()) 
+    
+    dea = ec.DEA(prng)
     dea.observer = observers.screen_observer
     start = time()
     final_pop = dea.evolve(evaluator=evaluate_real, 
