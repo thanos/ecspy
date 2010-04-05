@@ -275,7 +275,8 @@ class PSO(object):
         self._kwargs['_num_generations'] = num_generations
         self._kwargs['_num_evaluations'] = num_evaluations
         
-        population.sort(key=lambda x: x.fitness, reverse=True)
+        #population.sort(key=lambda x: x.fitness, reverse=True)
+        population.sort(reverse=True)
         self._kwargs['_population'] = population
         
         pop_copy = list(population)
@@ -300,7 +301,8 @@ class PSO(object):
                     particle.candidate = copy.deepcopy(particle.x)
                     particle.fitness = copy.deepcopy(particle.xfitness)
                     
-            population.sort(key=lambda x: x.fitness, reverse=True)
+            #population.sort(key=lambda x: x.fitness, reverse=True)
+            population.sort(reverse=True)
             num_evaluations += len(updated_fitness)
             num_generations += 1
             self._kwargs['_population'] = population

@@ -137,7 +137,8 @@ def hypervolume(pareto_set, reference_point=None):
     if ref is None:
         ref = [max(ps, key=lambda x: x[o])[o] for o in xrange(n)]
     pl = ps[:]
-    pl.sort(key=lambda x: x[0], reverse=True)
+    #pl.sort(key=lambda x: x[0], reverse=True)
+    pl.sort(reverse=True)
     s = [(1, pl)]
     for k in xrange(n - 1):
         s_prime = []
