@@ -41,7 +41,8 @@ class Individual(object):
     - *birthdate* -- the system time at which the individual was created
     
     """
-    def __init__(self, candidate = None):
+    def __init__(self, candidate=None, maximize=True):
+        self.maximize = maximize
         self.candidate = candidate
         self.fitness = None
         self.birthdate = time.time()
@@ -61,7 +62,10 @@ class Individual(object):
         
     def __lt__(self, other):
         if self.fitness is not None and other.fitness is not None:
-            return self.fitness < other.fitness
+            if self.maximize: 
+                return self.fitness < other.fitness
+            else:
+                return self.fitness > other.fitness
         else:
             raise Exception("fitness is not defined")
 
@@ -69,7 +73,14 @@ class Individual(object):
         return self < other or not other < self
             
     def __gt__(self, other):
-        return other < self
+        # return other < self
+        if self.fitness is not None and other.fitness is not None:
+            if self.maximize: 
+                return self.fitness > other.fitness
+            else:
+                return self.fitness < other.fitness
+        else:
+            raise Exception("fitness is not defined")
 
     def __ge__(self, other):
         return other < self or not self < other
@@ -192,6 +203,10 @@ class EvolutionaryComputation(object):
             self._kwargs['_evolutionary_computation']
         except KeyError:
             self._kwargs['_evolutionary_computation'] = self
+        try:
+            self._kwargs['maximize']
+        except KeyError:
+            self._kwargs['maximize'] = True
         
         # Create the initial population.
         try:
@@ -211,7 +226,7 @@ class EvolutionaryComputation(object):
         population = []
         archive = []
         for cs, fit in zip(initial_cs, initial_fit):
-            ind = Individual(cs)
+            ind = Individual(cs, maximize=self._kwargs['maximize'])
             ind.fitness = fit
             population.append(ind)
             
