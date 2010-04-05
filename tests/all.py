@@ -31,6 +31,12 @@ from examples import nsga_example
 from examples import paes_example
 from examples import pso_example
 
+# speeds up ~25%
+try:
+    import psyco; psyco.full()
+except ImportError:
+    pass
+
 prng = random.Random()
 prng.seed(1000) 
 
@@ -112,6 +118,7 @@ class NSGA_Test(unittest.TestCase):
         nsga = nsga_example.main(do_plot=False,prng=prng)
         archive = nsga._kwargs['_archive']
         fitnesses = [[round(j,3) for j in i.fitness] for i in archive]
+        print fitnesses
         self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')
         self.assertTrue([1.0, 0.0] in fitnesses, 'expected a fitness contained [1,0]')
 

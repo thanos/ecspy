@@ -27,10 +27,10 @@ from ecspy import archivers
 from ecspy import terminators
 from ecspy import observers
 
-try:
-    import psyco; psyco.full()
-except:
-    pass
+#try:
+#    import psyco; psyco.full()
+#except:
+#    pass
 
 
 class Individual(object):
@@ -68,9 +68,9 @@ class Individual(object):
     def __lt__(self, other):
         if self.fitness is not None and other.fitness is not None:
             if self.maximize: 
-                return self.fitness > other.fitness
-            else:
                 return self.fitness < other.fitness
+            else:
+                return self.fitness > other.fitness
 #            if self.maximize: 
 #                return self.fitness < other.fitness
 #            else:
@@ -82,14 +82,7 @@ class Individual(object):
         return self < other or not other < self
             
     def __gt__(self, other):
-        # return other < self
-        if self.fitness is not None and other.fitness is not None:
-            if self.maximize: 
-                return self.fitness > other.fitness
-            else:
-                return self.fitness < other.fitness
-        else:
-            raise Exception("fitness is not defined")
+        return other < self
 
     def __ge__(self, other):
         return other < self or not self < other

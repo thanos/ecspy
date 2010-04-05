@@ -1,6 +1,6 @@
 import random
 import time
-from ecspy import emo
+from ecspy import emo, ec
 from ecspy import selectors
 from ecspy import variators
 from ecspy import observers
@@ -18,19 +18,21 @@ def generate_candidate(random, args):
     except KeyError:
         upper_bound = 1
         
+    #return ec.Individual([random.random() * (upper_bound - lower_bound) + lower_bound], args['maximize'])
     return [random.random() * (upper_bound - lower_bound) + lower_bound]
 
 def evaluate_sch(candidates, args):
+    maximize = args['maximize']
     fitness = []
     for cs in candidates:
         x = cs[0]**2
         y = (cs[0]-2)**2 
-        fitness.append(emo.Pareto([x, y]))
+        fitness.append(emo.Pareto(maximize, [x, y]))
     return fitness
 
 def converged_sch(population, num_generations, num_evaluations, args):
     pop = round_fitness(population, 1)
-    return [0.0, 2.0] in pop
+    return [0.0, 4.0] in pop
 
 def my_observer(population, num_generations, num_evaluations, args):
     try:
@@ -59,7 +61,7 @@ def main(do_plot=True, prng=None):
         prng.seed(time.time()) 
 
     nsga = emo.NSGA2(prng)
-    nsga.variator = [variators.n_point_crossover, variators.gaussian_mutation]
+    nsga.variator = [variators.gaussian_mutation, variators.blend_crossover]
     nsga.observer = my_observer
     final_arc = nsga.evolve(maximize=False,
                             generator=generate_candidate, 
@@ -67,8 +69,9 @@ def main(do_plot=True, prng=None):
                             pop_size=100,
                             terminator=[terminators.evaluation_termination,converged_sch], 
                             max_evaluations=1e8,
-                            lower_bound=-10e3,
-                            upper_bound= 10e3
+                            lower_bound=-1000.,
+                            upper_bound= 1000.,
+                            #mut_range=1.
                             )
     
     print('*******************************')
@@ -81,8 +84,8 @@ def main(do_plot=True, prng=None):
             x.append(f.fitness[0])
             y.append(f.fitness[1])
         pylab.scatter(x, y, color='b')
-        #pylab.show()
-        pylab.savefig('nsga2-front.pdf', format='pdf')
+        pylab.show()
+        #pylab.savefig('nsga2-front.pdf', format='pdf')
     return nsga
         
 if __name__ == '__main__':

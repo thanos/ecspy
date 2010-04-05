@@ -36,7 +36,8 @@ class Pareto(object):
     strictly better in at least one objective.
     
     """
-    def __init__(self, values=[]):
+    def __init__(self, maximize, values=[]):
+        self.maximize = maximize
         self.values = values
         
     def __len__(self):
@@ -50,16 +51,25 @@ class Pareto(object):
     
     def __lt__(self, other):
         if len(self.values) != len(other.values):
-            return NotImplemented
+            raise NotImplementedError
         else:
             not_worse = True
             strictly_better = False
+            
+        if self.maximize:
             for x, y in zip(self.values, other.values):
                 if x > y:
                     not_worse = False
                 elif y > x:
                     strictly_better = True
-            return not_worse and strictly_better
+        else:
+            for x, y in zip(self.values, other.values):
+                if x < y:
+                    not_worse = False
+                elif y < x:
+                    strictly_better = True
+        
+        return not_worse and strictly_better
             
     def __le__(self, other):
         return self < other or not other < self
@@ -137,8 +147,7 @@ def hypervolume(pareto_set, reference_point=None):
     if ref is None:
         ref = [max(ps, key=lambda x: x[o])[o] for o in xrange(n)]
     pl = ps[:]
-    #pl.sort(key=lambda x: x[0], reverse=True)
-    pl.sort(reverse=True)
+    pl.sort(key=lambda x: x[0], reverse=True)
     s = [(1, pl)]
     for k in xrange(n - 1):
         s_prime = []

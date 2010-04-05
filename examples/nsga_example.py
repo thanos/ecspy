@@ -24,7 +24,7 @@ def evaluate_candidate(candidates, args):
     for cs in candidates:
         x = cs[0]**2
         y = (cs[0]-1)**2 
-        fitness.append(emo.Pareto([x, y]))
+        fitness.append(emo.Pareto(args['maximize'], [x, y]))
     return fitness
 
 def my_observer(population, num_generations, num_evaluations, args):
