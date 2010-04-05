@@ -31,6 +31,8 @@ def evaluate_sch(candidates, args):
     return fitness
 
 def converged_sch(population, num_generations, num_evaluations, args):
+    if num_generations < 20:
+        return False
     pop = round_fitness(population, 1)
     return [0.0, 4.0] in pop
 
@@ -79,8 +81,12 @@ def main(do_plot=True, prng=None):
         import pylab
         x = []
         y = []
-        for f in final_arc:
+        for f in final_arc[1:]:
             print(f)
+            # filter out left over values in the archive...
+            a,b = abs(f.fitness[0]), abs(f.fitness[1])
+            if a>4 or b>4:
+                continue 
             x.append(f.fitness[0])
             y.append(f.fitness[1])
         pylab.scatter(x, y, color='b')
