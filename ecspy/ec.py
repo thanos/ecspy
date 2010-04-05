@@ -232,7 +232,6 @@ class EvolutionaryComputation(object):
         self._kwargs['_num_generations'] = num_generations
         self._kwargs['_num_evaluations'] = num_evaluations
         
-        #population.sort(key=lambda x: x.fitness, reverse=True)
         population.sort(reverse=True)
         self._kwargs['_population'] = population
         
@@ -253,7 +252,6 @@ class EvolutionaryComputation(object):
             
             # Sort the parents just before taking out the candidate so that relative fitness
             # can be determined in the variators (e.g., differential crossover).
-            #parents.sort(key=lambda x: x.fitness, reverse=True)
             parents.sort(reverse=True)
             parent_cs = [copy.deepcopy(i.candidate) for i in parents]
             offspring_cs = parent_cs
@@ -279,7 +277,6 @@ class EvolutionaryComputation(object):
             
             # Migrate individuals.
             population = self.migrator(random=self._random, population=pop_copy, args=self._kwargs)
-            #population.sort(key=lambda x: x.fitness, reverse=True)
             population.sort(reverse=True)
             self._kwargs['_population'] = population
             

@@ -66,7 +66,6 @@ def truncation_selection(random, population, args):
         num_selected = len(population)
         args['num_selected'] = num_selected
     pool = list(population)
-    #pool.sort(key=lambda x: x.fitness, reverse=True)
     pool.sort(reverse=True)
     return pool[:num_selected]
 
@@ -130,7 +129,6 @@ def fitness_proportionate_selection(random, population, args):
         for index in xrange(len_pop):
             psum[index] = index + 1 / float(len_pop)
     elif (pop_max_fit > 0 and pop_min_fit >= 0) or (pop_max_fit <= 0 and pop_min_fit < 0):
-        #pop.sort(key=lambda x: x.fitness, reverse=True)
         pop.sort(reverse=True)
         psum[0] = pop[0].fitness
         for i in xrange(1, len_pop):

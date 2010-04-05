@@ -65,7 +65,6 @@ def truncation_replacement(random, population, parents, offspring, args):
     """
     pool = list(population)
     pool.extend(list(offspring))
-    #pool.sort(key=lambda x: x.fitness, reverse=True)
     pool.sort(reverse=True)
     return pool[:len(population)]
 
@@ -124,10 +123,8 @@ def generational_replacement(random, population, parents, offspring, args):
         args['num_elites'] = num_elites
     off = list(offspring)
     pop = list(population)
-    #pop.sort(key=lambda x: x.fitness, reverse=True)
     pop.sort(reverse=True)
     off.extend(pop[:num_elites])
-#    off.sort(key=lambda x: x.fitness, reverse=True)
     off.sort(reverse=True)
     survivors = off[:len(population)]
     return survivors
@@ -163,7 +160,6 @@ def random_replacement(random, population, parents, offspring, args):
         args['num_elites'] = num_elites
     off = list(offspring)
     pop = list(population)
-    #pop.sort(key=lambda x: x.fitness, reverse=True)
     pop.sort(reverse=True)
     num_to_replace = min(len(off), len(pop) - num_elites) 
     valid_indices = range(num_elites, len(pop))
@@ -206,7 +202,6 @@ def plus_replacement(random, population, parents, offspring, args):
         args['use_one_fifth_rule'] = use_one_fifth_rule
     pool = list(parents)
     pool.extend(list(offspring))
-    #pool.sort(key=lambda x: x.fitness, reverse=True)
     pool.sort(reverse=True)
     survivors = pool[:len(population)]
     if use_one_fifth_rule:
@@ -244,7 +239,6 @@ def comma_replacement(random, population, parents, offspring, args):
     
     """
     pool = list(offspring)
-    #pool.sort(key=lambda x: x.fitness, reverse=True)
     pool.sort(reverse=True)
     survivors = pool[:len(population)]
     return survivors
