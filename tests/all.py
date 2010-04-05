@@ -28,14 +28,9 @@ from examples import eda_example
 from examples import es_example
 from examples import ga_example
 from examples import nsga_example
+from examples import nsga_example_sch
 from examples import paes_example
 from examples import pso_example
-
-# speeds up ~25%
-try:
-    import psyco; psyco.full()
-except ImportError:
-    pass
 
 prng = random.Random()
 prng.seed(1000) 
@@ -112,22 +107,28 @@ class GA_Test(unittest.TestCase):
                          'expected a fitness of %s, got %s' % ( target, result )
                         )
 
-
 class NSGA_Test(unittest.TestCase):
     def test(self):
         nsga = nsga_example.main(do_plot=False,prng=prng)
         archive = nsga._kwargs['_archive']
         fitnesses = [[round(j,3) for j in i.fitness] for i in archive]
-        print fitnesses
         self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')
         self.assertTrue([1.0, 0.0] in fitnesses, 'expected a fitness contained [1,0]')
 
+
+class NSGA_SCH_Test(unittest.TestCase):
+    def test(self):
+        nsga = nsga_example_sch.main(do_plot=False,prng=prng)
+        archive = nsga._kwargs['_archive']
+        fitnesses = [[round(j,1) for j in i.fitness] for i in archive]
+        self.assertTrue([0.0,4.0] in fitnesses or [4.0, 0.0] in fitnesses, 'expected a fitness of either 0.0 or 4.0')
+        self.assertTrue(nsga._kwargs['_num_generations']<=20, 'expected to converge in 20 generations')
 
 class PAES_Test(unittest.TestCase):
     def test(self):
         paes = paes_example.main(do_plot=False,prng=prng)
         archive = paes._kwargs['_archive']
-        fitnesses = [[round(j,3) for j in i.fitness] for i in archive]
+        fitnesses = [[round(j,1) for j in i.fitness] for i in archive]
         self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')
         self.assertTrue([1.0, 0.0] in fitnesses, 'expected a fitness contained [1,0]')
 

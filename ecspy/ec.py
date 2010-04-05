@@ -27,11 +27,6 @@ from ecspy import archivers
 from ecspy import terminators
 from ecspy import observers
 
-#try:
-#    import psyco; psyco.full()
-#except:
-#    pass
-
 
 class Individual(object):
     """Represents an individual in an evolutionary computation.
