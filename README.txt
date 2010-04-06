@@ -6,7 +6,7 @@ creating evolutionary computations in Python. Additionally, ECsPy
 provides an easy-to-use canonical genetic algorithm (GA), evolution 
 strategy (ES), estimation of distribution algorithm (EDA), differential 
 evolution algorithm (DEA), and particle swarm optimizer (PSO) for users 
-who don't need much customization.
+who don't need much customization. 
 
   
 Requirements
