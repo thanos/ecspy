@@ -1,7 +1,7 @@
 ``ecspy`` -- A framework for creating evolutionary computations in Python.
 --------------------------------------------------------------------------
 
-ECsPy (pronounced "easy as pie") is a free, open source framework for 
+ECsPy (Evolutionary Computations in Python) is a free, open source framework for 
 creating evolutionary computations in Python. Additionally, ECsPy 
 provides an easy-to-use canonical genetic algorithm (GA), evolution 
 strategy (ES), estimation of distribution algorithm (EDA), differential 
