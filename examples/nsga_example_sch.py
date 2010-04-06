@@ -1,5 +1,5 @@
-import random
-import time
+from random import Random
+from time import time
 from ecspy import emo, ec
 from ecspy import selectors
 from ecspy import variators
@@ -58,8 +58,8 @@ def my_observer(population, num_generations, num_evaluations, args):
    
 def main(do_plot=True, prng=None):
     if prng is None:
-        prng = random.Random()
-        prng.seed(time.time()) 
+        prng = Random()
+        prng.seed(time()) 
 
     nsga = emo.NSGA2(prng)
     nsga.variator = [variators.gaussian_mutation, variators.blend_crossover]

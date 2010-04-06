@@ -1,5 +1,5 @@
-import random
-import time
+from random import Random
+from time import time
 from ecspy import emo
 from ecspy import selectors
 from ecspy import variators
@@ -50,14 +50,13 @@ def my_observer(population, num_generations, num_evaluations, args):
    
 def main(do_plot=True, prng=None):
     if prng is None:
-        prng = random.Random()
-        prng.seed(time.time()) 
+        prng = Random()
+        prng.seed(time()) 
 
     nsga = emo.NSGA2(prng)
     nsga.variator = variators.gaussian_mutation
     nsga.observer = my_observer
-    final_arc = nsga.evolve(maximize=False,
-                            generator=generate_candidate, 
+    final_arc = nsga.evolve(generator=generate_candidate, 
                             evaluator=evaluate_candidate, 
                             pop_size=100,
                             terminator=terminators.evaluation_termination, 

@@ -121,8 +121,8 @@ def fitness_proportionate_selection(random, population, args):
     pop = list(population)
     len_pop = len(pop)
     psum = [i for i in xrange(len_pop)]
-    pop_max_fit = (max(pop, key=lambda x: x.fitness)).fitness
-    pop_min_fit = (min(pop, key=lambda x: x.fitness)).fitness
+    pop_max_fit = (max(pop)).fitness
+    pop_min_fit = (min(pop)).fitness
     
     # Set up the roulette wheel
     if pop_max_fit == pop_min_fit:
@@ -175,7 +175,7 @@ def rank_selection(random, population, args):
         args['num_selected'] = num_selected
     pop = list(population)
     len_pop = len(pop)
-    pop.sort(key=lambda x: x.fitness)
+    pop.sort()
     psum = [i for i in xrange(len_pop)]
     den = (len_pop * (len_pop + 1)) / 2.0
     for i in xrange(len_pop):
@@ -228,7 +228,7 @@ def tournament_selection(random, population, args):
     selected = []
     for _ in xrange(num_selected):
         tourn = random.sample(pop, tourn_size)
-        selected.append(max(tourn, key=lambda x: x.fitness))
+        selected.append(max(tourn))
     return selected
 
 

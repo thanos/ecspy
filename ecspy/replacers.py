@@ -87,7 +87,7 @@ def steady_state_replacement(random, population, parents, offspring, args):
     """
     off = list(offspring)
     pop = list(population)
-    pop.sort(key=lambda x: x.fitness)
+    pop.sort()
     num_to_replace = min(len(off), len(pop))
     pop[:num_to_replace] = off[:num_to_replace]
     return pop
@@ -328,7 +328,7 @@ def nsga_replacement(random, population, parents, offspring, args):
         for p in pop:
             dominated = False
             for q in pop:
-                if combined[p].fitness < combined[q].fitness:
+                if combined[p] < combined[q]:
                     dominated = True
                     break
             if not dominated:

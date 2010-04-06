@@ -32,7 +32,7 @@ def main(prng=None):
 
     if prng is None:
         prng = Random()
-        prng.seed(time.time()) 
+        prng.seed(time()) 
     
     ga = ec.GA(prng)
     ga.observer = [observers.screen_observer, observers.file_observer]

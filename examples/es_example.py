@@ -21,7 +21,7 @@ def main(prng=None):
     file = open('es_observer.txt', 'w')
     if prng is None:
         prng = Random()
-        prng.seed(time.time()) 
+        prng.seed(time()) 
     es = ec.ES(prng)
     es.observer = [observers.screen_observer, observers.file_observer]
     start = time()

@@ -56,12 +56,11 @@ class Pareto(object):
             strictly_better = False
             
             for x, y in zip(self.values, other.values):
-                if x < y:
+                if x > y:
                     not_worse = False
-                elif y < x:
+                elif y > x:
                     strictly_better = True
-
-        return not_worse and strictly_better
+            return not_worse and strictly_better
             
     def __le__(self, other):
         return self < other or not other < self
@@ -169,7 +168,7 @@ class NSGA2(ec.EvolutionaryComputation):
         self.replacer = replacers.nsga_replacement
         self.selector = selectors.tournament_selection
     
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, maximize=True, **args):
         try:
             args['num_selected']
         except KeyError:
@@ -178,7 +177,7 @@ class NSGA2(ec.EvolutionaryComputation):
             args['tourn_size']
         except KeyError:
             args['tourn_size'] = 2
-        return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)
+        return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, maximize, **args)
 
     
 class PAES(ec.EvolutionaryComputation):
@@ -196,8 +195,8 @@ class PAES(ec.EvolutionaryComputation):
         self.variator = variators.gaussian_mutation
         self.replacer = replacers.paes_replacement  
 
-    def evolve(self, generator, evaluator, pop_size=1, seeds=[], terminator=terminators.default_termination, **args):
-        final_arc = ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, **args)
+    def evolve(self, generator, evaluator, pop_size=1, seeds=[], terminator=terminators.default_termination, maximize=True, **args):
+        final_arc = ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, maximize, **args)
         try:
             del self.archiver.grid_population
         except AttributeError:

@@ -1,5 +1,5 @@
-import random
-import time
+from random import Random
+from time import time
 from ecspy import emo
 from ecspy import observers
 from ecspy import terminators
@@ -28,8 +28,8 @@ def my_observer(population, num_generations, num_evaluations, args):
 
 def main(do_plot=True, prng=None):
     if prng is None:
-        prng = random.Random()
-        prng.seed(time.time()) 
+        prng = Random()
+        prng.seed(time()) 
     paes = emo.PAES(prng)
     paes.observer = my_observer
     final_arc = paes.evolve(generator=generate_candidate, 

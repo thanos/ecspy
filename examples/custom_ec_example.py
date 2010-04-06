@@ -26,7 +26,7 @@ def evaluate_real(candidates, args):
 def main(do_plot=True, prng=None):
     if prng is None:
         prng = Random()
-        prng.seed(time.time()) 
+        prng.seed(time()) 
     
     evocomp = ec.EvolutionaryComputation(prng)
     evocomp.selector = selectors.tournament_selection

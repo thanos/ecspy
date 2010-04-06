@@ -22,7 +22,7 @@ def evaluate_real(candidates, args):
 def main(prng=None):
     if prng is None:
         prng = Random()
-        prng.seed(time.time()) 
+        prng.seed(time()) 
     
     dea = ec.DEA(prng)
     dea.observer = observers.screen_observer

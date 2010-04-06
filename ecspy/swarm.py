@@ -43,8 +43,8 @@ class Particle(ec.Individual):
     - *v* -- the particle's velocity
     
     """
-    def __init__(self, candidate = None):
-        ec.Individual.__init__(self, candidate)
+    def __init__(self, candidate=None, maximize=True):
+        ec.Individual.__init__(self, candidate, maximize)
         self.x = candidate
         self.xfitness = None
         self.v = [0.0] * len(candidate)
@@ -178,7 +178,7 @@ class PSO(object):
         
         return population
 
-    def swarm(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, **args):
+    def swarm(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, maximize=True, **args):
         """Perform the swarming.
         
         This function creates a swarm and allows the particles to fly around
@@ -196,6 +196,7 @@ class PSO(object):
         - *terminator* -- the terminator (or iterable collection of terminators)
           to be used to determine whether the evolutionary process
           has finished (default terminators.default_termination)
+        - *maximize* -- Boolean value stating use of maximization (default True)
         - *args* -- a dictionary of keyword arguments
 
         Optional keyword arguments in args:
@@ -263,8 +264,9 @@ class PSO(object):
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
         
         population = []
+        archive = []
         for cs, fit in zip(initial_cs, initial_fit):
-            particle = Particle(cs)
+            particle = Particle(cs, maximize=maximize)
             particle.fitness = fit
             particle.x = cs
             particle.xfitness = fit
@@ -296,9 +298,14 @@ class PSO(object):
             updated_fitness = evaluator(candidates=updated_candidates, args=self._kwargs)
             for particle, fitness in zip(population, updated_fitness):
                 particle.xfitness = fitness
-                if particle.xfitness > particle.fitness:
-                    particle.candidate = copy.deepcopy(particle.x)
-                    particle.fitness = copy.deepcopy(particle.xfitness)
+                if maximize:
+                    if particle.xfitness > particle.fitness:
+                        particle.candidate = copy.deepcopy(particle.x)
+                        particle.fitness = copy.deepcopy(particle.xfitness)
+                else:
+                    if particle.xfitness < particle.fitness:
+                        particle.candidate = copy.deepcopy(particle.x)
+                        particle.fitness = copy.deepcopy(particle.xfitness)
                     
             population.sort(reverse=True)
             num_evaluations += len(updated_fitness)
