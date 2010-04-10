@@ -349,7 +349,7 @@ class EDA(EvolutionaryComputation):
         try:
             args['num_selected']
         except KeyError:
-            args['num_selected'] = pop_size / 2
+            args['num_selected'] = pop_size // 2
         try:
             args['num_offspring']
         except KeyError:

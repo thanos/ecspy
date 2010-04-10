@@ -164,7 +164,7 @@ def random_replacement(random, population, parents, offspring, args):
     num_to_replace = min(len(off), len(pop) - num_elites) 
     valid_indices = range(num_elites, len(pop))
     rep_index = random.sample(valid_indices, num_to_replace)
-    for i in xrange(len(off)):
+    for i in range(len(off)):
         pop[rep_index[i]] = off[i]
     return pop
 
@@ -295,9 +295,9 @@ def simulated_annealing_replacement(random, population, parents, offspring, args
         
     new_pop = []
     for p, o in zip(parents, offspring):
-        if o.fitness >= p.fitness:
+        if o >= p:
             new_pop.append(o)
-        elif random.random() < math.exp(-(p.fitness - o.fitness) / temp):
+        elif random.random() < math.exp(-math.abs(p.fitness - o.fitness) / float(temp)):
             new_pop.append(o)
         else:
             new_pop.append(p)
@@ -344,15 +344,15 @@ def nsga_replacement(random, population, parents, offspring, args):
     for i, front in enumerate(fronts):
         if len(survivors) + len(front) > len(population):
             # Determine the crowding distance.
-            distance = [0 for _ in xrange(len(combined))]
+            distance = [0 for _ in range(len(combined))]
             individuals = front[:]
             num_individuals = len(individuals)
             num_objectives = len(individuals[0]['individual'].fitness)
-            for obj in xrange(num_objectives):
+            for obj in range(num_objectives):
                 individuals.sort(key=lambda x: x['individual'].fitness[obj])
                 distance[individuals[0]['index']] = float('inf')
                 distance[individuals[-1]['index']] = float('inf')
-                for i in xrange(1, num_individuals-1):
+                for i in range(1, num_individuals-1):
                     distance[individuals[i]['index']] = distance[individuals[i]['index']] + (individuals[i+1]['individual'].fitness[obj] - individuals[i-1]['individual'].fitness[obj])
                 
             crowd = [dict(dist=distance[f['index']], index=f['index']) for f in front]

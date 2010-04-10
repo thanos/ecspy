@@ -25,6 +25,7 @@
 """
 
 import time
+import math
 
 
 def default_observer(population, num_generations, num_evaluations, args):
@@ -47,24 +48,35 @@ def screen_observer(population, num_generations, num_evaluations, args):
        args -- a dictionary of keyword arguments
     
     """
-    print('Generation: %d' % num_generations)
-    print('Evaluations: %d' % num_evaluations)
-    avg_fit = sum([x.fitness for x in population]) / float(len(population))
-    print('Average Fitness: %0.5f     Maximum Fitness: %0.5f' % (avg_fit, population[0].fitness))
+    import numpy
+    
+    worst_fit = population[-1].fitness
+    best_fit = population[0].fitness
+    med_fit = numpy.median([p.fitness for p in population])
+    avg_fit = numpy.mean([p.fitness for p in population])
+    std_fit = numpy.std([p.fitness for p in population], ddof=1)
+
+    print('Generation Evaluation Worst      Best       Median     Average    Std Dev   ')
+    print('---------- ---------- ---------- ---------- ---------- ---------- ----------')
+    print('{0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10}\n'.format(num_generations, num_evaluations, worst_fit, best_fit, med_fit, avg_fit, std_fit))
+    print('Current Population:')
     for ind in population:
         print(str(ind))
-    print('')
+    print('----------------------------------------------------------------------------')
 
     
 def file_observer(population, num_generations, num_evaluations, args):
     """Print the output of the EC to a file.
     
     This function saves the results of the evolutionary computation
-    to a file. The output includes the generation number, the current
-    number of evaluations, the average fitness, the maximum fitness, 
-    and the full population. The default action for the file is to
-    create a new file called 'ecspy-observer-file-<timestamp>' in
-    which to write the information.
+    to two files. The first file, which by default is named 
+    'ecspy-statistics-file-<timestamp>.csv', contains the basic
+    generational statistics of the population throughout the run
+    (worst, best, median, and average fitness and standard deviation
+    of the fitness values). The second file, which by default is named
+    'ecspy-individuals-file-<timestamp>.csv', contains every individual
+    during each generation of the run. Both files may be passed to the
+    function as keyword arguments (see below).
     
     .. Arguments:
        population -- the population of Individuals
@@ -73,23 +85,37 @@ def file_observer(population, num_generations, num_evaluations, args):
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    *observer_file* -- a file object (default; see text)
+    *statistics_file* -- a file object (default: see text)
+    *individuals_file* -- a file object (default: see text) 
     
     """
+    # Import the necessary libraries here. Otherwise, they would have to be
+    # installed even if this function is not called.
+    import numpy
+    
     try:
-        observer_file = args['observer_file']
+        statistics_file = args['statistics_file']
     except KeyError:
-        filename = 'ecspy-observer-file-' + str(time.time())
-        observer_file = open(filename, 'w')
-        args['observer_file'] = observer_file
+        filename = 'ecspy-statistics-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv'
+        statistics_file = open(filename, 'w')
+        args['statistics_file'] = statistics_file
 
-    observer_file.write('Generation: %d \n' % num_generations)
-    observer_file.write('Evaluations: %d \n' % num_evaluations)
-    avg_fit = sum([x.fitness for x in population]) / float(len(population))
-    observer_file.write('Average Fitness: %0.5f     Maximum Fitness: %0.5f \n' % (avg_fit, population[0].fitness))
-    for ind in population:
-        observer_file.write(str(ind) + '\n')
-    observer_file.write('\n')
+    try:
+        individuals_file = args['individuals_file']
+    except KeyError:
+        filename = 'ecspy-individuals-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv'
+        individuals_file = open(filename, 'w')
+        args['individuals_file'] = individuals_file
+
+    worst_fit = population[-1].fitness
+    best_fit = population[0].fitness
+    med_fit = numpy.median([p.fitness for p in population])
+    avg_fit = numpy.mean([p.fitness for p in population])
+    std_fit = numpy.std([p.fitness for p in population], ddof=1)
+    statistics_file.write('{0}, {1}, {2}, {3}, {4}, {5}, {6}\n'.format(num_generations, len(population), worst_fit, best_fit, med_fit, avg_fit, std_fit))
+    
+    for i, p in enumerate(population):
+        individuals_file.write('{0}, {1}, {2}, {3}\n'.format(num_generations, i, p.fitness, str(p.candidate)))
     
 
 def archive_observer(population, num_generations, num_evaluations, args):
@@ -99,7 +125,7 @@ def archive_observer(population, num_generations, num_evaluations, args):
     except KeyError:
         archive = []
     for a in archive:
-        print(a.candidate)
+        print(a)
 
         
 def plot_observer(population, num_generations, num_evaluations, args):    
@@ -132,36 +158,41 @@ def plot_observer(population, num_generations, num_evaluations, args):
     import numpy
     
     best_fitness = population[0].fitness
-    average_fitness = sum([x.fitness for x in population]) / float(len(population))
-    median_fitness = population[len(population)/2].fitness
-    colors = ['blue', 'green', 'red']
-    labels = ['best', 'average', 'median']
+    worst_fitness = population[-1].fitness
+    median_fitness = numpy.median([p.fitness for p in population])
+    average_fitness = numpy.mean([p.fitness for p in population])
+    colors = ['black', 'blue', 'green', 'red']
+    labels = ['average', 'median', 'best', 'worst']
     data = []
     if num_generations == 0:
         pylab.ion()
-        data = [[num_evaluations], [best_fitness], [average_fitness], [median_fitness]]
+        data = [[num_evaluations], [average_fitness], [median_fitness], [best_fitness], [worst_fitness]]
         lines = []
-        for i in xrange(3):
+        for i in range(4):
             line, = pylab.plot(data[0], data[i+1], color=colors[i], label=labels[i])
             lines.append(line)
         # Add the legend when the first data is added.
         pylab.legend(loc='lower right')
         args['plot_data'] = data
         args['plot_lines'] = lines
+        pylab.xlabel('Evaluations')
+        pylab.ylabel('Fitness')
     else:
         data = args['plot_data']
         data[0].append(num_evaluations)
-        data[1].append(best_fitness)
-        data[2].append(average_fitness)
-        data[3].append(median_fitness)
+        data[1].append(average_fitness)
+        data[2].append(median_fitness)
+        data[3].append(best_fitness)
+        data[4].append(worst_fitness)
         lines = args['plot_lines']
         for i, line in enumerate(lines):
             line.set_xdata(numpy.array(data[0]))
             line.set_ydata(numpy.array(data[i+1]))
         args['plot_data'] = data
         args['plot_lines'] = lines
-    ymin = min(min(data[1]), min(data[2]), min(data[3]))
-    ymax = max(max(data[1]), max(data[2]), max(data[3]))
+    ymin = min([min(d) for d in data[1:]])
+    ymax = max([max(d) for d in data[1:]])
     yrange = ymax - ymin
     pylab.xlim((0, num_evaluations))
     pylab.ylim((ymin - 0.1*yrange, ymax + 0.1*yrange))
+    pylab.draw()

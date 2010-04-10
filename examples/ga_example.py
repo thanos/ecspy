@@ -28,7 +28,8 @@ def evaluate_binary(candidates, args):
     return fitness
 
 def main(prng=None): 
-    file = open('ga_observer.txt', 'w')
+    stat_file = open('ga_statistics.csv', 'w')
+    ind_file = open('ga_individuals.csv', 'w')
 
     if prng is None:
         prng = Random()
@@ -40,12 +41,15 @@ def main(prng=None):
     final_pop = ga.evolve(evaluator=evaluate_binary,
                           generator=generate_binary,
                           terminator=terminators.evaluation_termination,
-                          max_evaluations=1000,
+                          max_evaluations=1000, 
+                          statistics_file=stat_file,
+                          individuals_file=ind_file,
                           num_elites=1,
                           pop_size=100,
-                          num_bits=10,
-                          observer_file=file)
+                          num_bits=10)
     stop = time()
+    stat_file.close()
+    ind_file.close()
             
     print('***********************************')
     print('Total Execution Time: %0.5f seconds' % (stop - start))

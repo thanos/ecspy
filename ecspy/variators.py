@@ -50,8 +50,6 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from itertools import izip
-
 
 def default_variation(random, candidates, args):
     """Return the set of candidates without variation.
@@ -101,7 +99,7 @@ def n_point_crossover(random, candidates, args):
     moms = cand[::2]
     dads = cand[1::2]
     children = []
-    for mom, dad in izip(moms, dads):
+    for mom, dad in zip(moms, dads):
         if random.random() < crossover_rate:
             bro = list(mom)
             sis = list(dad)
@@ -159,11 +157,11 @@ def uniform_crossover(random, candidates, args):
     moms = cand[::2]
     dads = cand[1::2]
     children = []
-    for mom, dad in izip(moms, dads):
+    for mom, dad in zip(moms, dads):
         if random.random() < crossover_rate:
             bro = []
             sis = []
-            for m, d in izip(mom, dad):
+            for m, d in zip(mom, dad):
                 if random.random() < pux_bias:
                     bro.append(m)
                     sis.append(d)
@@ -240,11 +238,11 @@ def blend_crossover(random, candidates, args):
     moms = cand[::2]
     dads = cand[1::2]
     children = []
-    for mom, dad in izip(moms, dads):
+    for mom, dad in zip(moms, dads):
         if random.random() < crossover_rate:
             bro = []
             sis = []
-            for index, (m, d) in enumerate(izip(mom, dad)):
+            for index, (m, d) in enumerate(zip(mom, dad)):
                 smallest = min(m, d)
                 largest = max(m, d)
                 delta = blx_alpha * (largest - smallest)
@@ -328,11 +326,11 @@ def differential_crossover(random, candidates, args):
     moms = cand_pair[::2]
     dads = cand_pair[1::2]
     children = []
-    for mom, dad in izip(moms, dads):
+    for mom, dad in zip(moms, dads):
         if random.random() < crossover_rate:
             bro = []
             sis = []
-            for index, (m, d) in enumerate(izip(mom[1], dad[1])):
+            for index, (m, d) in enumerate(zip(mom[1], dad[1])):
                 if mom[0] > dad[0]:
                     negpos = 1
                     val = d
@@ -507,11 +505,11 @@ def estimation_of_distribution_variation(random, candidates, args):
         
     cs_copy = list(candidates)
     num_genes = max([len(x) for x in cs_copy])
-    genes = [[x[i] for x in cs_copy] for i in xrange(num_genes)] 
+    genes = [[x[i] for x in cs_copy] for i in range(num_genes)] 
     mean = [float(sum(x)) / float(len(x)) for x in genes]
     stdev = [max(sum([(x - m)**2 for x in g]) / float(len(g) - 1), 0.001) for g, m in zip(genes, mean)]
     offspring = []
-    for _ in xrange(num_offspring):
+    for _ in range(num_offspring):
         child = []
         for m, s, hi, lo in zip(mean, stdev, upper_bound, lower_bound):
             value = m + random.gauss(0, s);

@@ -150,12 +150,12 @@ class PSO(object):
                     
         for index, particle in enumerate(population):
             if topology == 'ring' and neighborhood_size is not None and neighborhood_size > 0:
-                if index < neighborhood_size / 2:
-                    start = len(population) - neighborhood_size / 2 + index
+                if index < neighborhood_size // 2:
+                    start = len(population) - neighborhood_size // 2 + index
                 else:
-                    start = index - neighborhood_size / 2
+                    start = index - neighborhood_size // 2
                 gbest = population[start]
-                for i in xrange(1, neighborhood_size):
+                for i in range(1, neighborhood_size):
                     hood_i = (start + i) % len(population)
                     if population[hood_i] > gbest:
                         gbest = population[hood_i]
@@ -258,7 +258,7 @@ class PSO(object):
             seeds = [seeds]
         initial_cs = list(seeds)
         num_generated = max(pop_size - len(seeds), 0)
-        for _ in xrange(num_generated):
+        for _ in range(num_generated):
             cs = generator(random=self._random, args=self._kwargs)
             initial_cs.append(cs)
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
