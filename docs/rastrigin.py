@@ -27,7 +27,7 @@ def evaluate_rastrigin(candidates, args):
     fitness = []
     for cs in candidates:
         fit = 10 * len(cs) + sum([((x - 1)**2 - 10 * cos(2 * pi * (x - 1))) for x in cs])
-        fitness.append(-fit)
+        fitness.append(fit)
     return fitness
 
 #start_main
@@ -37,6 +37,7 @@ es = ec.ES(rand)
 final_pop = es.evolve(generator=generate_rastrigin,
                       evaluator=evaluate_rastrigin,
                       terminator=terminators.evaluation_termination,
+                      maximize=False,
                       max_evaluations=20000,
                       mutation_rate=0.25,
                       lower_bound=-5.12,

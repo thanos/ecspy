@@ -13,6 +13,7 @@ Requirements
 ============
 
   * Requires at least Python 2.6.
+  * Numpy is required if the screen or file observers are used.
   * Matplotlib is required if the line plot observer is used.
   * Parallel Python (pp) is required if parallel evaluation is used.
 
@@ -31,22 +32,28 @@ Package Structure
   
 ECsPy consists of the following modules:
 
-  * ec.py -- provides the basic framework for the EvolutionEngine and specific ECs
+  * analysis.py -- provides tools for analyzing the results of an EC
+  
+  * archivers.py -- defines useful archiving methods, particularly for EMO algorithms
+  
+  * ec.py -- provides the basic framework for an EvolutionaryComputation and specific ECs
+  
+  * emo.py -- provides the Pareto class for multiobjective optimization along with specific EMOs (e.g. NSGA-II)
   
   * evaluators.py -- defines useful evaluation schemes, such as parallel evaluation
   
   * migrators.py -- defines a basic default migration which does nothing
-             
+
   * observers.py -- defines a few built-in observers, including screen, file, and plotting observers
   
   * replacers.py -- defines standard replacement schemes such as generational and steady-state replacement
-                    
+
   * selectors.py -- defines standard selectors (e.g., tournament)
   
   * swarm.py -- provides a basic particle swarm optimizer
   
   * terminators.py -- defines standard terminators (e.g., exceeding a maximum number of generations)
-                      
+
   * variators.py -- defines standard variators (crossover and mutation schemes such as n-point crossover)
 
 

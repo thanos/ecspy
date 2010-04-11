@@ -24,13 +24,14 @@ def main(prng=None):
     if prng is None:
         prng = Random()
         prng.seed(time()) 
-    sa = ec.ES(prng)
+    sa = ec.SA(prng)
     sa.observer = observers.screen_observer
     start = time()
     final_pop = sa.evolve(evaluator=evaluate_real, 
-                          generator=generate_real, maximize=False,
+                          generator=generate_real, 
                           pop_size=10, 
-                          terminator=[terminators.evaluation_termination, terminators.diversity_termination],
+                          maximize=False,
+                          terminator=terminators.evaluation_termination,
                           max_evaluations=400)
     stop = time()
         

@@ -60,10 +60,10 @@ class Particle(ec.Individual):
             self.__dict__[name] = val
 
     def __str__(self):
-        return "%s : %s" % (str(self.candidate), str(self.fitness))
+        return '{0} : {1}'.format(str(self.candidate), str(self.fitness))
         
     def __repr__(self):
-        return "x: %s : %s \nv: %s \np: %s : %s\n" % (str(self.x), str(self.xfitness), str(self.v), str(self.candidate), str(self.fitness))
+        return 'x: {0} : {1} \nv: {2} \np: {3} : {4}\n'.format(str(self.x), str(self.xfitness), str(self.v), str(self.candidate), str(self.fitness))
         
 
 class PSO(object):

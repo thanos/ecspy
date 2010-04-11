@@ -47,7 +47,7 @@ The Evaluator
     :pyobject: evaluate_rastrigin
     :end-before: #start_main
 
-This function takes an iterable object containing the candidates along with the keyword arguments. The function should perform the evaluation of each of the candidates and return an iterable object containing each fitness value in the same order as the candidates [#]_. The fitness here is actually the negative of the calculated value. This is because the Rastrigin problem is one of minimization, but the ECsPy algorithms all assume higher fitness values are "better". Therefore, we simply negate this value to accomplish the given task.
+This function takes an iterable object containing the candidates along with the keyword arguments. The function should perform the evaluation of each of the candidates and return an iterable object containing each fitness value in the same order as the candidates [#]_. The Rastrigin problem is one of minimization, so we'll need to tell the evolution strategy that we are minimizing (by using ``maximize=True`` in the call to ``evolve``).
 
 """"""""""""""""""""""""""""
 The Evolutionary Computation
@@ -66,11 +66,11 @@ Now that we have decided upon our generator and evaluator, we can create the EC.
 ::
 
 	$ python rastrigin.py
-	[1.0128954030179298, 0.99783491708012606, 0.98566673658365467] : -0.0746336668708
+	[1.0103563727741853, 1.0053437976583677, 0.99981717781109924] : 0.0269423868053
 
 .. {{{end}}}
 
-As can be seen, we first create our random number generator object, seeding it with the current system time. Then we construct our ES. Finally, we call the ``evolve`` method of the ES. To this method, we pass the generator, evaluator, a terminator (that stops after a given number of function evaluations), and a set of keyword arguments that will be needed by one or more of the functions involved. For instance, we pass ``num_inputs`` to be used by our generator. Likewise, ``max_fun_evals`` will be used by our terminator.
+As can be seen, we first create our random number generator object, seeding it with the current system time. Then we construct our ES. Finally, we call the ``evolve`` method of the ES. To this method, we pass the generator, evaluator, a terminator (that stops after a given number of function evaluations), a flag to denote that we're minimizing in this problem (which defaults to ``maximize=True`` if unspecified), and a set of keyword arguments that will be needed by one or more of the functions involved. For instance, we pass ``num_inputs`` to be used by our generator. Likewise, ``max_evaluations`` will be used by our terminator.
 
 The script outputs the best individual in the final generation, which will always be located at index 0 because the population is sorted by fitness before it is returned. Since the random number generator was seeded with the current time, your particular output will be different when running this script from that presented here. 
 

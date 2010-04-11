@@ -18,12 +18,11 @@ def my_serial_evaluator(candidate):
     return num
 
 def main(prng=None):    
-    file = open('es_observer.txt', 'w')
     if prng is None:
         prng = Random()
         prng.seed(time()) 
     es = ec.ES(prng)
-    es.observer = [observers.screen_observer, observers.file_observer]
+    es.observer = observers.screen_observer
     start = time()
     final_pop = es.evolve(evaluator=evaluators.parallel_evaluation, 
                           generator=generate_real, 
@@ -32,8 +31,7 @@ def main(prng=None):
                           serial_evaluator=my_serial_evaluator,
                           max_evaluations=2000,
                           mutation_rate=0.2,
-                          use_one_fifth_rule=True,
-                          observer_file=file)
+                          use_one_fifth_rule=True)
     stop = time()
         
     print('***********************************')

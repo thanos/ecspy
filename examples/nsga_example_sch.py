@@ -18,7 +18,6 @@ def generate_candidate(random, args):
     except KeyError:
         upper_bound = 1
         
-    #return ec.Individual([random.random() * (upper_bound - lower_bound) + lower_bound], args['maximize'])
     return [random.random() * (upper_bound - lower_bound) + lower_bound]
 
 def evaluate_sch(candidates, args):

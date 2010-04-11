@@ -40,7 +40,7 @@ def main(do_plot=True, prng=None):
                             lower_bound=0,
                             upper_bound=1,
                             max_archive_size=20,
-                            num_grid_divisions=1)
+                            num_grid_divisions=2)
     
     front = []
     for f in final_arc:

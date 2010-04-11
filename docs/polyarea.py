@@ -54,7 +54,7 @@ def mutate_polygon(random, candidates, args):
     try:
         lower_bound = args['lower_bound']
     except KeyError:
-        lower_bound = 0
+        lower_bound = -1
         args['lower_bound'] = lower_bound
     try:
         upper_bound = args['upper_bound']

@@ -26,7 +26,6 @@ def main(prng=None):
         prng.seed(time()) 
     
     eda = ec.EDA(prng)
-    eda.observer = observers.screen_observer
     start = time()
     final_pop = eda.evolve(evaluator=evaluate_real, 
                            generator=generate_real, 

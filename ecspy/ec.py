@@ -56,10 +56,10 @@ class Individual(object):
             self.__dict__[name] = val
     
     def __str__(self):
-        return "%s : %s" % (str(self.candidate), str(self.fitness))
+        return '{0} : {1}'.format(str(self.candidate), str(self.fitness))
         
     def __repr__(self):
-        return "<Individual: candidate = %s, fitness = %s, birthdate = %d>" % (str(self.candidate), str(self.fitness), self.birthdate)
+        return '<Individual: candidate = {0}, fitness = {1}, birthdate = {2}>'.format(str(self.candidate), str(self.fitness), self.birthdate)
         
     def __lt__(self, other):
         if self.fitness is not None and other.fitness is not None:
@@ -68,7 +68,7 @@ class Individual(object):
             else:
                 return self.fitness > other.fitness
         else:
-            raise Exception("fitness is not defined")
+            raise Exception('fitness is not defined')
 
     def __le__(self, other):
         return self < other or not other < self
