@@ -163,7 +163,6 @@ def generation_termination(population, num_generations, num_evaluations, args):
         max_generations = 1
     if num_generations >= max_generations:
         print 'REACHED GENERATION TERMINATION'
-        import ipdb; ipdb.set_trace()
         return True
     return False
 
