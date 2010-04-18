@@ -40,6 +40,7 @@ def default_termination(population, num_generations, num_evaluations, args):
        args -- a dictionary of keyword arguments
     
     """
+    print 'REACHED DEFAULT TERMINATION'
     return True
     
 
@@ -74,7 +75,10 @@ def diversity_termination(population, num_generations, num_evaluations, args):
         for x, y in zip(p.candidate, q.candidate):
             d += (x - y)**2
         distance.append(math.sqrt(d))
-    return max(distance) < min_diversity
+    if max(distance) < min_diversity:
+        print 'REACHED DIVERSITY TERMINATION'
+        return True
+    return False
 
     
 def avg_fitness_termination(population, num_generations, num_evaluations, args):
@@ -102,7 +106,10 @@ def avg_fitness_termination(population, num_generations, num_evaluations, args):
         min_fitness_diff = 0.001
     avg_fit = sum([x.fitness for x in population]) / float(len(population))
     max_fit = max([x.fitness for x in population])
-    return (max_fit - avg_fit) < min_fitness_diff
+    if (max_fit - avg_fit) < min_fitness_diff:
+        print 'REACHED AVERAGE FITNESS TERMINATION'
+        return True
+    return False
 
 
 def evaluation_termination(population, num_generations, num_evaluations, args):
@@ -127,7 +134,10 @@ def evaluation_termination(population, num_generations, num_evaluations, args):
         max_evaluations = args['max_evaluations']
     except KeyError:
         max_evaluations = len(population)
-    return num_evaluations >= max_evaluations
+    if num_evaluations >= max_evaluations:
+        print 'REACHED EVALUATION TERMINATION'
+        return True
+    return False
 
 
 def generation_termination(population, num_generations, num_evaluations, args):
@@ -151,5 +161,9 @@ def generation_termination(population, num_generations, num_evaluations, args):
         max_generations = args['max_generations']
     except KeyError:
         max_generations = 1
-    return num_generations >= max_generations
+    if num_generations >= max_generations:
+        print 'REACHED GENERATION TERMINATION'
+        import ipdb; ipdb.set_trace()
+        return True
+    return False
 
