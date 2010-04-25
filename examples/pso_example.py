@@ -2,6 +2,7 @@ from time import time
 from random import Random
 from ecspy import observers
 from ecspy import terminators
+from ecspy import topologies
 from ecspy.swarm import PSO
 
 
@@ -32,9 +33,10 @@ def main(prng=None):
     final_pop = pso.swarm(evaluator=evaluate_real, 
                           generator=generate_real,
                           pop_size=20,
+                          maximize=True,
                           terminator=terminators.evaluation_termination,
-                          max_evaluations=200,
-                          topology='ring',
+                          topology=topologies.ring_topology,
+                          max_evaluations=400, 
                           neighborhood_size=5,
                           use_constriction_coefficient=True,
                           particle_size=6)
