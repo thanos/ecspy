@@ -21,10 +21,10 @@
 import math
 import copy
 from ecspy import ec
+from ecspy import archivers
 from ecspy import observers
 from ecspy import terminators
-from ecspy import archivers
-
+from ecspy import topologies
 
 
 class Particle(ec.Individual):
@@ -60,10 +60,10 @@ class Particle(ec.Individual):
             self.__dict__[name] = val
 
     def __str__(self):
-        return '{0} : {1}'.format(str(self.candidate), str(self.fitness))
+        return '%s : %s' % (str(self.candidate), str(self.fitness))
         
     def __repr__(self):
-        return 'x: {0} : {1} \nv: {2} \np: {3} : {4}\n'.format(str(self.x), str(self.xfitness), str(self.v), str(self.candidate), str(self.fitness))
+        return 'x: %s : %s\np: %s : %s\nv: %s\n' % (str(self.x), str(self.xfitness), str(self.candidate), str(self.fitness), str(self.v))
         
 
 class PSO(object):
@@ -106,7 +106,7 @@ class PSO(object):
             terminate = terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
         return terminate
 
-    def _move(self, population, args):
+    def _move(self, population, topology, args):
         try:
             lower_bound = args['lower_bound']
         except KeyError:
@@ -128,16 +128,6 @@ class PSO(object):
             social_rate = 2.1
             args['social_rate'] = social_rate
         try:
-            topology = args['topology']
-        except KeyError:
-            topology = 'star'
-            args['topology'] = topology
-        try:
-            neighborhood_size = args['neighborhood_size']
-        except KeyError:
-            neighborhood_size = None
-            args['neighborhood_size'] = neighborhood_size
-        try:
             use_constriction_coefficient = args['use_constriction_coefficient']
         except KeyError:
             use_constriction_coefficient = False
@@ -147,23 +137,13 @@ class PSO(object):
         if(use_constriction_coefficient):
             phi = cognitive_rate + social_rate
             K = 2.0 / abs(2.0 - phi - math.sqrt(phi**2 - (4.0 * phi)))
-                    
-        for index, particle in enumerate(population):
-            if topology == 'ring' and neighborhood_size is not None and neighborhood_size > 0:
-                if index < neighborhood_size // 2:
-                    start = len(population) - neighborhood_size // 2 + index
-                else:
-                    start = index - neighborhood_size // 2
-                gbest = population[start]
-                for i in range(1, neighborhood_size):
-                    hood_i = (start + i) % len(population)
-                    if population[hood_i] > gbest:
-                        gbest = population[hood_i]
-            else: # star topology
-                gbest = population[0]
-                for p in population:
-                    if p > gbest:
-                        gbest = p
+
+        neighbors = topology(self._random, population, args)
+        for index, (particle, neighborhood) in enumerate(zip(population, neighbors)):
+            gbest = neighborhood[0]
+            for neighbor in neighborhood:
+                if neighbor > gbest:
+                    gbest = neighbor
                         
             for i, (x, v, p, g) in enumerate(zip(particle.x, particle.v, particle.candidate, gbest.candidate)):
                 r1 = self._random.random()
@@ -178,7 +158,13 @@ class PSO(object):
         
         return population
 
-    def swarm(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, maximize=True, **args):
+    def swarm(self, generator, evaluator, 
+              pop_size=100, 
+              seeds=[], 
+              maximize=True, 
+              terminator=terminators.default_termination, 
+              topology=topologies.star_topology,
+              **args):
         """Perform the swarming.
         
         This function creates a swarm and allows the particles to fly around
@@ -193,10 +179,11 @@ class PSO(object):
         - *pop_size* -- the number of Individuals in the population (default 100)
         - *seeds* -- an iterable collection of candidate solutions to include
           in the initial population (default [])
+        - *maximize* -- Boolean value stating use of maximization (default True)
         - *terminator* -- the terminator (or iterable collection of terminators)
           to be used to determine whether the evolutionary process
           has finished (default terminators.default_termination)
-        - *maximize* -- Boolean value stating use of maximization (default True)
+        - *topology* -- the neighborhood topology (default topologies.star_topology)
         - *args* -- a dictionary of keyword arguments
 
         Optional keyword arguments in args:
@@ -209,9 +196,6 @@ class PSO(object):
           position influences its movement (default 2.1)
         - *social_rate* -- the rate at which the particle's neighbors 
           influence its movement (default 2.1)
-        - *topology* -- the neighborhood topology; can be either 'ring' or 
-          'star' (default 'star')
-        - *neighborhood_size* -- the size of the neighborhood (default None)
         - *use_constriction_coefficient* -- whether Clerc's constriction 
           coefficient should be used (default False)
         
@@ -225,6 +209,7 @@ class PSO(object):
         - *_generator* -- the generator used for creating candidate solutions
         - *_evaluator* -- the evaluator used for evaluating solutions
         - *_terminator* -- the particular terminator(s) used
+        - *_topology* -- the particular topology used
         - *_population_size* -- the size of the population
         - *_num_generations* -- the number of generations that have elapsed
         - *_num_evaluations* -- the number of evaluations that have been completed
@@ -247,6 +232,10 @@ class PSO(object):
             self._kwargs['_terminator']
         except KeyError:
             self._kwargs['_terminator'] = terminator
+        try:
+            self._kwargs['_topology']
+        except KeyError:
+            self._kwargs['_topology'] = topology
         try:
             self._kwargs['_population_size']
         except KeyError:
@@ -292,7 +281,7 @@ class PSO(object):
             self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
             
         while not self._should_terminate(terminator, population, num_generations, num_evaluations):
-            population = self._move(population, self._kwargs)
+            population = self._move(population, topology, self._kwargs)
 
             updated_candidates = [p.x for p in population]
             updated_fitness = evaluator(candidates=updated_candidates, args=self._kwargs)
@@ -319,10 +308,10 @@ class PSO(object):
             archive = self.archiver(random=self._random, archive=arc_copy, population=pop_copy, args=self._kwargs)
             self._kwargs['_archive'] = archive
             
-        try:
-            for obs in self.observer:
-                obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
-        except TypeError:
-            self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
+            try:
+                for obs in self.observer:
+                    obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
+            except TypeError:
+                self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
             
         return archive
