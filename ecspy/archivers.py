@@ -179,7 +179,9 @@ def adaptive_grid_archiver(random, population, archive, args):
                         new_archive[i] = ind
                         join = True
                     elif ind > a:
-                        removal_set.add(a)
+                        #removal_set.add(a)
+                        if not a in removal_set: 
+                            removal_set.append(a)
                     # Otherwise, the individual is nondominated against this archive member.
                     
                 new_archive = list(set(new_archive) - set(removal_set))

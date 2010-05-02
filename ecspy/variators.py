@@ -1,3 +1,5 @@
+import math, copy
+
 """
     This module provides pre-defined variators for evolutionary computations.
     
@@ -258,7 +260,6 @@ def blend_crossover(random, candidates, args):
             children.append(mom)
             children.append(dad)
     return children
-
     
 def differential_crossover(random, candidates, args):
     """Return the offspring of differential crossover on the candidates.
@@ -350,6 +351,115 @@ def differential_crossover(random, candidates, args):
             children.append(dad[1])
     return children
     
+def simulated_binary_crossover(random, candidates, args):
+    """
+    Adapted from pyevolve's implementation by Amit Saha
+    Experimental SBX Implementation - Follows the implementation in NSGA-II (Deb, et.al)
+ 
+    Some implementation `reference <http://vision.ucsd.edu/~sagarwal/icannga.pdf>`_.
+ 
+    warning:: This crossover method is Data Type Dependent, which means that
+                must be used for 1D genome of real values.
+    """
+    # SBX specifix
+    try:
+        eta_c = args['sbx_etac']
+    except KeyError:
+        eta_c  = 10
+    try:
+        EPS = args['sbx_eps']
+    except KeyError:
+        EPS  = 1.0e-14
+
+    # general
+    try:
+        lower_bound = args['lower_bound']
+    except KeyError:
+        lower_bound = 0
+    try:
+        upper_bound = args['upper_bound']
+    except KeyError:
+        upper_bound = 1
+        
+    try:
+        iter(lower_bound)
+    except TypeError:
+        clen = max([len(x) for x in candidates])
+        lower_bound = [lower_bound] * clen
+        
+    try:
+        iter(upper_bound)
+    except TypeError:
+        clen = max([len(x) for x in candidates])
+        upper_bound = [upper_bound] * clen
+        
+    
+    cand = list(candidates)
+    if len(cand) % 2 == 1:
+        cand = cand[:-1]
+    random.shuffle(cand)
+    moms = cand[::2]
+    dads = cand[1::2]
+    
+    sister = copy.deepcopy(moms)
+    brother = copy.deepcopy(dads)
+    
+    children = []
+    for i in range(0,len(moms)):
+        for j in range(len(moms[i])):
+            if math.fabs(moms[i][j]-dads[i][j]) > EPS:
+                lb, ub = lower_bound[j], upper_bound[j]
+                if moms[i][j] > dads[i][j]:
+                    #swap
+                    temp = moms[i][j]
+                    moms[i][j] = dads[i][j]
+                    dads[i][j] = temp
+    
+                #random number betwn. 0 & 1
+                u = random.random() 
+                beta = 1.0 + 2*(moms[i][j] - lb)/(1.0*(dads[i][j]-moms[i][j]))
+                alpha = 2.0 - beta**(-(eta_c+1.0))
+    
+                if u <= (1.0/alpha):
+                    beta_q = (u*alpha)**(1.0/((eta_c + 1.0)*1.0))
+                else:
+                    beta_q = (1.0/(2.0-u*alpha))**(1.0/(1.0*(eta_c + 1.0)))
+        
+                brother[i][j] = 0.5*((moms[i][j] + dads[i][j]) - beta_q*(dads[i][j]-moms[i][j]))
+        
+                beta = 1.0 + 2.0*(ub - dads[i][j])/(1.0*(dads[i][j]-moms[i][j]))
+                alpha = 2.0 - beta**(-(eta_c+1.0))
+        
+                if u <= (1.0/alpha):
+                    beta_q = (u*alpha)**(1.0/((eta_c + 1)*1.0))
+                else:
+                    beta_q = (1.0/(2.0-u*alpha))**(1.0/(1.0*(eta_c + 1.0)))
+        
+                sister[i][j] = 0.5*((moms[i][j] + dads[i][j]) + beta_q*(dads[i][j]-moms[i][j]))
+    
+                if brother[i][j] > ub:
+                    brother[i][j] = ub
+                if brother[i][j] < lb:
+                    brother[i][j] = lb
+        
+                if sister[i][j] > ub:
+                    sister[i][j] = ub
+                if sister[i][j] < lb:
+                    sister[i][j] = lb
+    
+                if random.random() > 0.5:
+                    # Swap
+                    temp = sister[i][j]
+                    sister[i][j] = brother[i][j]
+                    brother[i][j] = temp
+            else:
+                sister[i][j] = moms[i][j]
+                brother[i][j] = dads[i][j]
+        children.append(brother[i])
+        children.append(sister[i])
+    return children
+            
+        
     
 def gaussian_mutation(random, candidates, args):
     """Return the mutants created by Gaussian mutation on the candidates.
