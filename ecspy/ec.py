@@ -234,11 +234,12 @@ class EvolutionaryComputation(object):
         archive = self.archiver(random=self._random, population=pop_copy, archive=arc_copy, args=self._kwargs)
         self._kwargs['_archive'] = archive
         
-        try:
+        if isinstance(self.observer, (list, tuple)):
             for obs in self.observer:
                 obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
-        except TypeError:
+        else:
             self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
+        
         while not self._should_terminate(terminator, population, num_generations, num_evaluations):
             # Select individuals.
             pop_copy = list(population)
@@ -249,10 +250,11 @@ class EvolutionaryComputation(object):
             parents.sort(reverse=True)
             parent_cs = [copy.deepcopy(i.candidate) for i in parents]
             offspring_cs = parent_cs
-            try:
+            
+            if isinstance(self.variator, (list, tuple)):
                 for op in self.variator:
                     offspring_cs = op(random=self._random, candidates=offspring_cs, args=self._kwargs)
-            except TypeError:
+            else:
                 offspring_cs = self.variator(random=self._random, candidates=offspring_cs, args=self._kwargs)
             
             # Evaluate offspring.
@@ -262,7 +264,7 @@ class EvolutionaryComputation(object):
                 off = Individual(cs, maximize=maximize)
                 off.fitness = fit
                 offspring.append(off)
-            
+            print 'LEN OFFSPRING',len(offspring)
             num_evaluations += len(offspring_fit)        
             self._kwargs['_num_evaluations'] = num_evaluations
             print 'NUM EVALS:', num_evaluations
@@ -283,10 +285,10 @@ class EvolutionaryComputation(object):
             
             num_generations += 1
             self._kwargs['_num_generations'] = num_generations
-            try:
+            if isinstance(self.observer, (list, tuple)):
                 for obs in self.observer:
                     obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
-            except TypeError:
+            else:
                 self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
         return archive
         
