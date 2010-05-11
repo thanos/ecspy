@@ -11,9 +11,8 @@ sentence = """
 numeric_sentence = map(ord, sentence)
 
 def evaluation_termination(population, num_generations, num_evaluations, args):
-    for p in population:
-        if sum([abs(a-b) for a,b in zip(p, numeric_sentence)]) == 0:
-            return  True
+    if sum([abs(a-b) for a,b in zip(population[0].candidate, numeric_sentence)]) == 0:
+        return  True
     return False
 
 def observer(population, num_generations, num_evaluations, args):
@@ -22,6 +21,8 @@ def observer(population, num_generations, num_evaluations, args):
     best_fit = population[0].candidate
     print '*'*20
     print  ''.join(map(chr, best_fit))
+    print 'fitnesses:',
+    #for p in population: print p.fitness
     
 def generate_sentence(random, args):
     s = [random.randint(0,100) for i in sentence]
@@ -112,17 +113,17 @@ def main(prng=None):
     #ga.archiver = archivers.best_archiver
     final_pop = ga.evolve(evaluator=evaluate_sentence,
                           generator=generate_sentence,
-                          terminator=terminators.evaluation_termination,
+                          terminator=evaluation_termination,
                           max_evaluations=10000000, 
                           pop_size=100,
                           tourn_size=2,
                           #num_selected=20,
                           num_crossover_points=1,
-                          #mutation_range=1,
+                          mutation_range=4,
                           mutation_rate=0.02,
                           crossover_rate=0.9,
-                          upper_bound=255,
-                          lower_bound =0,
+                          upper_bound=max(numeric_sentence),
+                          lower_bound =min(numeric_sentence),
                           maximize=False)
     final_sentence= ''.join(map(chr, final_pop[0].candidate))
     print 'FINAL SENTENCE'
