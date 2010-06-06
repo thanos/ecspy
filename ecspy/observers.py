@@ -85,27 +85,17 @@ def file_observer(population, num_generations, num_evaluations, args):
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
-    *statistics_file* -- a file object (default: see text)
-    *individuals_file* -- a file object (default: see text) 
+    
+    - *statistics_file* -- a file object (default: see text)
+    - *individuals_file* -- a file object (default: see text) 
     
     """
     # Import the necessary libraries here. Otherwise, they would have to be
     # installed even if this function is not called.
     import numpy
     
-    try:
-        statistics_file = args['statistics_file']
-    except KeyError:
-        filename = 'ecspy-statistics-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv'
-        statistics_file = open(filename, 'w')
-        args['statistics_file'] = statistics_file
-
-    try:
-        individuals_file = args['individuals_file']
-    except KeyError:
-        filename = 'ecspy-individuals-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv'
-        individuals_file = open(filename, 'w')
-        args['individuals_file'] = individuals_file
+    statistics_file = args.setdefault('statistics_file', open('ecspy-statistics-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv', 'w'))
+    individuals_file = args.setdefault('individuals_file', open('ecspy-individuals-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv', 'w'))
 
     worst_fit = population[-1].fitness
     best_fit = population[0].fitness
@@ -120,10 +110,7 @@ def file_observer(population, num_generations, num_evaluations, args):
 
 def archive_observer(population, num_generations, num_evaluations, args):
     """Print the current archive to the screen."""
-    try:
-        archive = args['_archive']
-    except KeyError:
-        archive = []
+    archive = args.setdefault('_archive', [])
     for a in archive:
         print(a)
 

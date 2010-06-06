@@ -66,11 +66,12 @@ Now that we have decided upon our generator and evaluator, we can create the EC.
 ::
 
 	$ python rastrigin.py
-	[1.0103563727741853, 1.0053437976583677, 0.99981717781109924] : 0.0269423868053
+	TERMINATED DUE TO evaluation_termination
+	[0.99067964706794498, 0.99932552559142507, 1.0006467772340022] : 0.0174024611432
 
 .. {{{end}}}
 
-As can be seen, we first create our random number generator object, seeding it with the current system time. Then we construct our ES. Finally, we call the ``evolve`` method of the ES. To this method, we pass the generator, evaluator, a terminator (that stops after a given number of function evaluations), a flag to denote that we're minimizing in this problem (which defaults to ``maximize=True`` if unspecified), and a set of keyword arguments that will be needed by one or more of the functions involved. For instance, we pass ``num_inputs`` to be used by our generator. Likewise, ``max_evaluations`` will be used by our terminator.
+As can be seen, we first create our random number generator object, seeding it with the current system time. Then we construct our ES, specifying a terminator (that stops after a given number of function evaluations). Finally, we call the ``evolve`` method of the ES. To this method, we pass the generator, evaluator, a flag to denote that we're minimizing in this problem (which defaults to ``maximize=True`` if unspecified), and a set of keyword arguments that will be needed by one or more of the functions involved. For instance, we pass ``num_inputs`` to be used by our generator. Likewise, ``max_evaluations`` will be used by our terminator.
 
 The script outputs the best individual in the final generation, which will always be located at index 0 because the population is sorted by fitness before it is returned. Since the random number generator was seeded with the current time, your particular output will be different when running this script from that presented here. 
 

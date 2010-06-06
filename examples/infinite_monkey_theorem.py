@@ -72,26 +72,10 @@ def gaussian_mutation(random, candidates, args):
     the same length as the chromosome.
     
     """
-    try:
-        mut_rate = args['mutation_rate']
-    except KeyError:
-        mut_rate = 0.1
-        args['mutation_rate'] = mut_rate
-    try:
-        mut_range = args['mutation_range']
-    except KeyError:
-        mut_range = 1.0
-        args['mutation_range'] = mut_range
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = 0
-        args['lower_bound'] = lower_bound
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
-        args['upper_bound'] = upper_bound
+    mut_rate = args.setdefault('mutation_rate', 0.1)
+    mut_range = args.setdefault('mutation_range', 1.0)
+    lower_bound = args.setdefault('lower_bound', 0)
+    upper_bound = args.setdefault('upper_bound', 1)
         
     try:
         iter(lower_bound)
@@ -126,13 +110,13 @@ def main(prng=None):
     ga.variator = [variators.uniform_crossover, gaussian_mutation]
     ga.archiver = archivers.best_archiver
     ga.selector = selectors.tournament_selection
+    ga.variator = [variators.uniform_crossover, gaussian_mutation]
+    ga.terminator = evaluation_termination
     final_pop = ga.evolve(evaluator=evaluate_sentence,
                           generator=generate_sentence,
-                          terminator=[terminators.evaluation_termination, evaluation_termination],
-                          max_evaluations=100000,
-                          pop_size=60,#100,
+                          max_evaluations=100000, 
+                          pop_size=60,
                           tourn_size=20,
-                          #num_selected=20,
                           num_crossover_points=1,
                           mutation_range=0.05,
                           mutation_rate=0.01,

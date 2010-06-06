@@ -53,6 +53,8 @@ ECsPy consists of the following modules:
   * swarm.py -- provides a basic particle swarm optimizer
   
   * terminators.py -- defines standard terminators (e.g., exceeding a maximum number of generations)
+  
+  * topologies.py -- defines standard topologies for particle swarms
 
   * variators.py -- defines standard variators (crossover and mutation schemes such as n-point crossover)
 

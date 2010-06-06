@@ -94,16 +94,10 @@ class NSGA2(ec.EvolutionaryComputation):
         self.replacer = replacers.nsga_replacement
         self.selector = selectors.tournament_selection
     
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], terminator=terminators.default_termination, maximize=True, **args):
-        try:
-            args['num_selected']
-        except KeyError:
-            args['num_selected'] = pop_size
-        try:
-            args['tourn_size']
-        except KeyError:
-            args['tourn_size'] = 2
-        return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, maximize, **args)
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, **args):
+        args.setdefault('num_selected', pop_size)
+        args.setdefault('tourn_size', 2)
+        return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, **args)
 
     
 class PAES(ec.EvolutionaryComputation):
@@ -121,8 +115,8 @@ class PAES(ec.EvolutionaryComputation):
         self.variator = variators.gaussian_mutation
         self.replacer = replacers.paes_replacement  
 
-    def evolve(self, generator, evaluator, pop_size=1, seeds=[], terminator=terminators.default_termination, maximize=True, **args):
-        final_arc = ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, terminator, maximize, **args)
+    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, **args):
+        final_arc = ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, **args)
         try:
             del self.archiver.grid_population
         except AttributeError:

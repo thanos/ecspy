@@ -64,22 +64,13 @@ def parallel_evaluation(candidates, args):
     except KeyError:
         return [-float('inf') for c in candidates]
     try:
-        serial_depend = args['serial_dependencies']
-    except KeyError:
-        serial_depend = ()
-    try:
-        serial_mod = args['serial_modules']
-    except KeyError:
-        serial_mod = ()
-    try:
         job_server = args['_job_server']
     except KeyError:
-        try:
-            parallel_servers = args['parallel_servers']
-        except KeyError:
-            parallel_servers = ("*",)
+        parallel_servers = args.get('parallel_servers', ("*",))
         job_server = pp.Server(ppservers=parallel_servers)
         args['_job_server'] = job_server
+    serial_depend = args.setdefault('serial_dependencies', ())
+    serial_mod = args.setdefault('serial_modules', ())
         
     func_template = pp.Template(job_server, serial_eval, serial_depend, serial_mod)
     jobs = [func_template.submit(cand) for cand in candidates]

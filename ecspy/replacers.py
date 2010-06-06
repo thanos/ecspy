@@ -116,11 +116,7 @@ def generational_replacement(random, population, parents, offspring, args):
     *num_elites* -- number of elites to consider (default 0)
     
     """
-    try:
-        num_elites = args['num_elites']
-    except KeyError:
-        num_elites = 0
-        args['num_elites'] = num_elites
+    num_elites = args.setdefault('num_elites', 0)
     off = list(offspring)
     pop = list(population)
     pop.sort(reverse=True)
@@ -153,11 +149,7 @@ def random_replacement(random, population, parents, offspring, args):
     *num_elites* -- number of elites to consider (default 0)
     
     """
-    try:
-        num_elites = args['num_elites']
-    except KeyError:
-        num_elites = 0
-        args['num_elites'] = num_elites
+    num_elites = args.setdefault('num_elites', 0)
     off = list(offspring)
     pop = list(population)
     pop.sort(reverse=True)
@@ -195,11 +187,7 @@ def plus_replacement(random, population, parents, offspring, args):
     *use_one_fifth_rule* -- whether the 1/5 rule should be used (default False)
     
     """
-    try:
-        use_one_fifth_rule = args['use_one_fifth_rule']
-    except KeyError:
-        use_one_fifth_rule = False
-        args['use_one_fifth_rule'] = use_one_fifth_rule
+    use_one_fifth_rule = args.setdefault('use_one_fifth_rule', False)
     pool = list(parents)
     pool.extend(list(offspring))
     pool.sort(reverse=True)
@@ -275,7 +263,7 @@ def simulated_annealing_replacement(random, population, parents, offspring, args
     
     - *temperature* -- the initial temperature
     - *cooling_rate* -- a real-valued coefficient in the range (0, 1) 
-                      by which the temperature should be reduced 
+      by which the temperature should be reduced 
     
     """
     try:
@@ -388,10 +376,7 @@ def paes_replacement(random, population, parents, offspring, args):
        args -- a dictionary of keyword arguments
     
     """
-    try:
-        archive = args['_archive']
-    except KeyError:
-        archive = []
+    archive = args.setdefault('_archive', [])
     try:
         archiver = args['_evolutionary_computation'].archiver
     except KeyError:

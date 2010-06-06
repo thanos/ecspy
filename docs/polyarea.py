@@ -19,18 +19,9 @@ def segments(p):
     return zip(p, p[1:] + [p[0]])
 
 def generate_polygon(random, args):
-    try:
-        size = args['num_vertices']
-    except KeyError:
-        size = 1
-    try:
-        lower = args['lower_bound']
-    except KeyError:
-        lower = -1
-    try:
-        upper = args['upper_bound']
-    except KeyError:
-        upper = 1
+    size = args.get('num_vertices', 1)
+    lower = args.get('lower_bound', 0)
+    upper = args.get('upper_bound', 1)
     return [(random.uniform(lower, upper), random.uniform(lower, upper)) for i in xrange(size)]
 
 def evaluate_polygon(candidates, args):
@@ -41,26 +32,10 @@ def evaluate_polygon(candidates, args):
     return fitness
 
 def mutate_polygon(random, candidates, args):
-    try:
-        mut_rate = args['mutation_rate']
-    except KeyError:
-        mut_rate = 0.1
-        args['mutation_rate'] = mut_rate
-    try:
-        mut_range = args['mutation_range']
-    except KeyError:
-        mut_range = 1.0
-        args['mutation_range'] = mut_range
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = -1
-        args['lower_bound'] = lower_bound
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
-        args['upper_bound'] = upper_bound
+    mut_rate = args.setdefault('mutation_rate', 0.1)
+    mut_range = args.setdefault('mutation_range', 1.0)
+    lower_bound = args.setdefault('lower_bound', -1)
+    upper_bound = args.setdefault('upper_bound', 1)
         
     try:
         iter(lower_bound)
@@ -89,8 +64,7 @@ def polygon_observer(population, num_generations, num_evaluations, args):
     try:
         canvas = args['canvas']
     except KeyError:
-        root = Tk()
-        canvas = Canvas(root, bg='white', height=400, width=400)
+        canvas = Canvas(Tk(), bg='white', height=400, width=400)
         args['canvas'] = canvas
         
     # Get the best polygon in the population.
@@ -124,6 +98,7 @@ my_ec.selector = ec.selectors.tournament_selection
 my_ec.variator = [ec.variators.uniform_crossover, mutate_polygon]
 my_ec.replacer = ec.replacers.steady_state_replacement
 my_ec.observer = polygon_observer
+my_ec.terminator = [terminators.evaluation_termination, terminators.avg_fitness_termination]
 window = Tk()
 window.title('Evolving Polygons')
 can = Canvas(window, bg='white', height=400, width=400)
@@ -131,7 +106,6 @@ can.pack()
 
 final_pop = my_ec.evolve(generator=generate_polygon,
                          evaluator=evaluate_polygon,
-                         terminator=[terminators.evaluation_termination, terminators.avg_fitness_termination],
                          max_evaluations=5000,
                          num_selected=2,
                          mutation_rate=0.25,

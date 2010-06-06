@@ -11,23 +11,9 @@ Evolutionary Computation
 .. automodule:: ecspy.ec
    :members:
    
-===========================
-Particle Swarm Optimization
-===========================
-
-.. automodule:: ecspy.swarm
-   :members:
-   
-========================================
-Evolutionary Multiobjective Optimization
-========================================
-
-.. automodule:: ecspy.emo
-   :members:
-   
-=========
+---------
 Functions
-=========
+---------
 
 An evolutionary computation is composed of many parts:
 
@@ -43,60 +29,85 @@ An evolutionary computation is composed of many parts:
 
 Each of these parts may be specified to create custom ECs to suit particular problems.
 
----------
+^^^^^^^^^
 Archivers
----------
+^^^^^^^^^
 
 .. automodule:: ecspy.archivers
    :members:
    
-----------
+^^^^^^^^^^
 Evaluators
-----------
+^^^^^^^^^^
 
 .. automodule:: ecspy.evaluators
    :members:
    
----------
+^^^^^^^^^
 Migrators
----------
+^^^^^^^^^
 
 .. automodule:: ecspy.migrators
    :members:
    
----------
+^^^^^^^^^
 Observers
----------
+^^^^^^^^^
 
 .. automodule:: ecspy.observers
    :members:
    
----------
+^^^^^^^^^
 Replacers
----------
+^^^^^^^^^
 
 .. automodule:: ecspy.replacers
    :members:
    
----------
+^^^^^^^^^
 Selectors
----------
+^^^^^^^^^
 
 .. automodule:: ecspy.selectors
    :members:
    
-----------
+^^^^^^^^^^
 Teminators
-----------
+^^^^^^^^^^
 
 .. automodule:: ecspy.terminators
    :members:
    
----------
+^^^^^^^^^
 Variators
----------
+^^^^^^^^^
 
 .. automodule:: ecspy.variators
+   :members:
+   
+===========================
+Particle Swarm Optimization
+===========================
+
+.. automodule:: ecspy.swarm
+   :members:
+   
+----------
+Topologies
+----------
+
+Additionally, particle swarms make use of topologies, which determine the logical
+relationships among particles in the swarm (i.e., which ones belong to the same
+"neighborhood").
+
+.. automodule:: ecspy.topologies
+   :members:
+
+========================================
+Evolutionary Multiobjective Optimization
+========================================
+
+.. automodule:: ecspy.emo
    :members:
    
 

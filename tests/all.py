@@ -5,7 +5,6 @@
 #    and converges in at a given generation
 #    
 #    TODO:
-#    *   PSO is broken
 #    *   too much rounding going on in DEA_Test
 #    *   too much rounding going on in EDA_Test
 #    *   no guarantee that all test will converge in due time
@@ -134,12 +133,10 @@ class PAES_Test(unittest.TestCase):
 
 class PSO_Test(unittest.TestCase):
     def test(self):
-        print 'PSO is broken...'
         pso = pso_example.main(prng=prng)
-#        archive = pso._kwargs['_archive']
-#        fitnesses = [[round(j,3) for j in i.fitness] for i in archive]
-#        self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')
-#        self.assertTrue([1.0, 0.0] in fitnesses, 'expected a fitness contained [1,0]')
+        archive = pso._kwargs['_archive']
+        fitnesses = [i.fitness for i in archive]
+        self.assertTrue(6.0 in fitnesses, 'expected a fitness to be 6.0')
 
 if __name__ == '__main__':
     unittest.main()

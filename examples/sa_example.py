@@ -7,10 +7,7 @@ from ecspy import evaluators
 
 
 def generate_real(random, args):
-    try:
-        size = args['chrom_size']
-    except KeyError:
-        size = 4
+    size = args.get('chrom_size', 4)
     return [random.random() for i in xrange(size)]
 
 def evaluate_real(candidates, args):
@@ -26,12 +23,12 @@ def main(prng=None):
         prng.seed(time()) 
     sa = ec.SA(prng)
     sa.observer = observers.screen_observer
+    sa.terminator = evaluation_termination
     start = time()
     final_pop = sa.evolve(evaluator=evaluate_real, 
                           generator=generate_real, 
                           pop_size=10, 
                           maximize=False,
-                          terminator=terminators.evaluation_termination,
                           max_evaluations=400)
     stop = time()
         

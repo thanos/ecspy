@@ -142,16 +142,8 @@ def adaptive_grid_archiver(random, population, archive, args):
             a.grid_location = loc
             grid_population[a.grid_location] += 1
 
-    try:
-        max_archive_size = args['max_archive_size']
-    except KeyError:
-        max_archive_size = len(population)
-        args['max_archive_size'] = max_archive_size
-    try:
-        num_grid_divisions = args['num_grid_divisions']
-    except KeyError:
-        num_grid_divisions = 1
-        args['num_grid_divisions'] = num_grid_divisions
+    max_archive_size = args.setdefault('max_archive_size', len(population))
+    num_grid_divisions = args.setdefault('num_grid_divisions', 1)
         
     if not 'grid_population' in dir(adaptive_grid_archiver):
         adaptive_grid_archiver.grid_population = [0 for _ in range(2**(min([len(p.fitness) for p in population]) * num_grid_divisions))]

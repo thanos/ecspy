@@ -24,9 +24,9 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
 import math
 import itertools
+
 
 def default_termination(population, num_generations, num_evaluations, args):
     """Return True.
@@ -40,7 +40,6 @@ def default_termination(population, num_generations, num_evaluations, args):
        args -- a dictionary of keyword arguments
     
     """
-    print 'REACHED DEFAULT TERMINATION'
     return True
     
 
@@ -64,10 +63,7 @@ def diversity_termination(population, num_generations, num_evaluations, args):
     *min_diversity* -- the minimum population diversity allowed (default 0.001)
     
     """
-    try:
-        min_diversity = args['min_diversity']
-    except KeyError:
-        min_diversity = 0.001
+    min_diversity = args.setdefault('min_diversity', 0.001)
     cart_prod = itertools.product(population, population)
     distance = []
     for (p, q) in cart_prod:
@@ -76,7 +72,6 @@ def diversity_termination(population, num_generations, num_evaluations, args):
             d += (x - y)**2
         distance.append(math.sqrt(d))
     if max(distance) < min_diversity:
-        print 'REACHED DIVERSITY TERMINATION'
         return True
     return False
 
@@ -97,17 +92,13 @@ def avg_fitness_termination(population, num_generations, num_evaluations, args):
     Optional keyword arguments in args:
     
     *min_fitness_diff* -- the minimum allowable difference between 
-                          average and maximum fitness (default 0.001)
+    average and maximum fitness (default 0.001)
     
     """
-    try:
-        min_fitness_diff = args['min_fitness_diff']
-    except KeyError:
-        min_fitness_diff = 0.001
+    min_fitness_diff = args.setdefault('min_fitness_diff', 0.001)
     avg_fit = sum([x.fitness for x in population]) / float(len(population))
     max_fit = max([x.fitness for x in population])
     if (max_fit - avg_fit) < min_fitness_diff:
-        print 'REACHED AVERAGE FITNESS TERMINATION'
         return True
     return False
 
@@ -130,12 +121,8 @@ def evaluation_termination(population, num_generations, num_evaluations, args):
     *max_evaluations* -- the maximum candidate solution evaluations (default len(population)) 
     
     """
-    try:
-        max_evaluations = args['max_evaluations']
-    except KeyError:
-        max_evaluations = len(population)
+    max_evaluations = args.setdefault('max_evaluations', len(population))
     if num_evaluations >= max_evaluations:
-        print 'REACHED EVALUATION TERMINATION'
         return True
     return False
 
@@ -157,12 +144,8 @@ def generation_termination(population, num_generations, num_evaluations, args):
     *max_generations* -- the maximum generations (default 1) 
     
     """
-    try:
-        max_generations = args['max_generations']
-    except KeyError:
-        max_generations = 1
+    max_generations = args.setdefault('max_generations', 1)
     if num_generations >= max_generations:
-        print 'REACHED GENERATION TERMINATION'
         return True
     return False
 

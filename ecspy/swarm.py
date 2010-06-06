@@ -78,6 +78,8 @@ class PSO(object):
     
     - *archiver* -- the archival operator
     - *observer* -- the (possibly list of) observer(s)
+    - *terminator* -- the (possibly list of) terminator(s)
+    - *topology* -- the neighborhood topology (default topologies.star_topology)
     
     Protected Attributes:
     
@@ -95,50 +97,39 @@ class PSO(object):
         self._random = random
         self.observer = observers.default_observer
         self.archiver = archivers.default_archiver
+        self.terminator = terminators.default_termination
+        self.topology = topologies.star_topology
         self._kwargs = dict()
 
-    def _should_terminate(self, terminator, pop, ng, ne):
+    def _should_terminate(self, pop, ng, ne):
         terminate = False
+        fname = ''
         try:
-            for clause in terminator:
+            for clause in self.terminator:
                 terminate = terminate or clause(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
+                if terminate:
+                    fname = clause.__name__
+                    break
         except TypeError:
-            terminate = terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
+            terminate = self.terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
+            fname = self.terminator.__name__
+        if terminate:
+            print('TERMINATED DUE TO %s' % fname)
         return terminate
 
-    def _move(self, population, topology, args):
-        try:
-            lower_bound = args['lower_bound']
-        except KeyError:
-            lower_bound = 0.0
-            args['lower_bound'] = lower_bound
-        try:
-            upper_bound = args['upper_bound']
-        except KeyError:
-            upper_bound = 1.0
-            args['upper_bound'] = upper_bound
-        try:
-            cognitive_rate = args['cognitive_rate']
-        except KeyError:
-            cognitive_rate = 2.1
-            args['cognitive_rate'] = cognitive_rate
-        try:
-            social_rate = args['social_rate']
-        except KeyError:
-            social_rate = 2.1
-            args['social_rate'] = social_rate
-        try:
-            use_constriction_coefficient = args['use_constriction_coefficient']
-        except KeyError:
-            use_constriction_coefficient = False
-            args['use_constriction_coefficient'] = use_constriction_coefficient
+    def _move(self, population, args):
+        lower_bound = args.setdefault('lower_bound', 0.0)
+        upper_bound = args.setdefault('upper_bound', 1.0)
+        cognitive_rate = args.setdefault('cognitive_rate', 2.1)
+        social_rate = args.setdefault('social_rate', 2.1)
+        use_constriction_coefficient = args.setdefault('use_constriction_coefficient', False)
                 
         K = 1.0
         if(use_constriction_coefficient):
             phi = cognitive_rate + social_rate
             K = 2.0 / abs(2.0 - phi - math.sqrt(phi**2 - (4.0 * phi)))
 
-        neighbors = topology(self._random, population, args)
+        neighbors = self.topology(self._random, population, args)
         for index, (particle, neighborhood) in enumerate(zip(population, neighbors)):
             gbest = neighborhood[0]
             for neighbor in neighborhood:
@@ -161,9 +152,7 @@ class PSO(object):
     def swarm(self, generator, evaluator, 
               pop_size=100, 
               seeds=[], 
-              maximize=True, 
-              terminator=terminators.default_termination, 
-              topology=topologies.star_topology,
+              maximize=True,
               **args):
         """Perform the swarming.
         
@@ -180,10 +169,6 @@ class PSO(object):
         - *seeds* -- an iterable collection of candidate solutions to include
           in the initial population (default [])
         - *maximize* -- Boolean value stating use of maximization (default True)
-        - *terminator* -- the terminator (or iterable collection of terminators)
-          to be used to determine whether the evolutionary process
-          has finished (default terminators.default_termination)
-        - *topology* -- the neighborhood topology (default topologies.star_topology)
         - *args* -- a dictionary of keyword arguments
 
         Optional keyword arguments in args:
@@ -199,47 +184,28 @@ class PSO(object):
         - *use_constriction_coefficient* -- whether Clerc's constriction 
           coefficient should be used (default False)
         
-        Note that this method will fail if the generator and evaluator 
-        parameters are left with their default values. Note also that the
-        *_kwargs* class variable will be initialized to the args parameter here.
-        It will also be modified to include the following 'built-in' keyword
-        arguments (each preceded by an underscore) unless these arguments are
-        already present (which shouldn't be the case):
+        Note that the *_kwargs* class variable will be initialized to the args 
+        parameter here. It will also be modified to include the following 'built-in' 
+        keyword arguments (each preceded by an underscore) unless these arguments 
+        are already present (which shouldn't be the case):
         
         - *_generator* -- the generator used for creating candidate solutions
         - *_evaluator* -- the evaluator used for evaluating solutions
-        - *_terminator* -- the particular terminator(s) used
-        - *_topology* -- the particular topology used
         - *_population_size* -- the size of the population
         - *_num_generations* -- the number of generations that have elapsed
         - *_num_evaluations* -- the number of evaluations that have been completed
         - *_population* -- the current population
         - *_archive* -- the current archive
+        - *_evolutionary_computation* -- the evolutionary computation (this object)
         
         """
         self._kwargs = args
         # Add entries to the keyword arguments dictionary
         # if they're not already present.
-        try:
-            self._kwargs['_generator']
-        except KeyError:
-            self._kwargs['_generator'] = generator
-        try:
-            self._kwargs['_evaluator']
-        except KeyError:
-            self._kwargs['_evaluator'] = evaluator
-        try:
-            self._kwargs['_terminator']
-        except KeyError:
-            self._kwargs['_terminator'] = terminator
-        try:
-            self._kwargs['_topology']
-        except KeyError:
-            self._kwargs['_topology'] = topology
-        try:
-            self._kwargs['_population_size']
-        except KeyError:
-            self._kwargs['_population_size'] = pop_size
+        self._kwargs.setdefault('_generator', generator)
+        self._kwargs.setdefault('_evaluator', evaluator)
+        self._kwargs.setdefault('_population_size', pop_size)
+        self._kwargs.setdefault('_evolutionary_computation', self)
 
         try:
             iter(seeds)
@@ -274,14 +240,14 @@ class PSO(object):
         archive = self.archiver(random=self._random, population=pop_copy, archive=arc_copy, args=self._kwargs)
         self._kwargs['_archive'] = archive
         
-        try:
+        if isinstance(self.observer, (list, tuple)):
             for obs in self.observer:
                 obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
-        except TypeError:
+        else:
             self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
             
-        while not self._should_terminate(terminator, population, num_generations, num_evaluations):
-            population = self._move(population, topology, self._kwargs)
+        while not self._should_terminate(population, num_generations, num_evaluations):
+            population = self._move(population, self._kwargs)
 
             updated_candidates = [p.x for p in population]
             updated_fitness = evaluator(candidates=updated_candidates, args=self._kwargs)
@@ -308,10 +274,10 @@ class PSO(object):
             archive = self.archiver(random=self._random, archive=arc_copy, population=pop_copy, args=self._kwargs)
             self._kwargs['_archive'] = archive
             
-            try:
+            if isinstance(self.observer, (list, tuple)):
                 for obs in self.observer:
                     obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
-            except TypeError:
+            else:
                 self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
             
         return archive

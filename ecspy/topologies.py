@@ -66,11 +66,7 @@ def ring_topology(random, population, args):
     (default 3)
     
     """
-    try:
-        neighborhood_size = args['neighborhood_size']
-    except KeyError:
-        neighborhood_size = 3
-        args['neighborhood_size'] = neighborhood_size
+    neighborhood_size = args.setdefault('neighborhood_size', 3)
 
     neighbor_index_start = []
     for index in range(len(population)):

@@ -9,18 +9,9 @@ from ecspy import terminators
 
 
 def generate_rastrigin(random, args):
-    try:
-        size = args['num_inputs']
-    except KeyError:
-        size = 1
-    try:
-        lower = args['lower_bound']
-    except KeyError:
-        lower = 0
-    try:
-        upper = args['upper_bound']
-    except KeyError:
-        upper = 1
+    size = args.get('num_inputs', 1)
+    lower = args.get('lower_bound', 0)
+    upper = args.get('upper_bound', 1)
     return [random.uniform(lower, upper) for i in xrange(size)]
 
 def evaluate_rastrigin(candidates, args):
@@ -34,9 +25,9 @@ def evaluate_rastrigin(candidates, args):
 rand = Random()
 rand.seed(int(time()))
 es = ec.ES(rand)
+es.terminator = terminators.evaluation_termination
 final_pop = es.evolve(generator=generate_rastrigin,
                       evaluator=evaluate_rastrigin,
-                      terminator=terminators.evaluation_termination,
                       maximize=False,
                       max_evaluations=20000,
                       mutation_rate=0.25,

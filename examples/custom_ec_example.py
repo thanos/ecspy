@@ -10,10 +10,7 @@ from ecspy import observers
 
 
 def generate_real(random, args):
-    try:
-        size = args['chrom_size']
-    except KeyError:
-        size = 4
+    size = args.get('chrom_size', 4)
     return [random.random() for i in xrange(size)]
 
 def evaluate_real(candidates, args):
@@ -32,6 +29,7 @@ def main(do_plot=True, prng=None):
     evocomp.selector = selectors.tournament_selection
     evocomp.variator = [variators.uniform_crossover, variators.gaussian_mutation]
     evocomp.replacer = replacers.steady_state_replacement
+    evocomp.terminator = terminators.generation_termination
     
     if do_plot:
         evocomp.observer = observers.plot_observer 
@@ -39,7 +37,6 @@ def main(do_plot=True, prng=None):
     start = time()
     final_pop = evocomp.evolve(evaluator=evaluate_real, 
                                generator=generate_real, 
-                               terminator=terminators.generation_termination,
                                pop_size=100, 
                                tourn_size=7,
                                num_selected=2, 

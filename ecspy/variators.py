@@ -1,5 +1,3 @@
-import math, copy
-
 """
     This module provides pre-defined variators for evolutionary computations.
     
@@ -35,7 +33,6 @@ import math, copy
     | uniform_crossover                    |    X     |           |           |          |         |      |        |
     +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
     
-    
     .. Copyright (C) 2009  Inspired Intelligence Initiative
 
     .. This program is free software: you can redistribute it and/or modify
@@ -51,6 +48,9 @@ import math, copy
     .. You should have received a copy of the GNU General Public License
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+
+import math
+import copy
 
 
 def default_variation(random, candidates, args):
@@ -84,16 +84,8 @@ def n_point_crossover(random, candidates, args):
     - *num_crossover_points* -- the n crossover points used (default 1)
     
     """
-    try:
-        crossover_rate = args['crossover_rate']
-    except KeyError:
-        crossover_rate = 1.0
-        args['crossover_rate'] = crossover_rate
-    try:
-        num_crossover_points = args['num_crossover_points']
-    except KeyError:
-        num_crossover_points = 1
-        args['num_crossover_points'] = num_crossover_points
+    crossover_rate = args.setdefault('crossover_rate', 1.0)
+    num_crossover_points = args.setdefault('num_crossover_points', 1)
     cand = list(candidates)
     if len(cand) % 2 == 1:
         cand = cand[:-1]
@@ -142,16 +134,8 @@ def uniform_crossover(random, candidates, args):
       (default 0.5)
     
     """
-    try:
-        pux_bias = args['pux_bias']
-    except KeyError:
-        pux_bias = 0.5
-        args['pux_bias'] = pux_bias
-    try:
-        crossover_rate = args['crossover_rate']
-    except KeyError:
-        crossover_rate = 1.0
-        args['crossover_rate'] = crossover_rate
+    pux_bias = args.setdefault('pux_bias', 0.5)
+    crossover_rate = args.setdefault('crossover_rate', 1.0)
     cand = list(candidates)
     if len(cand) % 2 == 1:
         cand = cand[:-1]
@@ -204,22 +188,10 @@ def blend_crossover(random, candidates, args):
     the same length as the chromosome.
     
     """
-    try:
-        blx_alpha = args['blx_alpha']
-    except KeyError:
-        blx_alpha = 0.1
-    try:
-        crossover_rate = args['crossover_rate']
-    except KeyError:
-        crossover_rate = 1.0
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = 0
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
+    blx_alpha = args.setdefault('blx_alpha', 0.1)
+    crossover_rate = args.setdefault('crossover_rate', 1.0)
+    lower_bound = args.setdefault('lower_bound', 0)
+    upper_bound = args.setdefault('upper_bound', 1)
     
     try:
         iter(lower_bound)
@@ -288,22 +260,10 @@ def differential_crossover(random, candidates, args):
     the same length as the chromosome.
     
     """
-    try:
-        differential_phi = args['differential_phi']
-    except KeyError:
-        differential_phi = 0.1
-    try:
-        crossover_rate = args['crossover_rate']
-    except KeyError:
-        crossover_rate = 1.0
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = 0
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
+    differential_phi = args.setdefault('differential_phi', 0.1)
+    crossover_rate = args.setdefault('crossover_rate', 1.0)
+    lower_bound = args.setdefault('lower_bound', 0)
+    upper_bound = args.setdefault('upper_bound', 1)
     
     try:
         iter(lower_bound)
@@ -354,32 +314,21 @@ def differential_crossover(random, candidates, args):
 def simulated_binary_crossover(random, candidates, args):
     """
     Adapted from pyevolve's implementation by Amit Saha
-    Experimental SBX Implementation - Follows the implementation in NSGA-II (Deb, et.al)
+    
+    Experimental SBX Implementation -- Follows the implementation in NSGA-II (Deb, et.al)
  
     Some implementation `reference <http://vision.ucsd.edu/~sagarwal/icannga.pdf>`_.
  
     warning:: This crossover method is Data Type Dependent, which means that
-                must be used for 1D genome of real values.
+    must be used for 1D genome of real values.
     """
     # SBX specifix
-    try:
-        eta_c = args['sbx_etac']
-    except KeyError:
-        eta_c  = 10
-    try:
-        EPS = args['sbx_eps']
-    except KeyError:
-        EPS  = 1.0e-14
+    eta_c = args.setdefault('sbx_etac', 10)
+    EPS = args.setdefault('sbx_eps', 1.0e-14)
 
     # general
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = 0
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
+    lower_bound = args.setdefault('lower_bound', 0)
+    upper_bound = args.setdefault('upper_bound', 1)
         
     try:
         iter(lower_bound)
@@ -485,26 +434,10 @@ def gaussian_mutation(random, candidates, args):
     the same length as the chromosome.
     
     """
-    try:
-        mut_rate = args['mutation_rate']
-    except KeyError:
-        mut_rate = 0.1
-        args['mutation_rate'] = mut_rate
-    try:
-        mut_range = args['mutation_range']
-    except KeyError:
-        mut_range = 1.0
-        args['mutation_range'] = mut_range
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = 0
-        args['lower_bound'] = lower_bound
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
-        args['upper_bound'] = upper_bound
+    mut_rate = args.setdefault('mutation_rate', 0.1)
+    mut_range = args.setdefault('mutation_range', 1.0)
+    lower_bound = args.setdefault('lower_bound', 0)
+    upper_bound = args.setdefault('upper_bound', 1)
         
     try:
         iter(lower_bound)
@@ -547,11 +480,7 @@ def bit_flip_mutation(random, candidates, args):
     The mutation rate is applied on a bit by bit basis.
     
     """
-    try:
-        rate = args['mutation_rate']
-    except KeyError:
-        rate = 0.1
-        args['mutation_rate'] = rate
+    rate = args.setdefault('mutation_rate', 0.1)
     cs_copy = list(candidates)
     for i, cs in enumerate(cs_copy):
         if len(cs) == len([x for x in cs if x in [0, 1]]):
@@ -585,21 +514,9 @@ def estimation_of_distribution_variation(random, candidates, args):
     the same length as the chromosome.
     
     """
-    try:
-        num_offspring = args['num_offspring']
-    except KeyError:
-        num_offspring = 1
-        args['num_offspring'] = num_offspring
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = 0
-        args['lower_bound'] = lower_bound
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
-        args['upper_bound'] = upper_bound
+    num_offspring = args.setdefault('num_offspring', 1)
+    lower_bound = args.setdefault('lower_bound', 0)
+    upper_bound = args.setdefault('upper_bound', 1)
     
     try:
         iter(lower_bound)

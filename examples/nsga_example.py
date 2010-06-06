@@ -8,15 +8,8 @@ from ecspy import terminators
 
 
 def generate_candidate(random, args):
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = 0
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
-        
+    lower_bound = args.get('lower_bound', 0)
+    upper_bound = args.get('upper_bound', 1)
     return [random.random() * (upper_bound - lower_bound) + lower_bound]
 
 def evaluate_candidate(candidates, args):
@@ -28,11 +21,7 @@ def evaluate_candidate(candidates, args):
     return fitness
 
 def my_observer(population, num_generations, num_evaluations, args):
-    try:
-        archive = args['_archive']
-    except KeyError:
-        archive = []
-    
+    archive = args.get('_archive', [])
     x = []
     y = []
     print('----------------------------')
@@ -56,10 +45,10 @@ def main(do_plot=True, prng=None):
     nsga = emo.NSGA2(prng)
     nsga.variator = variators.gaussian_mutation
     nsga.observer = my_observer
+    nsga.terminator = terminators.evaluation_termination
     final_arc = nsga.evolve(generator=generate_candidate, 
                             evaluator=evaluate_candidate, 
                             pop_size=100,
-                            terminator=terminators.evaluation_termination, 
                             max_evaluations=1000,
                             lower_bound=0.,
                             upper_bound=1.)

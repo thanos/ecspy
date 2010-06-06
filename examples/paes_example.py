@@ -5,14 +5,8 @@ from ecspy import observers
 from ecspy import terminators
 
 def generate_candidate(random, args):
-    try:
-        lower_bound = args['lower_bound']
-    except KeyError:
-        lower_bound = 0
-    try:
-        upper_bound = args['upper_bound']
-    except KeyError:
-        upper_bound = 1
+    lower_bound = args.get('lower_bound', 0)
+    upper_bound = args.get('upper_bound', 1)
     return [random.random() * (upper_bound - lower_bound) + lower_bound]
 
 def evaluate_candidate(candidates, args):
@@ -32,10 +26,10 @@ def main(do_plot=True, prng=None):
         prng.seed(time()) 
     paes = emo.PAES(prng)
     paes.observer = my_observer
+    paes.terminator = terminators.evaluation_termination
     final_arc = paes.evolve(generator=generate_candidate, 
                             evaluator=evaluate_candidate, 
                             pop_size=1,
-                            terminator=terminators.evaluation_termination, 
                             max_evaluations=1000,
                             lower_bound=0,
                             upper_bound=1,

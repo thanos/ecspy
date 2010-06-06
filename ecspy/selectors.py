@@ -60,11 +60,7 @@ def truncation_selection(random, population, args):
     (default len(population))
     
     """
-    try:
-        num_selected = args['num_selected']
-    except KeyError:
-        num_selected = len(population)
-        args['num_selected'] = num_selected
+    num_selected = args.setdefault('num_selected', len(population))
     pool = list(population)
     pool.sort(reverse=True)
     return pool[:num_selected]
@@ -87,11 +83,7 @@ def uniform_selection(random, population, args):
     (default 1)
     
     """
-    try:
-        num_selected = args['num_selected']
-    except KeyError:
-        num_selected = 1
-        args['num_selected'] = num_selected
+    num_selected = args.setdefault('num_selected', 1)
     pop = list(population)
     selected = []
     for _ in range(num_selected):
@@ -112,12 +104,7 @@ def fitness_proportionate_selection(random, population, args):
     *num_selected* -- the number of individuals to be selected (default 1)
     
     """
-    try:
-        num_selected = args['num_selected']
-    except KeyError:
-        num_selected = 1
-        args['num_selected'] = num_selected
-        
+    num_selected = args.setdefault('num_selected', 1)
     pop = list(population)
     len_pop = len(pop)
     psum = [i for i in range(len_pop)]
@@ -173,11 +160,7 @@ def rank_selection(random, population, args):
     *num_selected* -- the number of individuals to be selected (default 1)
     
     """
-    try:
-        num_selected = args['num_selected']
-    except KeyError:
-        num_selected = 1
-        args['num_selected'] = num_selected
+    num_selected = args.setdefault('num_selected', 1)
     pop = list(population)
     len_pop = len(pop)
     pop.sort()
@@ -219,16 +202,8 @@ def tournament_selection(random, population, args):
     - *tourn_size* -- the tournament size (default 2)
     
     """
-    try:
-        num_selected = args['num_selected']
-    except KeyError:
-        num_selected = 1
-        args['num_selected'] = num_selected
-    try:
-        tourn_size = args['tourn_size']
-    except KeyError:
-        tourn_size = 2
-        args['tourn_size'] = tourn_size
+    num_selected = args.setdefault('num_selected', 1)
+    tourn_size = args.setdefault('tourn_size', 2)
     pop = list(population)
     selected = []
     for _ in range(num_selected):

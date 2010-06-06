@@ -6,18 +6,12 @@ from ecspy import observers
 
 
 def generate_binary(random, args):
-    try:
-        bits = args['num_bits']
-    except KeyError:
-        bits = 8
+    bits = args.get('num_bits', 8)
     return [random.choice([0, 1]) for i in xrange(bits)]
         
 def evaluate_binary(candidates, args):
     fitness = []
-    try:
-        base = args['base']
-    except KeyError:
-        base = 2
+    base = args.get('base', 2)
     for cand in candidates:
         num = 0
         exp = len(cand) - 1
@@ -37,10 +31,10 @@ def main(prng=None):
     
     ga = ec.GA(prng)
     ga.observer = [observers.screen_observer, observers.file_observer]
+    ga.terminator = terminators.evaluation_termination
     start = time()
     final_pop = ga.evolve(evaluator=evaluate_binary,
                           generator=generate_binary,
-                          terminator=terminators.evaluation_termination,
                           max_evaluations=1000, 
                           statistics_file=stat_file,
                           individuals_file=ind_file,
