@@ -9,7 +9,7 @@ from ecspy import terminators
 
 
 def generate_rastrigin(random, args):
-    size = args.get('num_inputs', 1)
+    size = args.get('num_inputs', 10)
     lower = args.get('lower_bound', 0)
     upper = args.get('upper_bound', 1)
     return [random.uniform(lower, upper) for i in xrange(size)]

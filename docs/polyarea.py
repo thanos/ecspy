@@ -19,7 +19,7 @@ def segments(p):
     return zip(p, p[1:] + [p[0]])
 
 def generate_polygon(random, args):
-    size = args.get('num_vertices', 1)
+    size = args.get('num_vertices', 6)
     lower = args.get('lower_bound', 0)
     upper = args.get('upper_bound', 1)
     return [(random.uniform(lower, upper), random.uniform(lower, upper)) for i in xrange(size)]
