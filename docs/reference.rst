@@ -110,4 +110,13 @@ Evolutionary Multiobjective Optimization
 .. automodule:: ecspy.emo
    :members:
    
+========
+Analysis
+========
+
+.. automodule:: ecspy.analysis
+   :members:
+
+
+
 

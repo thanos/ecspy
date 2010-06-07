@@ -81,17 +81,17 @@ def hypervolume(pareto_set, reference_point=None):
     """Calculates the hypervolume by slicing objectives (HSO).
     
     This function calculates the hypervolume (or S-measure) of a nondominated
-    set using the Hypervolume by Slicing Objectives (HSO) procedure of While,
-    et. al. The *pareto_set* should be a list of lists of objective values.
+    set using the Hypervolume by Slicing Objectives (HSO) procedure of `While, et al. 
+    (IEEE CEC 2005) <http://www.lania.mx/~ccoello/EMOO/while05a.pdf.gz>`_.
+    The *pareto_set* should be a list of lists of objective values.
     The *reference_point* may be specified or it may be left as the default 
     value of None. In that case, the reference point is calculated to be the
-    maximum value in the set for all objectives (the ideal point). As with 
-    all other functions, this function assumes that objectives are to be
-    maximized.
+    maximum value in the set for all objectives (the ideal point). This function 
+    assumes that objectives are to be maximized.
     
     Arguments:
     
-    - *pareto_set* -- the list of objective values comprising the Pareto front
+    - *pareto_set* -- the list or lists of objective values comprising the Pareto front
     - *reference_point* -- the reference point to be used (default None)
     
     """
