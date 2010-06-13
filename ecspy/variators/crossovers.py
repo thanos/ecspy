@@ -1,38 +1,4 @@
 """
-    This module provides pre-defined variators for evolutionary computations.
-    
-    All variator functions have the following arguments:
-    
-    - *random* -- the random number generator object
-    - *candidates* -- the candidate solutions
-    - *args* -- a dictionary of keyword arguments
-    
-    Each variator function returns the list of modified individuals.
-    
-    These variators may make some limited assumptions about the type of
-    candidate solutions on which they operate. These assumptions are noted
-    in the table below.
-    
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    | Variator                             | Iterable | Indexable | Sliceable | Listable | Lenable | Real | Binary |
-    +======================================+==========+===========+===========+==========+=========+======+========+
-    | bit_flip_mutation                    |    X     |     X     |           |          |    X    |      |    X   |
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    | blend_crossover                      |    X     |           |           |          |    X    |   X  |        |
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    | default_variation                    |          |           |           |          |         |      |        |
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    | differential_crossover               |          |           |           |          |    X    |      |        |
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    | estimation_of_distribution_variation |          |     X     |           |          |    X    |   X  |        |
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    | gaussian_mutation                    |    X     |     X     |           |          |    X    |   X  |        |
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    | n_point_crossover                    |          |           |     X     |     X    |    X    |      |        |
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    | uniform_crossover                    |    X     |           |           |          |         |      |        |
-    +--------------------------------------+----------+-----------+-----------+----------+---------+------+--------+
-    
     .. Copyright (C) 2009  Inspired Intelligence Initiative
 
     .. This program is free software: you can redistribute it and/or modify
@@ -51,18 +17,6 @@
 
 import math
 import copy
-
-
-def default_variation(random, candidates, args):
-    """Return the set of candidates without variation.
-
-    .. Arguments:
-       random -- the random number generator object
-       candidates -- the candidate solutions
-       args -- a dictionary of keyword arguments
-    
-    """
-    return candidates
 
 
 def n_point_crossover(random, candidates, args):
@@ -312,24 +266,39 @@ def differential_crossover(random, candidates, args):
     return children
     
 def simulated_binary_crossover(random, candidates, args):
-    """
-    Adapted from pyevolve's implementation by Amit Saha
+    """Return the offspring of simulated binary crossover on the candidates.
     
-    Experimental SBX Implementation -- Follows the implementation in NSGA-II (Deb, et.al)
+    This function performs simulated binary crosssover. It was adapted 
+    from pyevolve's implementation by Amit Saha, which follows the 
+    implementation in NSGA-II 
+    `(Deb, et. al, ICANNGA 1999) <http://vision.ucsd.edu/~sagarwal/icannga.pdf>`_.
  
-    Some implementation `reference <http://vision.ucsd.edu/~sagarwal/icannga.pdf>`_.
- 
-    warning:: This crossover method is Data Type Dependent, which means that
-    must be used for 1D genome of real values.
-    """
-    # SBX specifix
-    eta_c = args.setdefault('sbx_etac', 10)
-    EPS = args.setdefault('sbx_eps', 1.0e-14)
+    .. Arguments:
+       random -- the random number generator object
+       candidates -- the candidate solutions
+       args -- a dictionary of keyword arguments
 
-    # general
+    Optional keyword arguments in args:
+    
+    - *sbx_etac* -- the non-negative distribution index (default 10)
+    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
+    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
+    
+    The lower and upper bounds can either be single values, which will
+    be applied to all elements of a chromosome, or lists of values of 
+    the same length as the chromosome.
+    
+    A small value of the `sbx_etac` optional argument allows solutions 
+    far away from parents to be created as children solutions, while a 
+    large value restricts only near-parent solutions to be created as
+    children solutions.
+    
+    """
+
+    etac = args.setdefault('sbx_etac', 10)
     lower_bound = args.setdefault('lower_bound', 0)
     upper_bound = args.setdefault('upper_bound', 1)
-        
+    
     try:
         iter(lower_bound)
     except TypeError:
@@ -342,206 +311,41 @@ def simulated_binary_crossover(random, candidates, args):
         clen = max([len(x) for x in candidates])
         upper_bound = [upper_bound] * clen
         
-    
     cand = list(candidates)
     if len(cand) % 2 == 1:
         cand = cand[:-1]
     random.shuffle(cand)
     moms = cand[::2]
     dads = cand[1::2]
-    
-    sister = copy.deepcopy(moms)
-    brother = copy.deepcopy(dads)
-    
+        
     children = []
-    for i in range(0,len(moms)):
-        for j in range(len(moms[i])):
-            if math.fabs(moms[i][j]-dads[i][j]) > EPS:
-                lb, ub = lower_bound[j], upper_bound[j]
-                if moms[i][j] > dads[i][j]:
-                    #swap
-                    temp = moms[i][j]
-                    moms[i][j] = dads[i][j]
-                    dads[i][j] = temp
-    
-                #random number betwn. 0 & 1
+    for mom, dad in zip(moms, dads): 
+        bro = []
+        sis = []
+        for index, (m, d) in enumerate(zip(mom, dad)):
+            try:
+                lb, ub = lower_bound[index], upper_bound[index]
+                if m > d:
+                    m, d = d, m
+                beta = 1.0 + 2 * min(m - lb, ub - d) / float(d - m)
+                alpha = 2.0 - 1.0 / beta**(eta_c + 1.0)
                 u = random.random() 
-                beta = 1.0 + 2*(moms[i][j] - lb)/(1.0*(dads[i][j]-moms[i][j]))
-                alpha = 2.0 - beta**(-(eta_c+1.0))
-    
-                if u <= (1.0/alpha):
-                    beta_q = (u*alpha)**(1.0/((eta_c + 1.0)*1.0))
+                if u <= (1.0 / alpha):
+                    beta_q = (u * alpha)**(1.0 / float(eta_c + 1.0))
                 else:
-                    beta_q = (1.0/(2.0-u*alpha))**(1.0/(1.0*(eta_c + 1.0)))
-        
-                brother[i][j] = 0.5*((moms[i][j] + dads[i][j]) - beta_q*(dads[i][j]-moms[i][j]))
-        
-                beta = 1.0 + 2.0*(ub - dads[i][j])/(1.0*(dads[i][j]-moms[i][j]))
-                alpha = 2.0 - beta**(-(eta_c+1.0))
-        
-                if u <= (1.0/alpha):
-                    beta_q = (u*alpha)**(1.0/((eta_c + 1)*1.0))
-                else:
-                    beta_q = (1.0/(2.0-u*alpha))**(1.0/(1.0*(eta_c + 1.0)))
-        
-                sister[i][j] = 0.5*((moms[i][j] + dads[i][j]) + beta_q*(dads[i][j]-moms[i][j]))
-    
-                if brother[i][j] > ub:
-                    brother[i][j] = ub
-                if brother[i][j] < lb:
-                    brother[i][j] = lb
-        
-                if sister[i][j] > ub:
-                    sister[i][j] = ub
-                if sister[i][j] < lb:
-                    sister[i][j] = lb
-    
+                    beta_q = (1.0 / (2.0 - u * alpha))**(1.0 / float(eta_c + 1.0))
+                bro_val = 0.5 * ((m + d) - beta_q * (d - m))
+                bro_val = max(min(bro_val, ub), lb)        
+                sis_val = 0.5 * ((m + d) + beta_q * (d - m)
+                sis_val = max(min(sis_val, ub), lb)
                 if random.random() > 0.5:
-                    # Swap
-                    temp = sister[i][j]
-                    sister[i][j] = brother[i][j]
-                    brother[i][j] = temp
-            else:
-                sister[i][j] = moms[i][j]
-                brother[i][j] = dads[i][j]
-        children.append(brother[i])
-        children.append(sister[i])
+                    bro_val, sis_val = sis_val, bro_val
+                bro.append(bro_val)
+                sis.append(sis_val)
+            except ZeroDivisionError:
+                sis.append(m)
+                bro.append(d)
+        children.append(bro)
+        children.append(sis)
     return children
-            
-        
-    
-def gaussian_mutation(random, candidates, args):
-    """Return the mutants created by Gaussian mutation on the candidates.
 
-    This function assumes that the candidate solutions are indexable
-    and numeric. It performs Gaussian mutation.
-
-    .. Arguments:
-       random -- the random number generator object
-       candidates -- the candidate solutions
-       args -- a dictionary of keyword arguments
-
-    Optional keyword arguments in args:
-    
-    - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
-    - *mutation_range* -- the variance used in the Gaussian function 
-      (default 1.0)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
-    
-    The lower and upper bounds can either be single values, which will
-    be applied to all elements of a chromosome, or lists of values of 
-    the same length as the chromosome.
-    
-    """
-    mut_rate = args.setdefault('mutation_rate', 0.1)
-    mut_range = args.setdefault('mutation_range', 1.0)
-    lower_bound = args.setdefault('lower_bound', 0)
-    upper_bound = args.setdefault('upper_bound', 1)
-        
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
-        
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
-        
-    cs_copy = list(candidates)
-    for i, cs in enumerate(cs_copy):
-        for j, c in enumerate(cs):
-            if random.random() < mut_rate:
-                c += random.gauss(0, mut_range) * (upper_bound[j] - lower_bound[j])
-                c = max(min(c, upper_bound[j]), lower_bound[j])
-                cs_copy[i][j] = c
-    return cs_copy
-
-
-def bit_flip_mutation(random, candidates, args):
-    """Return the mutants produced by bit-flip mutation on the candidates.
-
-    This function assumes that the candidate solutions are binary values.
-    It performs bit-flip mutation. If a candidate solution contains
-    non-binary values, this function leaves it unchanged.
-
-    .. Arguments:
-       random -- the random number generator object
-       candidates -- the candidate solutions
-       args -- a dictionary of keyword arguments
-
-    Optional keyword arguments in args:
-    
-    *mutation_rate* -- the rate at which mutation is performed (default 0.1)
-    
-    The mutation rate is applied on a bit by bit basis.
-    
-    """
-    rate = args.setdefault('mutation_rate', 0.1)
-    cs_copy = list(candidates)
-    for i, cs in enumerate(cs_copy):
-        if len(cs) == len([x for x in cs if x in [0, 1]]):
-            for j, c in enumerate(cs):
-                if random.random() < rate:
-                    cs_copy[i][j] = (c + 1) % 2
-    return cs_copy
-
-    
-def estimation_of_distribution_variation(random, candidates, args):
-    """Return the offspring produced using estimation of distribution.
-
-    This function assumes that the candidate solutions are iterable 
-    objects containing real values. It creates a statistical model 
-    based on the set of candidates. The offspring are then generated 
-    from this model.
-
-    .. Arguments:
-       random -- the random number generator object
-       candidates -- the candidate solutions
-       args -- a dictionary of keyword arguments
-    
-    Optional keyword arguments in args:
-    
-    - *num_offspring* -- the number of offspring to create (default 1)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
-    
-    The lower and upper bounds can either be single values, which will
-    be applied to all elements of a chromosome, or lists of values of 
-    the same length as the chromosome.
-    
-    """
-    num_offspring = args.setdefault('num_offspring', 1)
-    lower_bound = args.setdefault('lower_bound', 0)
-    upper_bound = args.setdefault('upper_bound', 1)
-    
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
-        
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
-        
-    cs_copy = list(candidates)
-    num_genes = max([len(x) for x in cs_copy])
-    genes = [[x[i] for x in cs_copy] for i in range(num_genes)] 
-    mean = [float(sum(x)) / float(len(x)) for x in genes]
-    stdev = [max(sum([(x - m)**2 for x in g]) / float(len(g) - 1), 0.001) for g, m in zip(genes, mean)]
-    offspring = []
-    for _ in range(num_offspring):
-        child = []
-        for m, s, hi, lo in zip(mean, stdev, upper_bound, lower_bound):
-            value = m + random.gauss(0, s);
-            value = max(min(value, hi), lo)
-            child.append(value)
-        offspring.append(child)
-        
-    return offspring

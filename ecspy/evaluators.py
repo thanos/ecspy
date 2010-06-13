@@ -1,5 +1,6 @@
 """
-    This module provides pre-defined evaluators for evolutionary computations.
+    Evaluator functions are problem-specific. This module provides pre-defined 
+    evaluators for evolutionary computations.
 
     All evaluator functions have the following arguments:
     

@@ -43,6 +43,16 @@ Evaluators
 .. automodule:: ecspy.evaluators
    :members:
    
+^^^^^^^^^^
+Generators
+^^^^^^^^^^
+
+Generator functions are problem-specific. They are used to create the initial set of candidate
+solutions needed by the evolutionary computation. All generator functions have the following arguments:
+    
+- *random* -- the random number generator object
+- *args* -- a dictionary of keyword arguments
+   
 ^^^^^^^^^
 Migrators
 ^^^^^^^^^

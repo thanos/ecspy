@@ -76,12 +76,12 @@ def diversity_termination(population, num_generations, num_evaluations, args):
     return False
 
     
-def avg_fitness_termination(population, num_generations, num_evaluations, args):
-    """Return True if the population's average fitness is near its maximum fitness.
+def average_fitness_termination(population, num_generations, num_evaluations, args):
+    """Return True if the population's average fitness is near its best fitness.
     
-    This function calculates the average fitness of the population as well
-    as the maximum (i.e., best) fitness. If the difference between those values
-    is less than a specified minimum, the function returns True. 
+    This function calculates the average fitness of the population, as well
+    as the best fitness. If the difference between those values is less 
+    than a specified tolerance, the function returns True. 
     
     .. Arguments:
        population -- the population of Individuals
@@ -91,14 +91,14 @@ def avg_fitness_termination(population, num_generations, num_evaluations, args):
     
     Optional keyword arguments in args:
     
-    *min_fitness_diff* -- the minimum allowable difference between 
-    average and maximum fitness (default 0.001)
+    *tolerance* -- the minimum allowable difference between average 
+    and best fitness (default 0.001)
     
     """
-    min_fitness_diff = args.setdefault('min_fitness_diff', 0.001)
+    tolerance = args.setdefault('tolerance', 0.001)
     avg_fit = sum([x.fitness for x in population]) / float(len(population))
-    max_fit = max([x.fitness for x in population])
-    if (max_fit - avg_fit) < min_fitness_diff:
+    best_fit = max([x.fitness for x in population])
+    if (best_fit - avg_fit) < tolerance:
         return True
     return False
 

@@ -30,6 +30,7 @@ from examples import nsga_example
 from examples import nsga_example_sch
 from examples import paes_example
 from examples import pso_example
+from examples import niche_example
 
 prng = random.Random()
 prng.seed(1000) 
@@ -137,6 +138,17 @@ class PSO_Test(unittest.TestCase):
         archive = pso._kwargs['_archive']
         fitnesses = [i.fitness for i in archive]
         self.assertTrue(6.0 in fitnesses, 'expected a fitness to be 6.0')
+
+class Niche_Test(unittest.TestCase):
+    def test(self):
+        ec = niche_example.main(do_plot=False,prng=prng)
+        archive = ec._kwargs['_archive']
+        candidates = [i.candidate[0] for i in archive]
+        self.assertTrue(any(map(lambda x: 1 < x < 2, candidates)), 'expected a solution in [1, 2]')
+        self.assertTrue(any(map(lambda x: 7 < x < 8, candidates)), 'expected a solution in [7, 8]')
+        self.assertTrue(any(map(lambda x: 14 < x < 15, candidates)), 'expected a solution in [14, 15]')
+        self.assertTrue(any(map(lambda x: 20 < x < 21, candidates)), 'expected a solution in [20, 21]')
+        
 
 if __name__ == '__main__':
     unittest.main()

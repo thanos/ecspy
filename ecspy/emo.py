@@ -35,9 +35,32 @@ class Pareto(object):
     better than or equal to the other solution in all objectives and
     strictly better in at least one objective.
     
+    Since some problems may mix maximization and minimization among
+    different objectives, an optional `maximize` parameter may be
+    passed upon construction of the Pareto object. This parameter
+    may be a list of Booleans of the same length as the set of 
+    objective values. If this parameter is used, then the `maximize`
+    parameter of the evolutionary computation's `evolve` method 
+    should be left as the default True value in order to avoid
+    confusion. (Setting the `evolve`'s parameter to False would
+    essentially invert all of the Booleans in the Pareto `maximize`
+    list.) So, if all objectives are of the same type (either
+    maximization or minimization), then it is best simply to use
+    the `maximize` parameter of the `evolve` method and to leave
+    the `maximize` parameter of the Pareto initialization set to
+    its default True value. However, if the objectives are mixed
+    maximization and minimization, it is best to leave the `evolve`'s
+    `maximize` parameter set to its default True value and specify
+    the Pareto's `maximize` list to the appropriate Booleans.
+    
     """
-    def __init__(self, values=[]):
+    def __init__(self, values=[], maximize=True):
         self.values = values
+        try:
+            iter(maximize)
+        except TypeError:
+            maximize = [maximize for v in values]
+        self.maximize = maximize
         
     def __len__(self):
         return len(self.values)
@@ -54,12 +77,17 @@ class Pareto(object):
         else:
             not_worse = True
             strictly_better = False
-            
-            for x, y in zip(self.values, other.values):
-                if x > y:
-                    not_worse = False
-                elif y > x:
-                    strictly_better = True
+            for x, y, m in zip(self.values, other.values, self.maximize):
+                if m:
+                    if x > y:
+                        not_worse = False
+                    elif y > x:
+                        strictly_better = True
+                else:
+                    if x < y:
+                        not_worse = False
+                    elif y < x:
+                        strictly_better = True
             return not_worse and strictly_better
             
     def __le__(self, other):

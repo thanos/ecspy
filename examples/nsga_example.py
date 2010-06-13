@@ -20,31 +20,15 @@ def evaluate_candidate(candidates, args):
         fitness.append(emo.Pareto([x, y]))
     return fitness
 
-def my_observer(population, num_generations, num_evaluations, args):
-    archive = args.get('_archive', [])
-    x = []
-    y = []
-    print('----------------------------')
-    print('Gens: %d   Evals: %d' % (num_generations, num_evaluations))
-    print('-----------')
-    print('Population:')
-    for p in population:
-        print(p)
-    print('-----------')
-    print('Archive:')
-    for a in archive:
-        print(a)
-    print('-----------')
-    
-   
+  
 def main(do_plot=True, prng=None):
     if prng is None:
         prng = Random()
         prng.seed(time()) 
 
     nsga = emo.NSGA2(prng)
-    nsga.variator = variators.gaussian_mutation
-    nsga.observer = my_observer
+    nsga.variator = [variators.uniform_crossover, variators.gaussian_mutation]
+    nsga.observer = observers.archive_observer
     nsga.terminator = terminators.evaluation_termination
     final_arc = nsga.evolve(generator=generate_candidate, 
                             evaluator=evaluate_candidate, 

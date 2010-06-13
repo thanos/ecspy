@@ -224,12 +224,64 @@ def comma_replacement(random, population, parents, offspring, args):
        parents -- the list of parent individuals
        offspring -- the list of offspring individuals
        args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:
     
+    *use_one_fifth_rule* -- whether the 1/5 rule should be used (default False)
+       
     """
     pool = list(offspring)
     pool.sort(reverse=True)
     survivors = pool[:len(population)]
     return survivors
+
+
+def crowding_replacement(random, population, parents, offspring, args):
+    """Performs crowding replacement as a form of niching.
+    
+    This function performs crowding replacement, which means that
+    the members of the population are replaced one-at-a-time with
+    each of the offspring. A random sample of `crowding_distance`
+    individuals is pulled from the current population, and the
+    closest individual to the current offspring (where "closest"
+    is determined by the `distance_function`) is replaced by that
+    offspring. It is possible for one offspring to replace an 
+    earlier offspring in the same generation, given the random
+    sample that is taken of the current survivors for each offspring.
+    
+    .. Arguments:
+       random -- the random number generator object
+       population -- the population of individuals
+       parents -- the list of parent individuals
+       offspring -- the list of offspring individuals
+       args -- a dictionary of keyword arguments
+
+    Optional keyword arguments in args:    
+    
+    - *distance_function* -- a function that accepts two candidate 
+      solutions and returns the distance between them (default 
+      Euclidean L2 distance)
+    - *crowding_distance* -- a positive integer representing the 
+      number of closest solutions to consider as a "crowd" (default 2)
+       
+    """
+    def distance(x, y):
+        return math.sqrt(sum([(a - b)**2 for a, b in zip(x, y)]))
+    try:
+        distance_function = args['distance_function']
+    except KeyError:
+        distance_function = distance
+        args['distance_function'] = distance_function
+    crowding_distance = args.setdefault('crowding_distance', 2)
+    survivors = population[:]
+    for o in offspring:
+        pool = random.sample(survivors, crowding_distance)
+        closest = min(pool, key=lambda x: distance(o.candidate, x.candidate))
+        if o.fitness > closest.fitness:
+            survivors.remove(closest)
+            survivors.append(o)
+    return survivors
+
 
 
     
@@ -341,7 +393,9 @@ def nsga_replacement(random, population, parents, offspring, args):
                 distance[individuals[0]['index']] = float('inf')
                 distance[individuals[-1]['index']] = float('inf')
                 for i in range(1, num_individuals-1):
-                    distance[individuals[i]['index']] = distance[individuals[i]['index']] + (individuals[i+1]['individual'].fitness[obj] - individuals[i-1]['individual'].fitness[obj])
+                    distance[individuals[i]['index']] = (distance[individuals[i]['index']] + 
+                                                         (individuals[i+1]['individual'].fitness[obj] - 
+                                                          individuals[i-1]['individual'].fitness[obj]))
                 
             crowd = [dict(dist=distance[f['index']], index=f['index']) for f in front]
             crowd.sort(key=lambda x: x['dist'], reverse=True)
