@@ -336,7 +336,7 @@ def simulated_binary_crossover(random, candidates, args):
                     beta_q = (1.0 / (2.0 - u * alpha))**(1.0 / float(eta_c + 1.0))
                 bro_val = 0.5 * ((m + d) - beta_q * (d - m))
                 bro_val = max(min(bro_val, ub), lb)        
-                sis_val = 0.5 * ((m + d) + beta_q * (d - m)
+                sis_val = 0.5 * ((m + d) + beta_q * (d - m))
                 sis_val = max(min(sis_val, ub), lb)
                 if random.random() > 0.5:
                     bro_val, sis_val = sis_val, bro_val
