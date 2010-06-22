@@ -287,6 +287,15 @@ class GA(EvolutionaryComputation):
     of bit-flip mutation, it is expected that the candidate 
     solution is an iterable object of binary values. 
     
+    Optional keyword arguments in ``evolve`` args parameter:
+    
+    - *num_selected* -- the number of individuals to be selected (default 1)
+    - *crossover_rate* -- the rate at which crossover is performed 
+      (default 1.0)
+    - *num_crossover_points* -- the n crossover points used (default 1)
+    - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
+    - *num_elites* -- number of elites to consider (default 0)
+    
     """
     def __init__(self, random):
         EvolutionaryComputation.__init__(self, random)
@@ -306,6 +315,15 @@ class ES(EvolutionaryComputation):
     default, the default selection (i.e., all individuals are selected), 
     Gaussian mutation, and 'plus' replacement. It is assumed that the
     candidate solution is an iterable object of real values. 
+
+    Optional keyword arguments in ``evolve`` args parameter:
+    
+    - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
+    - *mutation_range* -- the variance used in the Gaussian function 
+      (default 1.0)
+    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
+    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
+    - *use_one_fifth_rule* -- whether the 1/5 rule should be used (default False)
     
     """
     def __init__(self, random):
@@ -322,6 +340,15 @@ class EDA(EvolutionaryComputation):
     uses, by default, truncation selection, estimation of distribution 
     variation, and generational replacement. It is assumed that the
     candidate solution is an iterable object of real values. 
+
+    Optional keyword arguments in ``evolve`` args parameter:
+    
+    - *num_selected* -- the number of individuals to be selected 
+      (default len(population))
+    - *num_offspring* -- the number of offspring to create (default 1)
+    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
+    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
+    - *num_elites* -- number of elites to consider (default 0)
     
     """
     def __init__(self, random):
@@ -344,6 +371,20 @@ class DEA(EvolutionaryComputation):
     and steady-state replacement. It is expected that the candidate solution 
     is an iterable object of real values. 
     
+    Optional keyword arguments in ``evolve`` args parameter:
+    
+    - *num_selected* -- the number of individuals to be selected (default 1)
+    - *tourn_size* -- the tournament size (default 2)
+    - *crossover_rate* -- the rate at which crossover is performed 
+      (default 1.0)
+    - *differential_phi* -- the amount of random change in the crossover 
+      (default 0.1)
+    - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
+    - *mutation_range* -- the variance used in the Gaussian function 
+      (default 1.0)
+    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
+    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
+
     """
     def __init__(self, random):
         EvolutionaryComputation.__init__(self, random)
