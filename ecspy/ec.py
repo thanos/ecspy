@@ -103,6 +103,8 @@ class EvolutionaryComputation(object):
     - *archiver* -- the archival operator
     - *observer* -- the (possibly list of) observer(s)
     - *terminator* -- the (possibly list of) terminator(s)
+    - *termination_cause* -- the name of the function causing 
+      ``evolve`` to terminate
     
     Protected Attributes:
     
@@ -125,6 +127,7 @@ class EvolutionaryComputation(object):
         self.observer = observers.default_observer
         self.archiver = archivers.default_archiver
         self.terminator = terminators.default_termination
+        self.termination_cause = None
         self._kwargs = dict()
         
     def _should_terminate(self, pop, ng, ne):
@@ -140,7 +143,7 @@ class EvolutionaryComputation(object):
             terminate = self.terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
             fname = self.terminator.__name__
         if terminate:
-            print('TERMINATED DUE TO %s' % fname)
+            self.termination_cause = fname
         return terminate
         
     
@@ -185,6 +188,8 @@ class EvolutionaryComputation(object):
         self._kwargs.setdefault('_evaluator', evaluator)
         self._kwargs.setdefault('_population_size', pop_size)
         self._kwargs.setdefault('_evolutionary_computation', self)
+        
+        self.termination_cause = None
         
         # Create the initial population.
         try:

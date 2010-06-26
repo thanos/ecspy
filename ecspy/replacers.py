@@ -156,8 +156,8 @@ def random_replacement(random, population, parents, offspring, args):
     num_to_replace = min(len(off), len(pop) - num_elites) 
     valid_indices = range(num_elites, len(pop))
     rep_index = random.sample(valid_indices, num_to_replace)
-    for i in range(len(off)):
-        pop[rep_index[i]] = off[i]
+    for i, repind in enumerate(rep_index):
+        pop[repind] = off[i]
     return pop
 
 
