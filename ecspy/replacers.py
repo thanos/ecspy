@@ -276,7 +276,7 @@ def crowding_replacement(random, population, parents, offspring, args):
     survivors = population[:]
     for o in offspring:
         pool = random.sample(survivors, crowding_distance)
-        closest = min(pool, key=lambda x: distance(o.candidate, x.candidate))
+        closest = min(pool, key=lambda x: distance_function(o.candidate, x.candidate))
         if o.fitness > closest.fitness:
             survivors.remove(closest)
             survivors.append(o)
