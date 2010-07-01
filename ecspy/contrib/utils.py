@@ -18,9 +18,9 @@ class memoized(object):
     If called later with the same arguments, the cached value is returned, and
     not re-evaluated.
     
-    Use this function when you are evaluating a -expensive- fitness function 
+    Use this function when you are evaluating an *expensive* fitness function 
     such that already evaluated individuals are cached, avoiding a costly 
-    re-evaluation of its fitness...
+    re-evaluation of its fitness.
     
     usage:
     
@@ -31,13 +31,20 @@ class memoized(object):
     def __init__(self, func):
         self.func = func
         self.cache = {}
-    def __call__(self, *args, **kwargs):
-        try:
-            return self.cache.setdefault(args,self.func(*args, **kwargs))
-        except TypeError:
-            # uncachable -- for instance, passing a list as an argument.
-            # Better to not cache than to blow up entirely.
-            return self.func(*args, **kwargs)
+        
+    def __call__(self, candidates, args):
+        fitness = []
+        for candidate in candidates:
+            try:
+                fitness.append(self.cache[tuple(candidate)])
+            except KeyError:
+                fitness.append(self.func([candidate], args)[0])
+                self.cache[tuple(candidate)] = fitness[-1]
+            except TypeError:
+                fitness.append(self.func([candidate], args)[0])
+        return fitness
+        
     def __repr__(self):
-        """Return the function's docstring."""
         return self.func.__doc__
+
+        
