@@ -21,7 +21,7 @@ def check_range(_operator):
         if value < instance._lowerbound:
             value = instance._lowerbound
         instance.value = value
-        return value
+        return Range(value, instance._lowerbound, instance._upperbound)
     return decorator1
 
 class Range(object):
@@ -43,6 +43,12 @@ class Range(object):
         set a random value within bounds
         '''
         self.value = random.uniform(self._lowerbound, self._upperbound)
+        
+    def __str__(self):
+        return self.__repr__()
+    
+    def __repr__(self):
+        return "<Range: %s>" % (self.value)
     
     @check_range
     def __mul__(self, other):
