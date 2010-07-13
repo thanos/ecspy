@@ -4,6 +4,7 @@ from ecspy import observers
 from ecspy import terminators
 from ecspy import topologies
 from ecspy.swarm import PSO
+from ecspy import ec
 
 
 
@@ -29,16 +30,17 @@ def main(prng=None):
     pso.topology = topologies.ring_topology
     
     start = time()
-    final_pop = pso.swarm(evaluator=evaluate_real, 
+    final_pop = pso.evolve(evaluator=evaluate_real, 
                           generator=generate_real,
                           pop_size=20,
                           maximize=True,
+                          bounder=ec.bounder(0, 1),
                           max_evaluations=400, 
                           neighborhood_size=5,
-                          use_constriction_coefficient=True,
                           particle_size=6)
     stop = time()
         
+    final_pop.sort(reverse=True)
     print('***********************************')
     print('Total Execution Time: %0.5f seconds' % (stop - start))
     for ind in final_pop:

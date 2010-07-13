@@ -10,8 +10,7 @@ from ecspy import observers
 
 
 def generate_real(random, args):
-    size = args.get('chrom_size', 4)
-    return [random.random() for i in xrange(size)]
+    return [random.random() for i in xrange(4)]
 
 def evaluate_real(candidates, args):
     fitness = []
@@ -38,6 +37,7 @@ def main(do_plot=True, prng=None):
     final_pop = evocomp.evolve(evaluator=evaluate_real, 
                                generator=generate_real, 
                                pop_size=100, 
+                               bounder=ec.bounder(0, 1),
                                tourn_size=7,
                                num_selected=2, 
                                max_generations=50,

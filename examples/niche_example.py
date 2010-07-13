@@ -14,9 +14,7 @@ def my_distance(x, y):
     return sum([math.fabs(a - b) for a, b in zip(x, y)])
 
 def generate(random, args):
-    lower = args.get('lower_bound', 0)
-    upper = args.get('upper_bound', 1)
-    return [random.uniform(lower, upper) for _ in xrange(1)]
+    return [random.uniform(0, 26)]
     
 
 def evaluate(candidates, args):
@@ -29,7 +27,7 @@ def evaluate(candidates, args):
 
 def main(do_plot=True, prng=None):
     if prng is None:
-        prng = Random()
+        prng = random.Random()
         prng.seed(time.time()) 
     
     ga = ec.EvolutionaryComputation(prng)
@@ -39,15 +37,12 @@ def main(do_plot=True, prng=None):
     ga.observer = observers.screen_observer
     ga.terminator = terminators.evaluation_termination
 
-    final_pop = ga.evolve(generate, evaluate, pop_size=20,
+    final_pop = ga.evolve(generate, evaluate, pop_size=20, bounder=ec.bounder(0, 26),
                           max_evaluations=5000,
                           num_selected=20,
-                          upper_bound=26,
-                          lower_bound=0,
                           mutation_rate=1.0,
                           crowding_distance=10,
-                          distance_function=my_distance,
-                          mutation_range=0.1)
+                          distance_function=my_distance)
                           
     if do_plot:
         import pylab

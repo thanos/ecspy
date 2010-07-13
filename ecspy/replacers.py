@@ -325,11 +325,11 @@ def simulated_annealing_replacement(random, population, parents, offspring, args
         args['temperature'] = temp
     except KeyError:
         try:
-            num_evals = args['_num_evaluations']
+            num_evals = args['_evolutionary_computation'].num_evaluations
             max_evals = args['max_evaluations']
             temp = float(max_evals - num_evals) / float(max_evals)
         except KeyError:
-            num_gens = args['_num_generations']
+            num_gens = args['_evolutionary_computation'].num_generations
             max_gens = args['max_generations']
             temp = 1 - float(max_gens - num_gens) / float(max_gens)
         
@@ -337,7 +337,7 @@ def simulated_annealing_replacement(random, population, parents, offspring, args
     for p, o in zip(parents, offspring):
         if o >= p:
             new_pop.append(o)
-        elif random.random() < math.exp(-math.abs(p.fitness - o.fitness) / float(temp)):
+        elif random.random() < math.exp(-abs(p.fitness - o.fitness) / float(temp)):
             new_pop.append(o)
         else:
             new_pop.append(p)
@@ -430,7 +430,7 @@ def paes_replacement(random, population, parents, offspring, args):
        args -- a dictionary of keyword arguments
     
     """
-    archive = args.setdefault('_archive', [])
+    archive = args['_evolutionary_computation'].archive
     try:
         archiver = args['_evolutionary_computation'].archiver
     except KeyError:

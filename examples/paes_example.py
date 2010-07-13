@@ -3,11 +3,10 @@ from time import time
 from ecspy import emo
 from ecspy import observers
 from ecspy import terminators
+from ecspy import ec
 
 def generate_candidate(random, args):
-    lower_bound = args.get('lower_bound', 0)
-    upper_bound = args.get('upper_bound', 1)
-    return [random.random() * (upper_bound - lower_bound) + lower_bound]
+    return [random.random()]
 
 def evaluate_candidate(candidates, args):
     fitness = []
@@ -27,15 +26,15 @@ def main(do_plot=True, prng=None):
     paes = emo.PAES(prng)
     paes.observer = my_observer
     paes.terminator = terminators.evaluation_termination
-    final_arc = paes.evolve(generator=generate_candidate, 
+    final_pop = paes.evolve(generator=generate_candidate, 
                             evaluator=evaluate_candidate, 
                             pop_size=1,
+                            bounder=ec.bounder([0], [1]),
                             max_evaluations=1000,
-                            lower_bound=0,
-                            upper_bound=1,
                             max_archive_size=20,
                             num_grid_divisions=2)
     
+    final_arc = paes.archive
     front = []
     for f in final_arc:
         front.append(f.fitness)

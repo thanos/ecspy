@@ -68,6 +68,7 @@ myec.terminator = terminators.evaluation_termination
 myec.observer = observers.screen_observer
 pop = myec.evolve(my_generator, my_evaluator, 
                   pop_size=100, 
+                  bounder=ec.bounder([-2.0] * 2, [2.0] * 2),
                   num_selected=100,
                   lower_bound=-2.0,
                   upper_bound=2.0, 

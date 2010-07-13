@@ -19,7 +19,9 @@ def gaussian_mutation(random, candidates, args):
     """Return the mutants created by Gaussian mutation on the candidates.
 
     This function assumes that the candidate solutions are indexable
-    and numeric. It performs Gaussian mutation.
+    and numeric. It performs Gaussian mutation. This function also 
+    makes use of the bounder function as specified in the EC's 
+    ``evolve`` method.
 
     .. Arguments:
        random -- the random number generator object
@@ -29,40 +31,23 @@ def gaussian_mutation(random, candidates, args):
     Optional keyword arguments in args:
     
     - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
-    - *mutation_range* -- the variance used in the Gaussian function 
+    - *mean* -- the mean used in the Gaussian function (default 0)
+    - *stdev* -- the standard deviation used in the Gaussian function
       (default 1.0)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
-    
-    The lower and upper bounds can either be single values, which will
-    be applied to all elements of a chromosome, or lists of values of 
-    the same length as the chromosome.
     
     """
     mut_rate = args.setdefault('mutation_rate', 0.1)
-    mut_range = args.setdefault('mutation_range', 1.0)
-    lower_bound = args.setdefault('lower_bound', 0)
-    upper_bound = args.setdefault('upper_bound', 1)
-        
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
-        
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
+    mean = args.setdefault('mean', 0.0)
+    stdev = args.setdefault('stdev', 1.0)
+    bounder = args['_evolutionary_computation'].bounder
         
     cs_copy = list(candidates)
     for i, cs in enumerate(cs_copy):
         for j, c in enumerate(cs):
             if random.random() < mut_rate:
-                c += random.gauss(0, mut_range) * (upper_bound[j] - lower_bound[j])
-                c = max(min(c, upper_bound[j]), lower_bound[j])
+                c += random.gauss(mean, stdev)
                 cs_copy[i][j] = c
+        cs_copy[i] = bounder(cs_copy[i], args)
     return cs_copy
 
 

@@ -28,14 +28,16 @@ def evaluation_termination(population, num_generations, num_evaluations, args):
 def observer(population, num_generations, num_evaluations, args):
     '''
     '''
-    if args['_num_generations']%100 == 0:
+    if num_generations % 100 == 0:
+        population = list(population)
+        population.sort(reverse=True)
         best_fit = population[0].candidate
         print '*'*20
         print  ''.join(map(chr, best_fit))
         print 'fitnesses:',
-        print 'n archive:', len(args['_archive'])
-        print 'n population:', len(args['_population'])
-        print 'n evals:', args['_num_evaluations']
+        print 'n archive:', len(args['_evolutionary_computation'].archive)
+        print 'n population:', len(population)
+        print 'n evals:', num_evaluations
     
 def generate_sentence(random, args):
     s = [random.randint(0,max_ord) for i in sentence]
@@ -126,12 +128,13 @@ def main(prng=None):
                           mu=1,
                           sigma=4,
                           maximize=False)
+    final_pop.sort(reverse=True)
     final_sentence= ''.join(map(chr, final_pop[0].candidate))
     print 'FINAL SENTENCE'
     print final_sentence
-    print 'n generations:',ga._kwargs['_num_generations']
-    print 'n archive:', len(ga._kwargs['_archive'])
-    print 'n population:', len(ga._kwargs['_population'])
+    print 'n generations:',ga.num_generations
+    print 'n archive:', len(ga.archive)
+    print 'n population:', len(ga.population)
     print 'evolution took:', time() - ta
     return ga
             

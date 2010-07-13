@@ -43,12 +43,12 @@ class DEA_Test(unittest.TestCase):
         # should I make a property "dea.archive" that returns the archive?
         # perhaps looking it up in the ._kwargs is a little obscure?
 
-        result = [round(i.fitness, 0) for i in dea._kwargs['_archive']]
+        result = [round(i.fitness, 0) for i in dea.archive]
         
         self.assertEqual(result, target,
                          'expected %s as a result, got %s' % ( target, result )
                          )
-        result = dea._kwargs['_num_generations']
+        result = dea.num_generations
         target = 2495
         
         if result < target:
@@ -62,7 +62,7 @@ class DEA_Test(unittest.TestCase):
 class Custom_EC_Test(unittest.TestCase):
     def test(self):
         custom = custom_ec_example.main(do_plot=False,prng=prng)
-        archive = custom._kwargs['_archive']
+        archive = custom.archive
         result = round(archive[0].fitness, 1)
         target = 4
         self.assertEqual(result, target,
@@ -73,7 +73,7 @@ class Custom_EC_Test(unittest.TestCase):
 class EDA_Test(unittest.TestCase):
     def test(self):
         eda = eda_example.main(prng=prng)
-        archive = eda._kwargs['_archive']
+        archive = eda.archive
         # too much rounding!!!
         result = round(archive[0].fitness, 0)
         target = 4
@@ -93,14 +93,14 @@ class ES_Test(unittest.TestCase):
             self.fail('evolutionary strategies example requires python >= 2.6')
         
         es = es_example.main(prng=prng)
-        archive = es._kwargs['_archive']
+        archive = es.archive
         self.assertTrue( all([i.fitness==4 for i in archive]), 'not all archive fitness equal to 4' )
         
 
 class GA_Test(unittest.TestCase):
     def test(self):
         ga = ga_example.main(prng=prng)
-        archive = ga._kwargs['_archive']
+        archive = ga.archive
         result = archive[0].candidate
         target = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] 
         self.assertEqual(result, target,
@@ -110,7 +110,7 @@ class GA_Test(unittest.TestCase):
 class NSGA_Test(unittest.TestCase):
     def test(self):
         nsga = nsga_example.main(do_plot=False,prng=prng)
-        archive = nsga._kwargs['_archive']
+        archive = nsga.archive
         fitnesses = [[round(j,3) for j in i.fitness] for i in archive]
         self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')
         self.assertTrue([1.0, 0.0] in fitnesses, 'expected a fitness contained [1,0]')
@@ -119,15 +119,15 @@ class NSGA_Test(unittest.TestCase):
 class NSGA_SCH_Test(unittest.TestCase):
     def test(self):
         nsga = nsga_example_sch.main(do_plot=False,prng=prng)
-        archive = nsga._kwargs['_archive']
+        archive = nsga.archive
         fitnesses = [[round(j,1) for j in i.fitness] for i in archive]
         self.assertTrue([0.0,4.0] in fitnesses or [4.0, 0.0] in fitnesses, 'expected a fitness of either 0.0 or 4.0')
-        self.assertTrue(nsga._kwargs['_num_generations']<=20, 'expected to converge in 20 generations')
+        self.assertTrue(nsga.num_generations<=20, 'expected to converge in 20 generations')
 
 class PAES_Test(unittest.TestCase):
     def test(self):
         paes = paes_example.main(do_plot=False,prng=prng)
-        archive = paes._kwargs['_archive']
+        archive = paes.archive
         fitnesses = [[round(j,1) for j in i.fitness] for i in archive]
         self.assertTrue([0.0, 1.0] in fitnesses, 'expected a fitness contained [0,1]')
         self.assertTrue([1.0, 0.0] in fitnesses, 'expected a fitness contained [1,0]')
@@ -135,14 +135,14 @@ class PAES_Test(unittest.TestCase):
 class PSO_Test(unittest.TestCase):
     def test(self):
         pso = pso_example.main(prng=prng)
-        archive = pso._kwargs['_archive']
+        archive = pso.archive
         fitnesses = [i.fitness for i in archive]
         self.assertTrue(6.0 in fitnesses, 'expected a fitness to be 6.0')
 
 class Niche_Test(unittest.TestCase):
     def test(self):
         ec = niche_example.main(do_plot=False,prng=prng)
-        archive = ec._kwargs['_archive']
+        archive = ec.archive
         candidates = [i.candidate[0] for i in archive]
         self.assertTrue(any(map(lambda x: 1 < x < 2, candidates)), 'expected a solution in [1, 2]')
         self.assertTrue(any(map(lambda x: 7 < x < 8, candidates)), 'expected a solution in [7, 8]')

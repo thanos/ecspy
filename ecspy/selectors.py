@@ -143,7 +143,7 @@ def fitness_proportionate_selection(random, population, args):
         lower = min(len_pop-1, lower)
         lower = max(0, lower)
         selected.append(pop[lower])
-
+    
     return selected
 
 

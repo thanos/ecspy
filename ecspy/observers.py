@@ -50,6 +50,8 @@ def screen_observer(population, num_generations, num_evaluations, args):
     """
     import numpy
     
+    population = list(population)
+    population.sort(reverse=True)
     worst_fit = population[-1].fitness
     best_fit = population[0].fitness
     med_fit = numpy.median([p.fitness for p in population])
@@ -94,9 +96,17 @@ def file_observer(population, num_generations, num_evaluations, args):
     # installed even if this function is not called.
     import numpy
     
-    statistics_file = args.setdefault('statistics_file', open('ecspy-statistics-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv', 'w'))
-    individuals_file = args.setdefault('individuals_file', open('ecspy-individuals-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv', 'w'))
+    try:
+        statistics_file = args['statistics_file']
+    except KeyError:
+        statistics_file = open('ecspy-statistics-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv', 'w')
+    try:
+        individuals_file = args['individuals_file']
+    except KeyError:
+        individuals_file = open('ecspy-individuals-file-' + time.strftime('%m%d%Y-%H%M%S') + '.csv', 'w')
 
+    population = list(population)
+    population.sort(reverse=True)
     worst_fit = population[-1].fitness
     best_fit = population[0].fitness
     med_fit = numpy.median([p.fitness for p in population])
@@ -111,7 +121,7 @@ def file_observer(population, num_generations, num_evaluations, args):
 
 def archive_observer(population, num_generations, num_evaluations, args):
     """Print the current archive to the screen."""
-    archive = args.setdefault('_archive', [])
+    archive = args['_evolutionary_computation'].archive
     for a in archive:
         print(a)
 
@@ -145,6 +155,8 @@ def plot_observer(population, num_generations, num_evaluations, args):
     import pylab
     import numpy
     
+    population = list(population)
+    population.sort(reverse=True)
     best_fitness = population[0].fitness
     worst_fitness = population[-1].fitness
     median_fitness = numpy.median([p.fitness for p in population])

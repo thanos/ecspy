@@ -9,8 +9,8 @@ from ecspy import terminators
 from ecspy.contrib.utils import round_fitness
 
 def generate_candidate(random, args):
-    lower_bound = args.get('lower_bound', 0)
-    upper_bound = args.get('upper_bound', 1)
+    lower_bound = -1000
+    upper_bound = 1000
     return [random.random() * (upper_bound - lower_bound) + lower_bound]
 
 def evaluate_sch(candidates, args):
@@ -28,7 +28,7 @@ def converged_sch(population, num_generations, num_evaluations, args):
     return [0.0, 4.0] in pop
 
 def my_observer(population, num_generations, num_evaluations, args):
-    archive = args.get('_archive', [])   
+    archive = args['_evolutionary_computation'].archive
     x = []
     y = []
     print('----------------------------')
@@ -53,15 +53,13 @@ def main(do_plot=True, prng=None):
     nsga.variator = [variators.gaussian_mutation, variators.blend_crossover]
     nsga.observer = my_observer
     nsga.terminator = [terminators.evaluation_termination, converged_sch]
-    final_arc = nsga.evolve(maximize=False,
+    final_pop = nsga.evolve(maximize=False,
                             generator=generate_candidate, 
                             evaluator=evaluate_sch, 
                             pop_size=100,
-                            max_evaluations=1e8,
-                            lower_bound=-1000.,
-                            upper_bound= 1000.,
-                            #mut_range=1.
-                            )
+                            bounder=ec.bounder(-1000, 1000),
+                            max_evaluations=1e8)
+    final_arc = nsga.archive
     
     print('*******************************')
     if do_plot:

@@ -1,5 +1,6 @@
 from random import Random
 from time import time
+from ecspy import ec
 from ecspy import emo
 from ecspy import selectors
 from ecspy import variators
@@ -8,9 +9,7 @@ from ecspy import terminators
 
 
 def generate_candidate(random, args):
-    lower_bound = args.get('lower_bound', 0)
-    upper_bound = args.get('upper_bound', 1)
-    return [random.random() * (upper_bound - lower_bound) + lower_bound]
+    return [random.random()]
 
 def evaluate_candidate(candidates, args):
     fitness = []
@@ -30,12 +29,12 @@ def main(do_plot=True, prng=None):
     nsga.variator = [variators.uniform_crossover, variators.gaussian_mutation]
     nsga.observer = observers.archive_observer
     nsga.terminator = terminators.evaluation_termination
-    final_arc = nsga.evolve(generator=generate_candidate, 
+    final_pop = nsga.evolve(generator=generate_candidate, 
                             evaluator=evaluate_candidate, 
                             pop_size=100,
-                            max_evaluations=1000,
-                            lower_bound=0.,
-                            upper_bound=1.)
+                            bounder=ec.bounder([0], [1]),
+                            max_evaluations=1000)
+    final_arc = nsga.archive
     
     print('*******************************')
     if do_plot:

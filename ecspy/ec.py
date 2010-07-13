@@ -28,6 +28,48 @@ from ecspy import terminators
 from ecspy import observers
 
 
+def bounder(lower_bound=None, upper_bound=None):
+    """Defines a basic bounding function for numeric lists.
+    
+    This function returns a bounding function that bounds a 
+    numeric list between the lower and upper bounds specified.
+    These bounds can be single values or lists of values. For
+    instance, if the candidate is composed of five values, each
+    of which should be bounded between 0 and 1, you can say
+    ``bounder([0, 0, 0, 0, 0], [1, 1, 1, 1, 1])`` or just
+    ``bounder(0, 1)``.
+    
+    In general, a user-specified bounding function must accept
+    two arguments: the candidate to be bounded and the keyword
+    argument dictionary. Typically, the signature of such a 
+    function would be ``bounding_function(candidate, args)``.
+    This function should return the resulting candidate after 
+    bounding has been performed.
+    
+    """
+    def bounding_function(candidate, args):
+        # The default would be to leave the candidate alone
+        # unless both bounds are specified.
+        if lower_bound is None or upper_bound is None:
+            return candidate
+        else:
+            try:
+                iter(lower_bound)
+                lower = lower_bound
+            except TypeError:
+                lower = [lower_bound] * len(candidate)
+            try:
+                iter(upper_bound)
+                upper = upper_bound
+            except TypeError:
+                upper = [upper_bound] * len(candidate)
+            bounded_candidate = []
+            for c, lo, hi in zip(candidate, lower, upper):
+                bounded_candidate.append(max(min(c, hi), lo))
+            return bounded_candidate
+    return bounding_function
+
+
 class Individual(object):
     """Represents an individual in an evolutionary computation.
     
@@ -74,10 +116,25 @@ class Individual(object):
         return self < other or not other < self
             
     def __gt__(self, other):
-        return other < self
+        if self.fitness is not None and other.fitness is not None:
+            return other < self
+        else:
+            raise Exception('fitness is not defined')
 
     def __ge__(self, other):
         return other < self or not self < other
+        
+    def __lshift__(self, other):
+        return self < other
+    
+    def __rshift__(self, other):
+        return other < self
+        
+    def __ilshift__(self, other):
+        raise TypeError("unsupported operand type(s) for <<=: 'Individual' and 'Individual'")
+    
+    def __irshift__(self, other):
+        raise TypeError("unsupported operand type(s) for >>=: 'Individual' and 'Individual'")
         
     def __eq__(self, other):
         return self.candidate == other.candidate
@@ -85,7 +142,7 @@ class Individual(object):
     def __ne__(self, other):
         return self.candidate != other.candidate
 
-
+        
 class EvolutionaryComputation(object):
     """Represents a basic evolutionary computation.
     
@@ -103,8 +160,26 @@ class EvolutionaryComputation(object):
     - *archiver* -- the archival operator
     - *observer* -- the (possibly list of) observer(s)
     - *terminator* -- the (possibly list of) terminator(s)
+    
+    The following public attributes do not have legitimate values
+    until after the ``evolve`` method executes:
+    
     - *termination_cause* -- the name of the function causing 
       ``evolve`` to terminate
+    - *generator* -- the generator function passed to ``evolve``
+    - *evaluator* -- the evaluator function passed to ``evolve``
+    - *bounder* -- the bounding function passed to ``evolve``
+    - *archive* -- the archive of individuals
+    - *population* -- the population of individuals
+    - *num_evaluations* -- the number of fitness evaluations used
+    - *num_generations* -- the number of generations processed
+    
+    Note that the attributes above are, in general, not intended to 
+    be modified by the user. (They are intended for the user to query
+    during or after the ``evolve`` method's execution.) However, 
+    there may be instances where it is necessary to modify them 
+    within other functions. This is possible but should be the 
+    exception, rather than the rule.
     
     Protected Attributes:
     
@@ -128,6 +203,13 @@ class EvolutionaryComputation(object):
         self.archiver = archivers.default_archiver
         self.terminator = terminators.default_termination
         self.termination_cause = None
+        self.generator = None
+        self.evaluator = None
+        self.bounder = None
+        self.archive = None
+        self.population = None
+        self.num_evaluations = 0
+        self.num_generations = 0
         self._kwargs = dict()
         
     def _should_terminate(self, pop, ng, ne):
@@ -147,14 +229,14 @@ class EvolutionaryComputation(object):
         return terminate
         
     
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=bounder(), **args):
         """Perform the evolution.
         
         This function creates a population and then runs it through a series
         of evolutionary epochs until the terminator is satisfied. The general
         outline of an epoch is selection, variation, evaluation, replacement,
         migration, archival, and observation. The function returns the individuals
-        in the final archive (which, by default, will be the final population).
+        in the final population.
         
         Arguments:
         
@@ -164,32 +246,27 @@ class EvolutionaryComputation(object):
         - *seeds* -- an iterable collection of candidate solutions to include
           in the initial population (default [])
         - *maximize* -- Boolean value stating use of maximization (default True)
+        - *bounder* -- a function used to bound candidate solutions (default bounder())
         - *args* -- a dictionary of keyword arguments
 
         Note that the *_kwargs* class variable will be initialized to the args 
         parameter here. It will also be modified to include the following 'built-in' 
-        keyword arguments (each preceded by an underscore) unless these arguments 
-        are already present (which shouldn't be the case):
+        keyword arguments:
         
-        - *_generator* -- the generator used for creating candidate solutions
-        - *_evaluator* -- the evaluator used for evaluating solutions
-        - *_population_size* -- the size of the population
-        - *_num_generations* -- the number of generations that have elapsed
-        - *_num_evaluations* -- the number of evaluations that have been completed
-        - *_population* -- the current population
-        - *_archive* -- the current archive
         - *_evolutionary_computation* -- the evolutionary computation (this object)
+        - *_maximize* -- Boolean determining whether maximization is being performed
         
         """
         self._kwargs = args
-        # Add entries to the keyword arguments dictionary
-        # if they're not already present.
-        self._kwargs.setdefault('_generator', generator)
-        self._kwargs.setdefault('_evaluator', evaluator)
-        self._kwargs.setdefault('_population_size', pop_size)
         self._kwargs.setdefault('_evolutionary_computation', self)
+        self._kwargs.setdefault('_maximize', maximize)
         
         self.termination_cause = None
+        self.generator = generator
+        self.evaluator = evaluator
+        self.bounder = bounder
+        self.population = []
+        self.archive = []
         
         # Create the initial population.
         try:
@@ -206,40 +283,28 @@ class EvolutionaryComputation(object):
                 i += 1
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
         
-        population = []
-        archive = []
         for cs, fit in zip(initial_cs, initial_fit):
             ind = Individual(cs, maximize=maximize)
             ind.fitness = fit
-            population.append(ind)
+            self.population.append(ind)
             
-        num_evaluations = len(initial_fit)
-        num_generations = 0
-        self._kwargs['_num_generations'] = num_generations
-        self._kwargs['_num_evaluations'] = num_evaluations
+        self.num_evaluations = len(initial_fit)
+        self.num_generations = 0
         
-        population.sort(reverse=True)
-        self._kwargs['_population'] = population
-        
-        pop_copy = list(population)
-        arc_copy = list(archive)
-        archive = self.archiver(random=self._random, population=pop_copy, archive=arc_copy, args=self._kwargs)
-        self._kwargs['_archive'] = archive
-        
+        pop_copy = list(self.population)
+        arc_copy = list(self.archive)
+        self.archive = self.archiver(random=self._random, population=pop_copy, archive=arc_copy, args=self._kwargs)
+                
         if isinstance(self.observer, (list, tuple)):
             for obs in self.observer:
-                obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
+                obs(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
         else:
-            self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
+            self.observer(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
         
-        while not self._should_terminate(population, num_generations, num_evaluations):
+        while not self._should_terminate(self.population, self.num_generations, self.num_evaluations):
             # Select individuals.
-            pop_copy = list(population)
+            pop_copy = list(self.population)
             parents = self.selector(random=self._random, population=pop_copy, args=self._kwargs)
-            
-            # Sort the parents just before taking out the candidate so that relative fitness
-            # can be determined in the variators (e.g., differential crossover).
-            parents.sort(reverse=True)
             parent_cs = [copy.deepcopy(i.candidate) for i in parents]
             offspring_cs = parent_cs
             
@@ -256,31 +321,26 @@ class EvolutionaryComputation(object):
                 off = Individual(cs, maximize=maximize)
                 off.fitness = fit
                 offspring.append(off)
-            num_evaluations += len(offspring_fit)        
-            self._kwargs['_num_evaluations'] = num_evaluations
+            self.num_evaluations += len(offspring_fit)        
 
             # Replace individuals.
             pop_copy = self.replacer(random=self._random, population=pop_copy, parents=parents, offspring=offspring, args=self._kwargs)
             
             # Migrate individuals.
-            population = self.migrator(random=self._random, population=pop_copy, args=self._kwargs)
-            population.sort(reverse=True)
-            self._kwargs['_population'] = population
+            self.population = self.migrator(random=self._random, population=pop_copy, args=self._kwargs)
             
             # Archive individuals.
-            pop_copy = list(population)
-            arc_copy = list(archive)
-            archive = self.archiver(random=self._random, archive=arc_copy, population=pop_copy, args=self._kwargs)
-            self._kwargs['_archive'] = archive
+            pop_copy = list(self.population)
+            arc_copy = list(self.archive)
+            self.archive = self.archiver(random=self._random, archive=arc_copy, population=pop_copy, args=self._kwargs)
             
-            num_generations += 1
-            self._kwargs['_num_generations'] = num_generations
+            self.num_generations += 1
             if isinstance(self.observer, (list, tuple)):
                 for obs in self.observer:
-                    obs(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
+                    obs(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
             else:
-                self.observer(population=population, num_generations=num_generations, num_evaluations=num_evaluations, args=self._kwargs)
-        return archive
+                self.observer(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
+        return self.population
         
 
 class GA(EvolutionaryComputation):
@@ -308,9 +368,9 @@ class GA(EvolutionaryComputation):
         self.variator = [variators.n_point_crossover, variators.bit_flip_mutation]
         self.replacer = replacers.generational_replacement
         
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=bounder(), **args):
         args.setdefault('num_selected', pop_size)
-        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, **args)
+        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
 
 
 class ES(EvolutionaryComputation):
@@ -324,10 +384,9 @@ class ES(EvolutionaryComputation):
     Optional keyword arguments in ``evolve`` args parameter:
     
     - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
-    - *mutation_range* -- the variance used in the Gaussian function 
+    - *mean* -- the mean used in the Gaussian function (default 0)
+    - *stdev* -- the standard deviation used in the Gaussian function
       (default 1.0)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
     - *use_one_fifth_rule* -- whether the 1/5 rule should be used (default False)
     
     """
@@ -351,8 +410,6 @@ class EDA(EvolutionaryComputation):
     - *num_selected* -- the number of individuals to be selected 
       (default len(population))
     - *num_offspring* -- the number of offspring to create (default 1)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
     - *num_elites* -- number of elites to consider (default 0)
     
     """
@@ -362,10 +419,10 @@ class EDA(EvolutionaryComputation):
         self.variator = variators.estimation_of_distribution_variation
         self.replacer = replacers.generational_replacement
         
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=bounder(), **args):
         args.setdefault('num_selected', pop_size // 2)
         args.setdefault('num_offspring', pop_size)
-        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, **args)
+        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
 
 
 class DEA(EvolutionaryComputation):
@@ -385,10 +442,9 @@ class DEA(EvolutionaryComputation):
     - *differential_phi* -- the amount of random change in the crossover 
       (default 0.1)
     - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
-    - *mutation_range* -- the variance used in the Gaussian function 
+    - *mean* -- the mean used in the Gaussian function (default 0)
+    - *stdev* -- the standard deviation used in the Gaussian function
       (default 1.0)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
 
     """
     def __init__(self, random):
@@ -397,9 +453,9 @@ class DEA(EvolutionaryComputation):
         self.variator = [variators.differential_crossover, variators.gaussian_mutation]
         self.replacer = replacers.steady_state_replacement
         
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=bounder(), **args):
         args.setdefault('num_selected', 2)
-        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, **args)
+        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
 
 
 class SA(EvolutionaryComputation):
@@ -410,6 +466,6 @@ class SA(EvolutionaryComputation):
         self.variator = variators.gaussian_mutation
         self.replacer = replacers.simulated_annealing_replacement
     
-    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, **args):
+    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, bounder=bounder(), **args):
         pop_size=1
-        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, **args)
+        return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)

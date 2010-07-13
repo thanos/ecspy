@@ -122,10 +122,10 @@ class NSGA2(ec.EvolutionaryComputation):
         self.replacer = replacers.nsga_replacement
         self.selector = selectors.tournament_selection
     
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=ec.bounder(), **args):
         args.setdefault('num_selected', pop_size)
         args.setdefault('tourn_size', 2)
-        return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, **args)
+        return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
 
     
 class PAES(ec.EvolutionaryComputation):
@@ -143,8 +143,8 @@ class PAES(ec.EvolutionaryComputation):
         self.variator = variators.gaussian_mutation
         self.replacer = replacers.paes_replacement  
 
-    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, **args):
-        final_arc = ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, **args)
+    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, bounder=ec.bounder(), **args):
+        final_pop = ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
         try:
             del self.archiver.grid_population
         except AttributeError:
@@ -157,6 +157,6 @@ class PAES(ec.EvolutionaryComputation):
             del self.archiver.global_largest
         except AttributeError:
             pass
-        return final_arc
+        return final_pop
     
 

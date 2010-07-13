@@ -33,7 +33,8 @@ def estimation_of_distribution_variation(random, candidates, args):
     This function assumes that the candidate solutions are iterable 
     objects containing real values. It creates a statistical model 
     based on the set of candidates. The offspring are then generated 
-    from this model.
+    from this model. This function also makes use of the bounder
+    function as specified in the EC's ``evolve`` method.
 
     .. Arguments:
        random -- the random number generator object
@@ -43,30 +44,11 @@ def estimation_of_distribution_variation(random, candidates, args):
     Optional keyword arguments in args:
     
     - *num_offspring* -- the number of offspring to create (default 1)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
-    
-    The lower and upper bounds can either be single values, which will
-    be applied to all elements of a chromosome, or lists of values of 
-    the same length as the chromosome.
     
     """
     num_offspring = args.setdefault('num_offspring', 1)
-    lower_bound = args.setdefault('lower_bound', 0)
-    upper_bound = args.setdefault('upper_bound', 1)
+    bounder = args['_evolutionary_computation'].bounder
     
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
-        
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
-        
     cs_copy = list(candidates)
     num_genes = max([len(x) for x in cs_copy])
     genes = [[x[i] for x in cs_copy] for i in range(num_genes)] 
@@ -75,10 +57,9 @@ def estimation_of_distribution_variation(random, candidates, args):
     offspring = []
     for _ in range(num_offspring):
         child = []
-        for m, s, hi, lo in zip(mean, stdev, upper_bound, lower_bound):
-            value = m + random.gauss(0, s);
-            value = max(min(value, hi), lo)
-            child.append(value)
+        for m, s in zip(mean, stdev):
+            child.append(m + random.gauss(0, s))
+        child = bounder(child, args)
         offspring.append(child)
         
     return offspring

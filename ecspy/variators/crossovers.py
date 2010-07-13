@@ -122,7 +122,9 @@ def blend_crossover(random, candidates, args):
     This function assumes that the candidate solutions are iterable
     and composed of values on which arithmetic operations are defined.
     It performs blend crossover, which is similar to a generalized 
-    averaging of the candidate elements.
+    averaging of the candidate elements. This function also 
+    makes use of the bounder function as specified in the EC's 
+    ``evolve`` method.
 
     .. Arguments:
        random -- the random number generator object
@@ -134,31 +136,12 @@ def blend_crossover(random, candidates, args):
     - *crossover_rate* -- the rate at which crossover is performed 
       (default 1.0)
     - *blx_alpha* -- the blending rate (default 0.1)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
-    
-    The lower and upper bounds can either be single values, which will
-    be applied to all elements of a chromosome, or lists of values of 
-    the same length as the chromosome.
     
     """
     blx_alpha = args.setdefault('blx_alpha', 0.1)
     crossover_rate = args.setdefault('crossover_rate', 1.0)
-    lower_bound = args.setdefault('lower_bound', 0)
-    upper_bound = args.setdefault('upper_bound', 1)
-    
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
-        
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
-        
+    bounder = args['_evolutionary_computation'].bounder
+
     cand = list(candidates)
     if len(cand) % 2 == 1:
         cand = cand[:-1]
@@ -174,12 +157,10 @@ def blend_crossover(random, candidates, args):
                 smallest = min(m, d)
                 largest = max(m, d)
                 delta = blx_alpha * (largest - smallest)
-                bro_val = smallest - delta + random.random() * (largest - smallest + 2 * delta)
-                sis_val = smallest - delta + random.random() * (largest - smallest + 2 * delta)
-                bro_val = max(min(bro_val, upper_bound[index]), lower_bound[index])
-                sis_val = max(min(sis_val, upper_bound[index]), lower_bound[index])
-                bro.append(bro_val)
-                sis.append(sis_val)
+                bro.append(smallest - delta + random.random() * (largest - smallest + 2 * delta))
+                sis.append(smallest - delta + random.random() * (largest - smallest + 2 * delta))
+            bro = bounder(bro, args)
+            sis = bounder(sis, args)
             children.append(bro)
             children.append(sis)
         else:
@@ -193,7 +174,9 @@ def differential_crossover(random, candidates, args):
     This function assumes that the candidate solutions are iterable
     and composed of values on which arithmetic operations are defined.
     It performs differential crossover, which is similar to the update
-    rule used in particle swarm optimization.
+    rule used in particle swarm optimization. This function also 
+    makes use of the bounder function as specified in the EC's 
+    ``evolve`` method.
 
     .. Arguments:
        random -- the random number generator object
@@ -206,70 +189,51 @@ def differential_crossover(random, candidates, args):
       (default 1.0)
     - *differential_phi* -- the amount of random change in the crossover 
       (default 0.1)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
-    
-    The lower and upper bounds can either be single values, which will
-    be applied to all elements of a chromosome, or lists of values of 
-    the same length as the chromosome.
     
     """
     differential_phi = args.setdefault('differential_phi', 0.1)
     crossover_rate = args.setdefault('crossover_rate', 1.0)
-    lower_bound = args.setdefault('lower_bound', 0)
-    upper_bound = args.setdefault('upper_bound', 1)
-    
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
+    bounder = args['_evolutionary_computation'].bounder
         
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
-        
-    # Be careful shuffling the candidates so that 
-    # we will know which is better. 
     cand = list(candidates)
     if len(cand) % 2 == 1:
         cand = cand[:-1]
-    cand_pair = [(pos, ind) for pos, ind in enumerate(cand)]
-    random.shuffle(cand_pair)
-    moms = cand_pair[::2]
-    dads = cand_pair[1::2]
+        
+    # Since we don't have fitness information in the candidates, we need 
+    # to make a dictionary containing the candidate and its corresponding 
+    # individual in the population.
+    population = args['_evolutionary_computation'].population[:]
+    lookup = dict(zip([tuple(p.candidate) for p in population], population))
+    
+    moms = cand[::2]
+    dads = cand[1::2]
     children = []
     for mom, dad in zip(moms, dads):
         if random.random() < crossover_rate:
             bro = []
             sis = []
-            for index, (m, d) in enumerate(zip(mom[1], dad[1])):
-                if mom[0] > dad[0]:
+            for m, d in zip(mom, dad):
+                if lookup[tuple(mom)] > lookup[tuple(dad)]:
                     negpos = 1
                     val = d
                 else:
                     negpos = -1
                     val = m
-                bro_val = val + differential_phi * random.random() * negpos * (m - d)
-                sis_val = val + differential_phi * random.random() * negpos * (m - d)
-                bro_val = max(min(bro_val, upper_bound[index]), lower_bound[index])
-                sis_val = max(min(sis_val, upper_bound[index]), lower_bound[index])
-                bro.append(bro_val)
-                sis.append(sis_val)
+                bro.append(val + differential_phi * random.random() * negpos * (m - d))
+                sis.append(val + differential_phi * random.random() * negpos * (m - d))
+            bro = bounder(bro, args)
+            sis = bounder(sis, args)
             children.append(bro)
             children.append(sis)
         else:
-            children.append(mom[1])
-            children.append(dad[1])
+            children.append(mom)
+            children.append(dad)
     return children
     
 def simulated_binary_crossover(random, candidates, args):
     """Return the offspring of simulated binary crossover on the candidates.
     
-    This function performs simulated binary crosssover. It was adapted 
-    from pyevolve's implementation by Amit Saha, which follows the 
+    This function performs simulated binary crosssover, following the 
     implementation in NSGA-II 
     `(Deb, et. al, ICANNGA 1999) <http://vision.ucsd.edu/~sagarwal/icannga.pdf>`_.
  

@@ -7,8 +7,7 @@ from ecspy import evaluators
 
 
 def generate_real(random, args):
-    size = args.get('chrom_size', 4)
-    return [random.random() for i in xrange(size)]
+    return [random.random() for i in xrange(4)]
 
 def my_serial_evaluator(candidate):
     num = sum(candidate)
@@ -25,6 +24,7 @@ def main(prng=None):
     final_pop = es.evolve(evaluator=evaluators.parallel_evaluation, 
                           generator=generate_real, 
                           pop_size=100, 
+                          bounder=ec.bounder(0, 1),
                           serial_evaluator=my_serial_evaluator,
                           max_evaluations=2000,
                           mutation_rate=0.2,

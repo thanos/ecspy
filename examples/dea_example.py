@@ -6,8 +6,7 @@ from ecspy import observers
 
 
 def generate_real(random, args):
-    size = args.get('chrom_size', 4)
-    return [random.random() for i in xrange(size)]
+    return [random.random() for i in xrange(4)]
 
 def evaluate_real(candidates, args):
     fitness = []
@@ -28,6 +27,7 @@ def main(prng=None):
     final_pop = dea.evolve(evaluator=evaluate_real, 
                            generator=generate_real, 
                            pop_size=10, 
+                           bounder=ec.bounder([0] * 4, [1] * 4),
                            max_evaluations=5000)
     stop = time()
         
