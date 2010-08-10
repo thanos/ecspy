@@ -112,6 +112,11 @@ def parallel_evaluation_mp(candidates, args):
     .. Arguments:
        candidates -- the candidate solutions
        args -- a dictionary of keyword arguments
+
+    Required keyword arguments in args:
+    
+    *serial_evaluator* -- the actual evaluation function, which should take a 
+    single argument representing a candidate solution (required)
     
     Optional keyword arguments in args:
     
