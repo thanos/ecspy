@@ -19,6 +19,7 @@
 
 import time
 import copy
+import logging
 from ecspy import selectors
 from ecspy import variators
 from ecspy import replacers
@@ -37,7 +38,9 @@ def bounder(lower_bound=None, upper_bound=None):
     instance, if the candidate is composed of five values, each
     of which should be bounded between 0 and 1, you can say
     ``bounder([0, 0, 0, 0, 0], [1, 1, 1, 1, 1])`` or just
-    ``bounder(0, 1)``.
+    ``bounder(0, 1)``. If either the ``lower_bound`` or 
+    ``upper_bound`` argument is ``None``, the bounding function 
+    leaves the candidate unchanged (which is the default behavior).
     
     In general, a user-specified bounding function must accept
     two arguments: the candidate to be bounded and the keyword
@@ -186,6 +189,7 @@ class EvolutionaryComputation(object):
     - *_random* -- the random number generator object
     - *_kwargs* -- the dictionary of keyword arguments initialized
       from the *args* parameter in the *evolve* method
+    - *_logger* -- the logger to use (defaults to the logger 'ecspy.ec')
     
     Public Methods:
     
@@ -211,21 +215,25 @@ class EvolutionaryComputation(object):
         self.num_evaluations = 0
         self.num_generations = 0
         self._kwargs = dict()
+        self._logger = logging.getLogger('ecspy.ec')
         
     def _should_terminate(self, pop, ng, ne):
         terminate = False
         fname = ''
         try:
             for clause in self.terminator:
+                self._logger.debug('termination test using %s at generation %d and evaluation %d' % (clause.__name__, ng, ne))
                 terminate = terminate or clause(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
                 if terminate:
                     fname = clause.__name__
                     break
         except TypeError:
+            self._logger.debug('termination test using %s at generation %d and evaluation %d' % (self.terminator.__name__, ng, ne))
             terminate = self.terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
             fname = self.terminator.__name__
         if terminate:
             self.termination_cause = fname
+            self._logger.debug('termination from %s at generation %d and evaluation %d' % (self.termination_cause, ng, ne))
         return terminate
         
     
@@ -276,45 +284,59 @@ class EvolutionaryComputation(object):
         initial_cs = list(seeds)
         num_generated = max(pop_size - len(seeds), 0)
         i = 0
+        self._logger.debug('generating initial population')
         while i < num_generated:
             cs = generator(random=self._random, args=self._kwargs)
             if cs not in initial_cs:
                 initial_cs.append(cs)
                 i += 1
+        self._logger.debug('evaluating initial population')
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
         
         for cs, fit in zip(initial_cs, initial_fit):
             ind = Individual(cs, maximize=maximize)
             ind.fitness = fit
             self.population.append(ind)
-            
+        self._logger.debug('population size is now %d' % len(self.population))
+        
         self.num_evaluations = len(initial_fit)
         self.num_generations = 0
         
+        self._logger.debug('archiving initial population')
         pop_copy = list(self.population)
         arc_copy = list(self.archive)
         self.archive = self.archiver(random=self._random, population=pop_copy, archive=arc_copy, args=self._kwargs)
+        self._logger.debug('archive size is now %d' % len(self.archive))
+        self._logger.debug('population size is now %d' % len(self.population))
                 
         if isinstance(self.observer, (list, tuple)):
             for obs in self.observer:
+                self._logger.debug('observation using %s at generation %d and evaluation %d' % (obs.__name__, self.num_generations, self.num_evaluations))
                 obs(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
         else:
+            self._logger.debug('observation using %s at generation %d and evaluation %d' % (self.observer.__name__, self.num_generations, self.num_evaluations))
             self.observer(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
         
         while not self._should_terminate(self.population, self.num_generations, self.num_evaluations):
             # Select individuals.
+            self._logger.debug('selection using %s at generation %d and evaluation %d' % (self.selector.__name__, self.num_generations, self.num_evaluations))
             pop_copy = list(self.population)
             parents = self.selector(random=self._random, population=pop_copy, args=self._kwargs)
+            self._logger.debug('selected %d candidates' % len(parents))
             parent_cs = [copy.deepcopy(i.candidate) for i in parents]
             offspring_cs = parent_cs
             
             if isinstance(self.variator, (list, tuple)):
                 for op in self.variator:
+                    self._logger.debug('variation using %s at generation %d and evaluation %d' % (op.__name__, self.num_generations, self.num_evaluations))
                     offspring_cs = op(random=self._random, candidates=offspring_cs, args=self._kwargs)
             else:
+                self._logger.debug('variation using %s at generation %d and evaluation %d' % (self.variator.__name__, self.num_generations, self.num_evaluations))
                 offspring_cs = self.variator(random=self._random, candidates=offspring_cs, args=self._kwargs)
+            self._logger.debug('created %d offspring' % len(offspring_cs))
             
             # Evaluate offspring.
+            self._logger.debug('evaluation using %s at generation %d and evaluation %d' % (evaluator.__name__, self.num_generations, self.num_evaluations))
             offspring_fit = evaluator(candidates=offspring_cs, args=self._kwargs)
             offspring = []
             for cs, fit in zip(offspring_cs, offspring_fit):
@@ -324,21 +346,30 @@ class EvolutionaryComputation(object):
             self.num_evaluations += len(offspring_fit)        
 
             # Replace individuals.
+            self._logger.debug('replacement using %s at generation %d and evaluation %d' % (self.replacer.__name__, self.num_generations, self.num_evaluations))
             pop_copy = self.replacer(random=self._random, population=pop_copy, parents=parents, offspring=offspring, args=self._kwargs)
+            self._logger.debug('population size is now %d' % len(pop_copy))
             
             # Migrate individuals.
+            self._logger.debug('migration using %s at generation %d and evaluation %d' % (self.migrator.__name__, self.num_generations, self.num_evaluations))
             self.population = self.migrator(random=self._random, population=pop_copy, args=self._kwargs)
+            self._logger.debug('population size is now %d' % len(self.population))
             
             # Archive individuals.
+            self._logger.debug('archival using %s at generation %d and evaluation %d' % (self.archiver.__name__, self.num_generations, self.num_evaluations))
             pop_copy = list(self.population)
             arc_copy = list(self.archive)
             self.archive = self.archiver(random=self._random, archive=arc_copy, population=pop_copy, args=self._kwargs)
+            self._logger.debug('archive size is now %d' % len(self.archive))
+            self._logger.debug('population size is now %d' % len(self.population))
             
             self.num_generations += 1
             if isinstance(self.observer, (list, tuple)):
                 for obs in self.observer:
+                    self._logger.debug('observation using %s at generation %d and evaluation %d' % (obs.__name__, self.num_generations, self.num_evaluations))
                     obs(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
             else:
+                self._logger.debug('observation using %s at generation %d and evaluation %d' % (self.observer.__name__, self.num_generations, self.num_evaluations))
                 self.observer(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
         return self.population
         

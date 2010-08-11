@@ -26,6 +26,8 @@
 
 import math
 import itertools
+import sys
+import time
 
 
 def default_termination(population, num_generations, num_evaluations, args):
@@ -149,3 +151,66 @@ def generation_termination(population, num_generations, num_evaluations, args):
         return True
     return False
 
+
+def user_termination(population, num_generations, num_evaluations, args):
+    """Return True if user presses the ESC key when prompted.
+    
+    This function prompts the user to press the ESC key to terminate the 
+    evolution. The prompt persists for a specified number of seconds before
+    evolution continues. Additionally, the function can be customized to 
+    allow any press of the ESC key to be stored until the next time this 
+    function is called. This function makes use of the ``msvcrt`` (Windows)
+    and ``curses`` (Unix) libraries. Other operating systems may not be 
+    supported.
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
+    
+    Optional keyword arguments in args:
+    
+    - *termination_response_timeout* -- the number of seconds to wait for 
+      the user to press the ESC key (default 5)
+    - *clear_termination_buffer* -- whether the keyboard buffer should be 
+      cleared before allowing the user to press a key (default True)
+    
+    """
+    def getch():
+        bims = sys.builtin_module_names
+        if 'msvcrt' in bims:
+            import msvcrt
+            if msvcrt.kbhit():
+                return msvcrt.getch()
+            else:
+                return -1
+        elif 'curses' in bims:
+            def _getch(stdscr):
+                stdscr.nodelay(1)
+                ch = stdscr.getch()
+                stdscr.nodelay(0)
+                return ch
+            import curses
+            return curses.wrapper(_getch)
+        else:
+            raise NotImplementedError
+            
+    num_secs = args.get('termination_response_timeout', 5)
+    clear_buffer = args.get('clear_termination_buffer', True)
+    if clear_buffer:
+        while getch() > -1:
+            pass
+    sys.stdout.write('Press ESC to terminate (%d secs):' % num_secs)
+    count = 1
+    start = time.time()
+    while time.time() - start < num_secs:
+        ch = getch()
+        if ch > -1 and ord(ch) == 27:
+            sys.stdout.write('\n\n')
+            return True
+        elif time.time() - start == count:
+            sys.stdout.write('.')
+            count += 1
+    sys.stdout.write('\n')
+    return False    
