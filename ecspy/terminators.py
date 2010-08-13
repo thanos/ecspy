@@ -24,10 +24,7 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import math
-import itertools
-import sys
-import time
+import math, itertools, sys, time, warnings
 
 
 def default_termination(population, num_generations, num_evaluations, args):
@@ -148,6 +145,48 @@ def generation_termination(population, num_generations, num_evaluations, args):
     """
     max_generations = args.setdefault('max_generations', 1)
     if num_generations >= max_generations:
+        return True
+    return False
+
+def time_termination(population, num_generations, num_evaluations, args):
+    """Return True if the number of generations meets or exceeds a duration of time.
+    
+    This function compares the number of generations with a specified 
+    maximum. It returns True if the maximum is met or exceeded.
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
+    
+    Optional keyword arguments in args:
+    
+    *start_time* -- time.time()
+    *max_time* -- the maximum generations (default 1) 
+    
+    """
+    #===========================================================================
+    # Argument handling
+    #===========================================================================
+    start_time = args.get('start_time')
+    logging = args.get('_evolutionary_computation')._logger
+    max_time = args.setdefault('max_time', 10*60.)
+
+    if args.get('start_time') is None:
+        msg = 'time_termination terminator added without setting the start_time argument'
+        logging.debug(msg)
+        raise AttributeError(msg)
+
+    if args.get('max_time') is None:
+        logging.debug('time_termination terminator added without setting the max_time argument\ndefaulting to 10 minutes computing time')
+    
+    #===========================================================================
+    # Has maximum computing time been reached?
+    #===========================================================================
+    _passed = (time.time() - start_time)
+    if _passed > max_time:
+        logging.info('time_termination termination after %s seconds' % (_passed))
         return True
     return False
 
