@@ -66,8 +66,7 @@ Now that we have decided upon our generator and evaluator, we can create the EC.
 ::
 
 	$ python rastrigin.py
-	TERMINATED DUE TO evaluation_termination
-	[1.0178475546852201, 0.98612366206874524, 1.0021561555706737] : 0.102228186078
+	[1.000087637046601, 1.0001637250284432, 1.0001970127944333] : 1.45421738935e-05
 
 .. {{{end}}}
 

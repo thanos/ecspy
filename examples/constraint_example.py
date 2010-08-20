@@ -16,7 +16,7 @@ def my_constraint_function(candidate):
 
 def my_generator(random, args):
     # Create pairs in the range [-2, 2].
-    return [4.0 * random.random() - 2.0 for i in range(2)]
+    return [random.uniform(-2.0, 2.0) for i in range(2)]
 
 def my_evaluator(candidates, args):
     # The fitness will be how close the point is to
@@ -28,8 +28,7 @@ def my_evaluator(candidates, args):
         if my_constraint_function(cand) > 0:
             fitness.append(WORST_FIT)
         else:
-            fit = cand[0]**2 + cand[1]**2
-            fitness.append(fit)
+            fitness.append(cand[0]**2 + cand[1]**2)
     return fitness
 
 def constrained_tournament_selection(random, population, args):
@@ -45,18 +44,15 @@ def constrained_tournament_selection(random, population, args):
         if constraint_func is None:
             selected.append(max(tourn))
         else:
-            x = constraint_func(tourn[0].candidate)
-            y = constraint_func(tourn[1].candidate)
+            cons = [constraint_func(t.candidate) for t in tourn]
             # If no constraints are violated, just do 
             # regular tournament selection.
-            if max(x, y) == 0:
+            if max(cons) == 0:
                 selected.append(max(tourn))
             # Otherwise, choose the least violator 
             # (which may be a non-violator).
-            elif x < y:
-                selected.append(tourn[0])
             else:
-                selected.append(tourn[1])
+                selected.append(tourn[cons.index(min(cons))])
     return selected
 
 r = random.Random()
@@ -68,9 +64,32 @@ myec.terminator = terminators.evaluation_termination
 myec.observer = observers.screen_observer
 pop = myec.evolve(my_generator, my_evaluator, 
                   pop_size=100, 
-                  bounder=ec.bounder([-2.0] * 2, [2.0] * 2),
+                  bounder=ec.Bounder([-2.0] * 2, [2.0] * 2),
                   num_selected=100,
-                  lower_bound=-2.0,
-                  upper_bound=2.0, 
                   constraint_func=my_constraint_function, 
-                  max_evaluations=1000)
+                  mutation_rate=0.5,
+                  max_evaluations=2000)
+                  
+import pylab
+x = []
+y = []
+c = []
+pop.sort()
+num_feasible = len([p for p in pop if p.fitness >= 0])
+feasible_count = 0
+for i, p in enumerate(pop):
+    x.append(p.candidate[0])
+    y.append(p.candidate[1])
+    if i == len(pop) - 1:
+        c.append('r')
+    elif p.fitness < 0:
+        c.append('0.98')
+    else:
+        c.append(str(1 - feasible_count / float(num_feasible)))
+        feasible_count += 1
+angles = pylab.linspace(0, 2*pylab.pi, 100)
+pylab.plot(pylab.cos(angles), pylab.sin(angles), color='b')
+pylab.scatter(x, y, color=c)
+pylab.savefig('constraint_example.pdf', format='pdf')
+
+                  

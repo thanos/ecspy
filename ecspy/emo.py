@@ -122,7 +122,7 @@ class NSGA2(ec.EvolutionaryComputation):
         self.replacer = replacers.nsga_replacement
         self.selector = selectors.tournament_selection
     
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=ec.bounder(), **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=ec.Bounder(), **args):
         args.setdefault('num_selected', pop_size)
         args.setdefault('tourn_size', 2)
         return ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
@@ -143,7 +143,7 @@ class PAES(ec.EvolutionaryComputation):
         self.variator = variators.gaussian_mutation
         self.replacer = replacers.paes_replacement  
 
-    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, bounder=ec.bounder(), **args):
+    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, bounder=ec.Bounder(), **args):
         final_pop = ec.EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
         try:
             del self.archiver.grid_population

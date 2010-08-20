@@ -148,11 +148,19 @@ def generation_termination(population, num_generations, num_evaluations, args):
         return True
     return False
 
-def time_termination(population, num_generations, num_evaluations, args):
-    """Return True if the number of generations meets or exceeds a duration of time.
     
-    This function compares the number of generations with a specified 
-    maximum. It returns True if the maximum is met or exceeded.
+def time_termination(population, num_generations, num_evaluations, args):
+    """Return True if the elapsed time meets or exceeds a duration of time.
+    
+    This function compares the elapsed time with a specified maximum. 
+    It returns True if the maximum is met or exceeded. If the `start_time`
+    keyword argument is omitted, it defaults to `None` and will be set to
+    the current system time (in seconds). If the `max_time` keyword argument
+    is omitted, it will default to `None` and will immediately terminate.
+    The `max_time` argument can be specified in seconds as a floating-point
+    number, as minutes/seconds as a two-element tuple of floating-point
+    numbers, or as hours/minutes/seconds as a three-element tuple of 
+    floating-point numbers.
     
     .. Arguments:
        population -- the population of Individuals
@@ -162,33 +170,31 @@ def time_termination(population, num_generations, num_evaluations, args):
     
     Optional keyword arguments in args:
     
-    *start_time* -- time.time()
-    *max_time* -- the maximum generations (default 1) 
+    *start_time* -- the time from which to start measuring (default None)
+    *max_time* -- the maximum time that should elapse (default None)
     
     """
-    #===========================================================================
-    # Argument handling
-    #===========================================================================
-    start_time = args.get('start_time')
-    logging = args.get('_evolutionary_computation')._logger
-    max_time = args.setdefault('max_time', 10*60.)
+    start_time = args.setdefault('start_time', None)
+    max_time = args.setdefault('max_time', None)
+    logging = args.get('_ec').logger
 
-    if args.get('start_time') is None:
-        msg = 'time_termination terminator added without setting the start_time argument'
-        logging.debug(msg)
-        raise AttributeError(msg)
-
-    if args.get('max_time') is None:
-        logging.debug('time_termination terminator added without setting the max_time argument\ndefaulting to 10 minutes computing time')
-    
-    #===========================================================================
-    # Has maximum computing time been reached?
-    #===========================================================================
-    _passed = (time.time() - start_time)
-    if _passed > max_time:
-        logging.info('time_termination termination after %s seconds' % (_passed))
-        return True
-    return False
+    if start_time is None:
+        start_time = time.time()
+        args['start_time'] = start_time
+        logging.debug('time_termination terminator added without setting the start_time argument; setting start_time to current time')
+    if max_time is None:
+        logging.debug('time_termination terminator added without setting the max_time argument; terminator will immediately terminate')
+    else:
+        try:
+            max_time = max_time[0] * 3600.0 + max_time[1] * 60.00 + max_time[2]
+            args['max_time'] = max_time
+        except TypeError:
+            pass
+        except IndexError:
+            max_time = max_time[0] * 60 + max_time[1]
+            args['max_time'] = max_time
+    time_elapsed = time.time() - start_time
+    return max_time is None or time_elapsed >= max_time
 
 
 def user_termination(population, num_generations, num_evaluations, args):

@@ -121,9 +121,12 @@ def file_observer(population, num_generations, num_evaluations, args):
 
 def archive_observer(population, num_generations, num_evaluations, args):
     """Print the current archive to the screen."""
-    archive = args['_evolutionary_computation'].archive
+    archive = args['_ec'].archive
+    print('                         Archive Size: %5d' % len(archive))
+    print('----------------------------------------------------------------------')
     for a in archive:
         print(a)
+    print('----------------------------------------------------------------------')
 
         
 def plot_observer(population, num_generations, num_evaluations, args):    
@@ -150,8 +153,6 @@ def plot_observer(population, num_generations, num_evaluations, args):
        args -- a dictionary of keyword arguments
     
     """
-    # Import the necessary libraries here. Otherwise, they would have to be
-    # installed even if this function is not called.
     import pylab
     import numpy
     

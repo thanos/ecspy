@@ -20,14 +20,12 @@ max_ord = max(ddd)
 min_ord = min(ddd)
 numeric_sentence = map(ord, sentence)
 
-def evaluation_termination(population, num_generations, num_evaluations, args):
+def optimal_termination(population, num_generations, num_evaluations, args):
     if any([i.fitness==0 for i in population]):
         return  True
     return False
 
 def observer(population, num_generations, num_evaluations, args):
-    '''
-    '''
     if num_generations % 100 == 0:
         population = list(population)
         population.sort(reverse=True)
@@ -35,12 +33,12 @@ def observer(population, num_generations, num_evaluations, args):
         print '*'*20
         print  ''.join(map(chr, best_fit))
         print 'fitnesses:',
-        print 'n archive:', len(args['_evolutionary_computation'].archive)
+        print 'n archive:', len(args['_ec'].archive)
         print 'n population:', len(population)
         print 'n evals:', num_evaluations
     
 def generate_sentence(random, args):
-    s = [random.randint(0,max_ord) for i in sentence]
+    s = [random.randint(0, max_ord) for i in sentence]
     return s 
     
 def evaluate_sentence(candidates, args):
@@ -50,96 +48,52 @@ def evaluate_sentence(candidates, args):
         fitness.append(fitt)
     return fitness
 
-def gaussian_mutation(random, candidates, args):
-    """Return the mutants created by Gaussian mutation on the candidates.
-
-    This function assumes that the candidate solutions are indexable
-    and numeric. It performs Gaussian mutation.
-
-    .. Arguments:
-       random -- the random number generator object
-       candidates -- the candidate solutions
-       args -- a dictionary of keyword arguments
-
-    Optional keyword arguments in args:
-    
-    - *mutation_rate* -- the rate at which mutation is performed (default 0.1)
-    - *mutation_range* -- the variance used in the Gaussian function 
-      (default 1.0)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
-    
-    The lower and upper bounds can either be single values, which will
-    be applied to all elements of a chromosome, or lists of values of 
-    the same length as the chromosome.
-    
-    """
+def integer_mutation(random, candidates, args):
     mut_rate = args.setdefault('mutation_rate', 0.1)
-    mut_range = args.setdefault('mutation_range', 1.0)
-    lower_bound = args.setdefault('lower_bound', 0)
-    upper_bound = args.setdefault('upper_bound', 1)
-        
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
-        
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
-        
-    cs_copy = list(candidates)
-    for i, cs in enumerate(cs_copy):
+    step = args.setdefault('mutation_step', 3)
+    cands = list(candidates)
+    for i, cs in enumerate(cands):
         for j, c in enumerate(cs):
             if random.random() < mut_rate:
-                c += random.gauss(0, mut_range) * (upper_bound[j] - lower_bound[j])
-                c = int(c)
-                c = max(min(c, upper_bound[j]), lower_bound[j])
-                cs_copy[i][j] = c
-    return cs_copy
+                s = random.randint(0, 2 * step + 1) - step
+                cands[i][j] = c + s
+    return cands
 
 
 def main(prng=None):
+    if prng is None:
+        prng = Random()
+        prng.seed(time())
+            
     ta = time()
-    prng = Random()
-    prng.seed(time()) 
-    ga = ec.GA(prng)
-    ga.observer = observer
-    ga.replacer = replacers.comma_replacement
-    ga.variator = [variators.uniform_crossover, gaussian_mutation]
-    ga.archiver = archivers.best_archiver
-    ga.selector = selectors.tournament_selection
-    ga.variator = [variators.uniform_crossover, gaussian_mutation]
-    ga.terminator = evaluation_termination
-    final_pop = ga.evolve(evaluator=evaluate_sentence,
+    ea = ec.EvolutionaryComputation(prng)
+    ea.observer = observer
+    ea.selector = selectors.tournament_selection
+    ea.variator = [variators.uniform_crossover, integer_mutation]
+    ea.replacer = replacers.comma_replacement
+    ea.archiver = archivers.best_archiver
+    ea.terminator = [optimal_termination, terminators.evaluation_termination]
+    final_pop = ea.evolve(evaluator=evaluate_sentence,
                           generator=generate_sentence,
                           max_evaluations=100000, 
                           pop_size=60,
                           tourn_size=20,
-                          num_crossover_points=1,
-                          mutation_range=0.05,
+                          num_selected=60, 
                           mutation_rate=0.01,
                           crossover_rate=1.0,
-                          upper_bound=max_ord,
-                          lower_bound=min_ord,
-                          mu=1,
-                          sigma=4,
                           maximize=False)
     final_pop.sort(reverse=True)
     final_sentence= ''.join(map(chr, final_pop[0].candidate))
     print 'FINAL SENTENCE'
     print final_sentence
-    print 'n generations:',ga.num_generations
-    print 'n archive:', len(ga.archive)
-    print 'n population:', len(ga.population)
+    print 'n generations:',ea.num_generations
+    print 'n archive:', len(ea.archive)
+    print 'n population:', len(ea.population)
     print 'evolution took:', time() - ta
-    return ga
+    return ea
             
 if __name__ == '__main__':
-    TEST_PERFORMANCE = True
+    TEST_PERFORMANCE = False
     if not TEST_PERFORMANCE:
         try:
             # 3 fold speed up!

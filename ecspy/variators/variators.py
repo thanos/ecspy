@@ -47,13 +47,13 @@ def estimation_of_distribution_variation(random, candidates, args):
     
     """
     num_offspring = args.setdefault('num_offspring', 1)
-    bounder = args['_evolutionary_computation'].bounder
+    bounder = args['_ec'].bounder
     
     cs_copy = list(candidates)
     num_genes = max([len(x) for x in cs_copy])
     genes = [[x[i] for x in cs_copy] for i in range(num_genes)] 
     mean = [float(sum(x)) / float(len(x)) for x in genes]
-    stdev = [max(sum([(x - m)**2 for x in g]) / float(len(g) - 1), 0.001) for g, m in zip(genes, mean)]
+    stdev = [sum([(x - m)**2 for x in g]) / float(len(g) - 1) for g, m in zip(genes, mean)]
     offspring = []
     for _ in range(num_offspring):
         child = []

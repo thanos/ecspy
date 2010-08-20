@@ -126,6 +126,13 @@ Analysis
 
 .. automodule:: ecspy.analysis
    :members:
+   
+=====================
+Contributed Utilities
+=====================
+
+.. automodule:: ecspy.contrib.utils
+   :members:
 
 
 

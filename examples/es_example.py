@@ -2,39 +2,53 @@ from random import Random
 from time import time
 from ecspy import ec
 from ecspy import terminators
-from ecspy import observers
-from ecspy import evaluators
+from ecspy import benchmarks
 
 
-def generate_real(random, args):
-    return [random.random() for i in xrange(4)]
-
-def my_serial_evaluator(candidate):
-    num = sum(candidate)
-    return num
-
-def main(prng=None):    
+def main(do_plot=True, prng=None):    
     if prng is None:
         prng = Random()
         prng.seed(time()) 
+        
+    problem = benchmarks.Rosenbrock(2)
     es = ec.ES(prng)
-    es.observer = observers.screen_observer
     es.terminator = [terminators.evaluation_termination, terminators.diversity_termination]
-    start = time()
-    final_pop = es.evolve(evaluator=evaluators.parallel_evaluation, 
-                          generator=generate_real, 
+    final_pop = es.evolve(generator=problem.generator, 
+                          evaluator=problem.evaluator, 
                           pop_size=100, 
-                          bounder=ec.bounder(0, 1),
-                          serial_evaluator=my_serial_evaluator,
-                          max_evaluations=2000,
+                          bounder=problem.bounder,
+                          maximize=problem.maximize,
+                          max_evaluations=30000,
                           mutation_rate=0.2,
                           use_one_fifth_rule=True)
-    stop = time()
         
-    print('***********************************')
-    print('Total Execution Time: %0.5f seconds' % (stop - start))
-    for ind in final_pop:
-        print(str(ind))
+    if do_plot:
+        best = max(final_pop)
+        print('ES Example (Rosenbrock) Best Solution: \n%s' % str(best))
+        import itertools
+        import pylab
+        import mpl_toolkits.mplot3d.axes3d as axes3d
+        num_points = 40
+        points = []
+        for lb, ub in zip(problem.bounder.lower_bound, problem.bounder.upper_bound):
+            points.append([(i / float(num_points)) * (ub - lb) + lb for i in range(num_points)])
+        points = itertools.product(*points)
+        x = []
+        y = []
+        for p in points:
+            x.append(p[0])
+            y.append(p[1])
+        z = problem.evaluator([[a, b] for a, b in zip(x, y)], {})
+        fig = pylab.figure()
+        ax = axes3d.Axes3D(fig)
+        ax.scatter3D(x, y, z)
+        ax.scatter3D([best.candidate[0]], [best.candidate[1]], [best.fitness], color='r')
+        ax.scatter3D([problem.global_optimum[0]], [problem.global_optimum[1]], problem.evaluator([problem.global_optimum], {}), color='g')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Fitness')
+        pylab.savefig('es_example_rosenbrock.pdf', format='pdf')
+        pylab.show()
     return es
             
 if __name__ == '__main__':

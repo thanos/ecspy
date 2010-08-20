@@ -11,7 +11,7 @@ from ecspy import observers
 
 
 def my_distance(x, y):
-    return sum([math.fabs(a - b) for a, b in zip(x, y)])
+    return sum([abs(a - b) for a, b in zip(x, y)])
 
 def generate(random, args):
     return [random.uniform(0, 26)]
@@ -30,14 +30,13 @@ def main(do_plot=True, prng=None):
         prng = random.Random()
         prng.seed(time.time()) 
     
-    ga = ec.EvolutionaryComputation(prng)
-    ga.selector = selectors.tournament_selection
-    ga.replacer = replacers.crowding_replacement
-    ga.variator = variators.gaussian_mutation
-    ga.observer = observers.screen_observer
-    ga.terminator = terminators.evaluation_termination
+    ea = ec.EvolutionaryComputation(prng)
+    ea.selector = selectors.tournament_selection
+    ea.replacer = replacers.crowding_replacement
+    ea.variator = variators.gaussian_mutation
+    ea.terminator = terminators.evaluation_termination
 
-    final_pop = ga.evolve(generate, evaluate, pop_size=20, bounder=ec.bounder(0, 26),
+    final_pop = ea.evolve(generate, evaluate, pop_size=20, bounder=ec.Bounder(0, 26),
                           max_evaluations=5000,
                           num_selected=20,
                           mutation_rate=1.0,
@@ -51,11 +50,14 @@ def main(do_plot=True, prng=None):
         for p in final_pop:
             x.append(p.candidate[0])
             y.append(math.sin(p.candidate[0]))
-        pylab.scatter(x, y)
+        t = [(i / 1000.0) * 26.0 for i in range(1000)]
+        s = [math.sin(a) for a in t]
+        pylab.plot(t, s, color='b')
+        pylab.scatter(x, y, color='r')
         pylab.axis([0, 26, 0, 1.1])
+        pylab.savefig('niche_example.pdf', format='pdf')
         pylab.show()
-
-    return ga
+    return ea
 
 if __name__ == '__main__':
     main()

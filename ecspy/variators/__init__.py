@@ -51,16 +51,18 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from crossovers import crossover
 from crossovers import blend_crossover
 from crossovers import differential_crossover
 from crossovers import n_point_crossover
 from crossovers import simulated_binary_crossover
 from crossovers import uniform_crossover
+from mutators import mutator
 from mutators import bit_flip_mutation
 from mutators import gaussian_mutation
 from variators import default_variation
 from variators import estimation_of_distribution_variation
 
-__all__ = ['blend_crossover', 'differential_crossover', 'n_point_crossover', 'simulated_binary_crossover', 'uniform_crossover', 
-           'bit_flip_mutation', 'gaussian_mutation',
+__all__ = ['crossover', 'blend_crossover', 'differential_crossover', 'n_point_crossover', 'simulated_binary_crossover', 'uniform_crossover', 
+           'mutator', 'bit_flip_mutation', 'gaussian_mutation',
            'default_variation', 'estimation_of_distribution_variation']

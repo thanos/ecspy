@@ -15,7 +15,45 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
     
-def gaussian_mutation(random, candidates, args):
+
+def mutator(mutate):
+    """Return an ecspy mutator function based on the given function.
+    
+    This function generator takes a function that operates on only
+    one candidate to produce a mutated candidate. The generator 
+    handles the iteration over each candidate in the set of offspring.
+
+    The given function ``mutate`` must have the following signature::
+    
+        mutant = mutate(random, candidate, args)
+        
+    This function is most commonly used as a function decorator with
+    the following usage::
+    
+        @mutator
+        def mutate(random, candidate, args):
+            # Implementation of mutation
+            
+    The generated function also contains an attribute named
+    ``single_mutation`` which holds the original mutation function.
+    In this way, the original single-candidate function can be
+    retrieved if necessary.
+    
+    """
+    def ecspy_mutator(random, candidates, args):
+        mutants = list(candidates)
+        for i, cs in enumerate(mutants):
+            mutants[i] = mutate(random, cs, args)
+        return mutants
+    ecspy_mutator.single_mutation = mutate
+    ecspy_mutator.__name__ = mutate.__name__
+    ecspy_mutator.__dict__ = mutate.__dict__
+    ecspy_mutator.__doc__ = mutate.__doc__
+    return ecspy_mutator
+    
+
+@mutator    
+def gaussian_mutation(random, candidate, args):
     """Return the mutants created by Gaussian mutation on the candidates.
 
     This function assumes that the candidate solutions are indexable
@@ -25,7 +63,7 @@ def gaussian_mutation(random, candidates, args):
 
     .. Arguments:
        random -- the random number generator object
-       candidates -- the candidate solutions
+       candidate -- the candidate solution
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -39,28 +77,25 @@ def gaussian_mutation(random, candidates, args):
     mut_rate = args.setdefault('mutation_rate', 0.1)
     mean = args.setdefault('mean', 0.0)
     stdev = args.setdefault('stdev', 1.0)
-    bounder = args['_evolutionary_computation'].bounder
-        
-    cs_copy = list(candidates)
-    for i, cs in enumerate(cs_copy):
-        for j, c in enumerate(cs):
-            if random.random() < mut_rate:
-                c += random.gauss(mean, stdev)
-                cs_copy[i][j] = c
-        cs_copy[i] = bounder(cs_copy[i], args)
-    return cs_copy
+    bounder = args['_ec'].bounder
+    for i, c in enumerate(candidate):
+        if random.random() < mut_rate:
+            candidate[i] += random.gauss(mean, stdev)
+    candidate = bounder(candidate, args)
+    return candidate
 
 
-def bit_flip_mutation(random, candidates, args):
+@mutator
+def bit_flip_mutation(random, candidate, args):
     """Return the mutants produced by bit-flip mutation on the candidates.
 
-    This function assumes that the candidate solutions are binary values.
-    It performs bit-flip mutation. If a candidate solution contains
+    This function assumes that the candidate solution is made of binary 
+    values. It performs bit-flip mutation. If a candidate solution contains
     non-binary values, this function leaves it unchanged.
 
     .. Arguments:
        random -- the random number generator object
-       candidates -- the candidate solutions
+       candidate -- the candidate solution
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -71,10 +106,48 @@ def bit_flip_mutation(random, candidates, args):
     
     """
     rate = args.setdefault('mutation_rate', 0.1)
-    cs_copy = list(candidates)
-    for i, cs in enumerate(cs_copy):
-        if len(cs) == len([x for x in cs if x in [0, 1]]):
-            for j, c in enumerate(cs):
-                if random.random() < rate:
-                    cs_copy[i][j] = (c + 1) % 2
-    return cs_copy
+    if len(candidate) == len([x for x in candidate if x in [0, 1]]):
+        for i, c in enumerate(candidate):
+            if random.random() < rate:
+                candidate[i] = (c + 1) % 2
+    return candidate
+
+    
+@mutator
+def nonuniform_mutation(random, candidate, args):
+    bounder = args['_ec'].bounder
+    num_gens = args['_ec'].num_generations
+    max_gens = args['max_generations']
+    strength = args['mutation_strength']
+    exponent = (1.0 - num_gens / max_gens) ^ strength
+    mutant = []
+    for c, lo, hi in zip(candidate, bounder.lower_bound, bounder.upper_bound):
+        if random.random() <= 0.5:
+            new_value = c + (hi - c) * (1.0 - random.random() ^ exponent)
+        else:
+            new_value = c - (c - lo) * (1.0 - random.random() ^ exponent)
+        mutant.append(new_value)
+    return mutant
+
+    
+@mutator
+def mptm_mutation(random, candidate, args):
+    bounder = args['_ec'].bounder
+    strength = args['mutation_strength']
+    mutant = []
+    for c, lo, hi in zip(candidate, bounder.lower_bound, bounder.upper_bound):
+        t = (c - lo) / (hi - c)
+        r = random.random()
+        if r < t:
+            t_hat = t - t * ((t - r) / t) ^ strength
+        elif r == t:
+            t_hat = t
+        else:
+            t_hat = t + (1 - t) * ((r - t) / (1 - t)) ^ strength
+        mutant.append((1 - t_hat) * lo + t_hat * hi)
+    return mutant
+
+
+
+
+

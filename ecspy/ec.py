@@ -20,6 +20,7 @@
 import time
 import copy
 import logging
+import itertools
 from ecspy import selectors
 from ecspy import variators
 from ecspy import replacers
@@ -29,18 +30,18 @@ from ecspy import terminators
 from ecspy import observers
 
 
-def bounder(lower_bound=None, upper_bound=None):
+class Bounder(object):
     """Defines a basic bounding function for numeric lists.
     
-    This function returns a bounding function that bounds a 
+    This callable class acts as a function that bounds a 
     numeric list between the lower and upper bounds specified.
     These bounds can be single values or lists of values. For
     instance, if the candidate is composed of five values, each
     of which should be bounded between 0 and 1, you can say
-    ``bounder([0, 0, 0, 0, 0], [1, 1, 1, 1, 1])`` or just
-    ``bounder(0, 1)``. If either the ``lower_bound`` or 
-    ``upper_bound`` argument is ``None``, the bounding function 
-    leaves the candidate unchanged (which is the default behavior).
+    ``Bounder([0, 0, 0, 0, 0], [1, 1, 1, 1, 1])`` or just
+    ``Bounder(0, 1)``. If either the ``lower_bound`` or 
+    ``upper_bound`` argument is ``None``, the Bounder leaves 
+    the candidate unchanged (which is the default behavior).
     
     In general, a user-specified bounding function must accept
     two arguments: the candidate to be bounded and the keyword
@@ -49,28 +50,44 @@ def bounder(lower_bound=None, upper_bound=None):
     This function should return the resulting candidate after 
     bounding has been performed.
     
+    Public Attributes:
+    
+    - *lower_bound* -- the lower bound for a candidate
+    - *upper_bound* -- the upper bound for a candidate
+    
     """
-    def bounding_function(candidate, args):
+    def __init__(self, lower_bound=None, upper_bound=None):
+        self.lower_bound = lower_bound
+        self.upper_bound = upper_bound
+        if self.lower_bound is not None and self.upper_bound is not None:
+            try:
+                iter(self.lower_bound)
+            except TypeError:
+                self.lower_bound = itertools.repeat(self.lower_bound)
+            try:
+                iter(self.upper_bound)
+            except TypeError:
+                self.upper_bound = itertools.repeat(self.upper_bound)
+            
+
+    def __call__(self, candidate, args):
         # The default would be to leave the candidate alone
         # unless both bounds are specified.
-        if lower_bound is None or upper_bound is None:
+        if self.lower_bound is None or self.upper_bound is None:
             return candidate
         else:
             try:
-                iter(lower_bound)
-                lower = lower_bound
+                iter(self.lower_bound)
             except TypeError:
-                lower = [lower_bound] * len(candidate)
+                self.lower_bound = [self.lower_bound] * len(candidate)
             try:
-                iter(upper_bound)
-                upper = upper_bound
+                iter(self.upper_bound)
             except TypeError:
-                upper = [upper_bound] * len(candidate)
+                self.upper_bound = [self.upper_bound] * len(candidate)
             bounded_candidate = []
-            for c, lo, hi in zip(candidate, lower, upper):
+            for c, lo, hi in zip(candidate, self.lower_bound, self.upper_bound):
                 bounded_candidate.append(max(min(c, hi), lo))
             return bounded_candidate
-    return bounding_function
 
 
 class Individual(object):
@@ -145,7 +162,18 @@ class Individual(object):
     def __ne__(self, other):
         return self.candidate != other.candidate
 
-        
+
+class EvolutionExit(Exception):
+    """An exception that may be raised and caught to end the evolution.
+    
+    This is an empty exception class that can be raised by the user
+    at any point in the code and caught outside of the ``evolve``
+    method. 
+    
+    """
+    pass
+
+
 class EvolutionaryComputation(object):
     """Represents a basic evolutionary computation.
     
@@ -172,10 +200,12 @@ class EvolutionaryComputation(object):
     - *generator* -- the generator function passed to ``evolve``
     - *evaluator* -- the evaluator function passed to ``evolve``
     - *bounder* -- the bounding function passed to ``evolve``
+    - *maximize* -- Boolean stating use of maximization passed to ``evolve``
     - *archive* -- the archive of individuals
     - *population* -- the population of individuals
     - *num_evaluations* -- the number of fitness evaluations used
     - *num_generations* -- the number of generations processed
+    - *logger* -- the logger to use (defaults to the logger 'ecspy.ec')
     
     Note that the attributes above are, in general, not intended to 
     be modified by the user. (They are intended for the user to query
@@ -184,12 +214,22 @@ class EvolutionaryComputation(object):
     within other functions. This is possible but should be the 
     exception, rather than the rule.
     
+    If logging is desired, the following basic code segment can be 
+    used in the ``main`` or calling scope to accomplish that::
+    
+        logger = logging.getLogger('ecspy.ec')
+        logger.setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler('ec.log', mode='w')
+        file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    
     Protected Attributes:
     
     - *_random* -- the random number generator object
     - *_kwargs* -- the dictionary of keyword arguments initialized
       from the *args* parameter in the *evolve* method
-    - *_logger* -- the logger to use (defaults to the logger 'ecspy.ec')
     
     Public Methods:
     
@@ -198,7 +238,6 @@ class EvolutionaryComputation(object):
     
     """
     def __init__(self, random):
-        self._random = random
         self.selector = selectors.default_selection
         self.variator = variators.default_variation
         self.replacer = replacers.default_replacement
@@ -210,34 +249,36 @@ class EvolutionaryComputation(object):
         self.generator = None
         self.evaluator = None
         self.bounder = None
+        self.maximize = True
         self.archive = None
         self.population = None
         self.num_evaluations = 0
         self.num_generations = 0
+        self.logger = logging.getLogger('ecspy.ec')
+        self._random = random
         self._kwargs = dict()
-        self._logger = logging.getLogger('ecspy.ec')
         
     def _should_terminate(self, pop, ng, ne):
         terminate = False
         fname = ''
         try:
             for clause in self.terminator:
-                self._logger.debug('termination test using %s at generation %d and evaluation %d' % (clause.__name__, ng, ne))
+                self.logger.debug('termination test using %s at generation %d and evaluation %d' % (clause.__name__, ng, ne))
                 terminate = terminate or clause(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
                 if terminate:
                     fname = clause.__name__
                     break
         except TypeError:
-            self._logger.debug('termination test using %s at generation %d and evaluation %d' % (self.terminator.__name__, ng, ne))
+            self.logger.debug('termination test using %s at generation %d and evaluation %d' % (self.terminator.__name__, ng, ne))
             terminate = self.terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
             fname = self.terminator.__name__
         if terminate:
             self.termination_cause = fname
-            self._logger.debug('termination from %s at generation %d and evaluation %d' % (self.termination_cause, ng, ne))
+            self.logger.debug('termination from %s at generation %d and evaluation %d' % (self.termination_cause, ng, ne))
         return terminate
         
     
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=bounder(), **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=Bounder(), **args):
         """Perform the evolution.
         
         This function creates a population and then runs it through a series
@@ -254,25 +295,24 @@ class EvolutionaryComputation(object):
         - *seeds* -- an iterable collection of candidate solutions to include
           in the initial population (default [])
         - *maximize* -- Boolean value stating use of maximization (default True)
-        - *bounder* -- a function used to bound candidate solutions (default bounder())
+        - *bounder* -- a function used to bound candidate solutions (default Bounder())
         - *args* -- a dictionary of keyword arguments
 
         Note that the *_kwargs* class variable will be initialized to the args 
         parameter here. It will also be modified to include the following 'built-in' 
         keyword arguments:
         
-        - *_evolutionary_computation* -- the evolutionary computation (this object)
-        - *_maximize* -- Boolean determining whether maximization is being performed
+        - *_ec* -- the evolutionary computation (this object)
         
         """
         self._kwargs = args
-        self._kwargs.setdefault('_evolutionary_computation', self)
-        self._kwargs.setdefault('_maximize', maximize)
+        self._kwargs['_ec'] = self
         
         self.termination_cause = None
         self.generator = generator
         self.evaluator = evaluator
         self.bounder = bounder
+        self.maximize = maximize
         self.population = []
         self.archive = []
         
@@ -284,59 +324,56 @@ class EvolutionaryComputation(object):
         initial_cs = list(seeds)
         num_generated = max(pop_size - len(seeds), 0)
         i = 0
-        self._logger.debug('generating initial population')
+        self.logger.debug('generating initial population')
         while i < num_generated:
             cs = generator(random=self._random, args=self._kwargs)
             if cs not in initial_cs:
                 initial_cs.append(cs)
                 i += 1
-        self._logger.debug('evaluating initial population')
+        self.logger.debug('evaluating initial population')
         initial_fit = evaluator(candidates=initial_cs, args=self._kwargs)
         
         for cs, fit in zip(initial_cs, initial_fit):
             ind = Individual(cs, maximize=maximize)
             ind.fitness = fit
             self.population.append(ind)
-        self._logger.debug('population size is now %d' % len(self.population))
+        self.logger.debug('population size is now %d' % len(self.population))
         
         self.num_evaluations = len(initial_fit)
         self.num_generations = 0
         
-        self._logger.debug('archiving initial population')
-        pop_copy = list(self.population)
-        arc_copy = list(self.archive)
-        self.archive = self.archiver(random=self._random, population=pop_copy, archive=arc_copy, args=self._kwargs)
-        self._logger.debug('archive size is now %d' % len(self.archive))
-        self._logger.debug('population size is now %d' % len(self.population))
+        self.logger.debug('archiving initial population')
+        self.archive = self.archiver(random=self._random, population=list(self.population), archive=list(self.archive), args=self._kwargs)
+        self.logger.debug('archive size is now %d' % len(self.archive))
+        self.logger.debug('population size is now %d' % len(self.population))
                 
         if isinstance(self.observer, (list, tuple)):
             for obs in self.observer:
-                self._logger.debug('observation using %s at generation %d and evaluation %d' % (obs.__name__, self.num_generations, self.num_evaluations))
-                obs(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
+                self.logger.debug('observation using %s at generation %d and evaluation %d' % (obs.__name__, self.num_generations, self.num_evaluations))
+                obs(population=list(self.population), num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
         else:
-            self._logger.debug('observation using %s at generation %d and evaluation %d' % (self.observer.__name__, self.num_generations, self.num_evaluations))
-            self.observer(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
+            self.logger.debug('observation using %s at generation %d and evaluation %d' % (self.observer.__name__, self.num_generations, self.num_evaluations))
+            self.observer(population=list(self.population), num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
         
-        while not self._should_terminate(self.population, self.num_generations, self.num_evaluations):
+        while not self._should_terminate(list(self.population), self.num_generations, self.num_evaluations):
             # Select individuals.
-            self._logger.debug('selection using %s at generation %d and evaluation %d' % (self.selector.__name__, self.num_generations, self.num_evaluations))
-            pop_copy = list(self.population)
-            parents = self.selector(random=self._random, population=pop_copy, args=self._kwargs)
-            self._logger.debug('selected %d candidates' % len(parents))
+            self.logger.debug('selection using %s at generation %d and evaluation %d' % (self.selector.__name__, self.num_generations, self.num_evaluations))
+            parents = self.selector(random=self._random, population=list(self.population), args=self._kwargs)
+            self.logger.debug('selected %d candidates' % len(parents))
             parent_cs = [copy.deepcopy(i.candidate) for i in parents]
             offspring_cs = parent_cs
             
             if isinstance(self.variator, (list, tuple)):
                 for op in self.variator:
-                    self._logger.debug('variation using %s at generation %d and evaluation %d' % (op.__name__, self.num_generations, self.num_evaluations))
+                    self.logger.debug('variation using %s at generation %d and evaluation %d' % (op.__name__, self.num_generations, self.num_evaluations))
                     offspring_cs = op(random=self._random, candidates=offspring_cs, args=self._kwargs)
             else:
-                self._logger.debug('variation using %s at generation %d and evaluation %d' % (self.variator.__name__, self.num_generations, self.num_evaluations))
+                self.logger.debug('variation using %s at generation %d and evaluation %d' % (self.variator.__name__, self.num_generations, self.num_evaluations))
                 offspring_cs = self.variator(random=self._random, candidates=offspring_cs, args=self._kwargs)
-            self._logger.debug('created %d offspring' % len(offspring_cs))
+            self.logger.debug('created %d offspring' % len(offspring_cs))
             
             # Evaluate offspring.
-            self._logger.debug('evaluation using %s at generation %d and evaluation %d' % (evaluator.__name__, self.num_generations, self.num_evaluations))
+            self.logger.debug('evaluation using %s at generation %d and evaluation %d' % (evaluator.__name__, self.num_generations, self.num_evaluations))
             offspring_fit = evaluator(candidates=offspring_cs, args=self._kwargs)
             offspring = []
             for cs, fit in zip(offspring_cs, offspring_fit):
@@ -346,31 +383,29 @@ class EvolutionaryComputation(object):
             self.num_evaluations += len(offspring_fit)        
 
             # Replace individuals.
-            self._logger.debug('replacement using %s at generation %d and evaluation %d' % (self.replacer.__name__, self.num_generations, self.num_evaluations))
-            pop_copy = self.replacer(random=self._random, population=pop_copy, parents=parents, offspring=offspring, args=self._kwargs)
-            self._logger.debug('population size is now %d' % len(pop_copy))
+            self.logger.debug('replacement using %s at generation %d and evaluation %d' % (self.replacer.__name__, self.num_generations, self.num_evaluations))
+            self.population = self.replacer(random=self._random, population=list(self.population), parents=parents, offspring=offspring, args=self._kwargs)
+            self.logger.debug('population size is now %d' % len(self.population))
             
             # Migrate individuals.
-            self._logger.debug('migration using %s at generation %d and evaluation %d' % (self.migrator.__name__, self.num_generations, self.num_evaluations))
-            self.population = self.migrator(random=self._random, population=pop_copy, args=self._kwargs)
-            self._logger.debug('population size is now %d' % len(self.population))
+            self.logger.debug('migration using %s at generation %d and evaluation %d' % (self.migrator.__name__, self.num_generations, self.num_evaluations))
+            self.population = self.migrator(random=self._random, population=list(self.population), args=self._kwargs)
+            self.logger.debug('population size is now %d' % len(self.population))
             
             # Archive individuals.
-            self._logger.debug('archival using %s at generation %d and evaluation %d' % (self.archiver.__name__, self.num_generations, self.num_evaluations))
-            pop_copy = list(self.population)
-            arc_copy = list(self.archive)
-            self.archive = self.archiver(random=self._random, archive=arc_copy, population=pop_copy, args=self._kwargs)
-            self._logger.debug('archive size is now %d' % len(self.archive))
-            self._logger.debug('population size is now %d' % len(self.population))
+            self.logger.debug('archival using %s at generation %d and evaluation %d' % (self.archiver.__name__, self.num_generations, self.num_evaluations))
+            self.archive = self.archiver(random=self._random, archive=list(self.archive), population=list(self.population), args=self._kwargs)
+            self.logger.debug('archive size is now %d' % len(self.archive))
+            self.logger.debug('population size is now %d' % len(self.population))
             
             self.num_generations += 1
             if isinstance(self.observer, (list, tuple)):
                 for obs in self.observer:
-                    self._logger.debug('observation using %s at generation %d and evaluation %d' % (obs.__name__, self.num_generations, self.num_evaluations))
-                    obs(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
+                    self.logger.debug('observation using %s at generation %d and evaluation %d' % (obs.__name__, self.num_generations, self.num_evaluations))
+                    obs(population=list(self.population), num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
             else:
-                self._logger.debug('observation using %s at generation %d and evaluation %d' % (self.observer.__name__, self.num_generations, self.num_evaluations))
-                self.observer(population=self.population, num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
+                self.logger.debug('observation using %s at generation %d and evaluation %d' % (self.observer.__name__, self.num_generations, self.num_evaluations))
+                self.observer(population=list(self.population), num_generations=self.num_generations, num_evaluations=self.num_evaluations, args=self._kwargs)
         return self.population
         
 
@@ -399,7 +434,7 @@ class GA(EvolutionaryComputation):
         self.variator = [variators.n_point_crossover, variators.bit_flip_mutation]
         self.replacer = replacers.generational_replacement
         
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=bounder(), **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=Bounder(), **args):
         args.setdefault('num_selected', pop_size)
         return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
 
@@ -450,7 +485,7 @@ class EDA(EvolutionaryComputation):
         self.variator = variators.estimation_of_distribution_variation
         self.replacer = replacers.generational_replacement
         
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=bounder(), **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=Bounder(), **args):
         args.setdefault('num_selected', pop_size // 2)
         args.setdefault('num_offspring', pop_size)
         return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
@@ -484,7 +519,7 @@ class DEA(EvolutionaryComputation):
         self.variator = [variators.differential_crossover, variators.gaussian_mutation]
         self.replacer = replacers.steady_state_replacement
         
-    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=bounder(), **args):
+    def evolve(self, generator, evaluator, pop_size=100, seeds=[], maximize=True, bounder=Bounder(), **args):
         args.setdefault('num_selected', 2)
         return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)
 
@@ -497,6 +532,6 @@ class SA(EvolutionaryComputation):
         self.variator = variators.gaussian_mutation
         self.replacer = replacers.simulated_annealing_replacement
     
-    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, bounder=bounder(), **args):
+    def evolve(self, generator, evaluator, pop_size=1, seeds=[], maximize=True, bounder=Bounder(), **args):
         pop_size=1
         return EvolutionaryComputation.evolve(self, generator, evaluator, pop_size, seeds, maximize, bounder, **args)

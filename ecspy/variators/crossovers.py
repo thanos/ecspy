@@ -19,7 +19,58 @@ import math
 import copy
 
 
-def n_point_crossover(random, candidates, args):
+def crossover(cross):
+    """Return an ecspy crossover function based on the given function.
+    
+    This function generator takes a function that operates on only
+    two parent candidates to produce an iterable list of offspring
+    (typically two). The generator handles the pairing of selected 
+    parents and collecting of all offspring.
+
+    The generated function chooses every odd candidate as a 'mom' and 
+    every even as a 'dad' (discounting the last candidate if there is
+    and odd number). For each mom-dad pair, offspring are produced via 
+    the `cross` function. 
+    
+    The given function ``cross`` must have the following signature::
+    
+        offspring = cross(random, mom, dad, args)
+    
+    This function is most commonly used as a function decorator with 
+    the following usage::
+    
+        @crossover
+        def cross(random, mom, dad, args):
+            # Implementation of paired crossing
+    
+    The generated function also contains an attribute named
+    ``single_crossover`` which holds the original crossover function.
+    In this way, the original single-candidate function can be
+    retrieved if necessary.
+    
+    """
+    def ecspy_crossover(random, candidates, args):
+        cand = list(candidates)
+        if len(cand) % 2 == 1:
+            cand = cand[:-1]
+        moms = cand[::2]
+        dads = cand[1::2]
+        children = []
+        for i, (mom, dad) in enumerate(zip(moms, dads)):
+            cross.index = i
+            offspring = cross(random, mom, dad, args)
+            for o in offspring:
+                children.append(o)
+        return children
+    ecspy_crossover.single_crossover = cross
+    ecspy_crossover.__name__ = cross.__name__
+    ecspy_crossover.__dict__ = cross.__dict__
+    ecspy_crossover.__doc__ = cross.__doc__
+    return ecspy_crossover
+
+    
+@crossover
+def n_point_crossover(random, mom, dad, args):
     """Return the offspring of n-point crossover on the candidates.
 
     This function assumes that the candidate solutions are sliceable.
@@ -28,7 +79,8 @@ def n_point_crossover(random, candidates, args):
 
     .. Arguments:
        random -- the random number generator object
-       candidates -- the candidate solutions
+       mom -- the first parent candidate
+       dad -- the second parent candidate
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -40,44 +92,45 @@ def n_point_crossover(random, candidates, args):
     """
     crossover_rate = args.setdefault('crossover_rate', 1.0)
     num_crossover_points = args.setdefault('num_crossover_points', 1)
-    cand = list(candidates)
-    if len(cand) % 2 == 1:
-        cand = cand[:-1]
-    random.shuffle(cand)
-    moms = cand[::2]
-    dads = cand[1::2]
     children = []
-    for mom, dad in zip(moms, dads):
-        if random.random() < crossover_rate:
-            bro = list(mom)
-            sis = list(dad)
-            num_cuts = min(len(mom)-1, num_crossover_points)
-            cut_points = random.sample(range(1, len(mom)), num_cuts)
-            cut_points.sort()
-            for p in cut_points:
-                bro[p:] = dad[p:]
-                sis[:p] = mom[:p]
-            children.append(bro)
-            children.append(sis)
-        else:
-            children.append(mom)
-            children.append(dad)            
+    if random.random() < crossover_rate:
+        num_cuts = min(len(mom)-1, num_crossover_points)
+        cut_points = random.sample(range(1, len(mom)), num_cuts)
+        cut_points.sort()
+        bro = []
+        sis = []
+        normal = True
+        for i, (m, d) in enumerate(zip(mom, dad)):
+            if i in cut_points:
+                normal = not normal
+            if normal:
+                bro.append(d)
+                sis.append(m)
+            else:
+                bro.append(m)
+                sis.append(d)
+        children.append(bro)
+        children.append(sis)
+    else:
+        children.append(mom)
+        children.append(dad)
     return children
 
-
-def uniform_crossover(random, candidates, args):
+    
+@crossover
+def uniform_crossover(random, mom, dad, args):
     """Return the offspring of uniform crossover on the candidates.
 
     This function assumes that the candidate solutions are iterable.
-    It chooses every odd candidate as a 'mom' and every even as a 'dad'.
-    For each mom-dad pair, two offspring are produced. For each element
-    of the parents, a biased coin is flipped to determine whether the 
-    first offspring gets the 'mom' or the 'dad' element. An optional
-    keyword argument in args, pux_bias, determines the bias.
+    For each element of the parents, a biased coin is flipped to 
+    determine whether the first offspring gets the 'mom' or the 
+    'dad' element. An optional keyword argument in args, ``pux_bias``, 
+    determines the bias.
 
     .. Arguments:
        random -- the random number generator object
-       candidates -- the candidate solutions
+       mom -- the first parent candidate
+       dad -- the second parent candidate
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -90,33 +143,27 @@ def uniform_crossover(random, candidates, args):
     """
     pux_bias = args.setdefault('pux_bias', 0.5)
     crossover_rate = args.setdefault('crossover_rate', 1.0)
-    cand = list(candidates)
-    if len(cand) % 2 == 1:
-        cand = cand[:-1]
-    random.shuffle(cand)
-    moms = cand[::2]
-    dads = cand[1::2]
     children = []
-    for mom, dad in zip(moms, dads):
-        if random.random() < crossover_rate:
-            bro = []
-            sis = []
-            for m, d in zip(mom, dad):
-                if random.random() < pux_bias:
-                    bro.append(m)
-                    sis.append(d)
-                else:
-                    bro.append(d)
-                    sis.append(m)
-            children.append(bro)
-            children.append(sis)
-        else:
-            children.append(mom)
-            children.append(dad)
+    if random.random() < crossover_rate:
+        bro = []
+        sis = []
+        for m, d in zip(mom, dad):
+            if random.random() < pux_bias:
+                bro.append(m)
+                sis.append(d)
+            else:
+                bro.append(d)
+                sis.append(m)
+        children.append(bro)
+        children.append(sis)
+    else:
+        children.append(mom)
+        children.append(dad)
     return children
 
     
-def blend_crossover(random, candidates, args):
+@crossover
+def blend_crossover(random, mom, dad, args):
     """Return the offspring of blend crossover on the candidates.
 
     This function assumes that the candidate solutions are iterable
@@ -128,7 +175,8 @@ def blend_crossover(random, candidates, args):
 
     .. Arguments:
        random -- the random number generator object
-       candidates -- the candidate solutions
+       mom -- the first parent candidate
+       dad -- the second parent candidate
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
@@ -140,33 +188,26 @@ def blend_crossover(random, candidates, args):
     """
     blx_alpha = args.setdefault('blx_alpha', 0.1)
     crossover_rate = args.setdefault('crossover_rate', 1.0)
-    bounder = args['_evolutionary_computation'].bounder
-
-    cand = list(candidates)
-    if len(cand) % 2 == 1:
-        cand = cand[:-1]
-    random.shuffle(cand)
-    moms = cand[::2]
-    dads = cand[1::2]
+    bounder = args['_ec'].bounder
     children = []
-    for mom, dad in zip(moms, dads):
-        if random.random() < crossover_rate:
-            bro = []
-            sis = []
-            for index, (m, d) in enumerate(zip(mom, dad)):
-                smallest = min(m, d)
-                largest = max(m, d)
-                delta = blx_alpha * (largest - smallest)
-                bro.append(smallest - delta + random.random() * (largest - smallest + 2 * delta))
-                sis.append(smallest - delta + random.random() * (largest - smallest + 2 * delta))
-            bro = bounder(bro, args)
-            sis = bounder(sis, args)
-            children.append(bro)
-            children.append(sis)
-        else:
-            children.append(mom)
-            children.append(dad)
+    if random.random() < crossover_rate:
+        bro = []
+        sis = []
+        for index, (m, d) in enumerate(zip(mom, dad)):
+            smallest = min(m, d)
+            largest = max(m, d)
+            delta = blx_alpha * (largest - smallest)
+            bro.append(smallest - delta + random.random() * (largest - smallest + 2 * delta))
+            sis.append(smallest - delta + random.random() * (largest - smallest + 2 * delta))
+        bro = bounder(bro, args)
+        sis = bounder(sis, args)
+        children.append(bro)
+        children.append(sis)
+    else:
+        children.append(mom)
+        children.append(dad)
     return children
+    
     
 def differential_crossover(random, candidates, args):
     """Return the offspring of differential crossover on the candidates.
@@ -193,7 +234,7 @@ def differential_crossover(random, candidates, args):
     """
     differential_phi = args.setdefault('differential_phi', 0.1)
     crossover_rate = args.setdefault('crossover_rate', 1.0)
-    bounder = args['_evolutionary_computation'].bounder
+    bounder = args['_ec'].bounder
         
     cand = list(candidates)
     if len(cand) % 2 == 1:
@@ -202,7 +243,7 @@ def differential_crossover(random, candidates, args):
     # Since we don't have fitness information in the candidates, we need 
     # to make a dictionary containing the candidate and its corresponding 
     # individual in the population.
-    population = args['_evolutionary_computation'].population[:]
+    population = args['_ec'].population[:]
     lookup = dict(zip([tuple(p.candidate) for p in population], population))
     
     moms = cand[::2]
@@ -230,7 +271,9 @@ def differential_crossover(random, candidates, args):
             children.append(dad)
     return children
     
-def simulated_binary_crossover(random, candidates, args):
+
+@crossover
+def simulated_binary_crossover(random, mom, dad, args):
     """Return the offspring of simulated binary crossover on the candidates.
     
     This function performs simulated binary crosssover, following the 
@@ -239,18 +282,13 @@ def simulated_binary_crossover(random, candidates, args):
  
     .. Arguments:
        random -- the random number generator object
-       candidates -- the candidate solutions
+       mom -- the first parent candidate
+       dad -- the second parent candidate
        args -- a dictionary of keyword arguments
 
     Optional keyword arguments in args:
     
     - *sbx_etac* -- the non-negative distribution index (default 10)
-    - *lower_bound* -- the lower bounds of the chromosome elements (default 0)
-    - *upper_bound* -- the upper bounds of the chromosome elements (default 1)
-    
-    The lower and upper bounds can either be single values, which will
-    be applied to all elements of a chromosome, or lists of values of 
-    the same length as the chromosome.
     
     A small value of the `sbx_etac` optional argument allows solutions 
     far away from parents to be created as children solutions, while a 
@@ -258,58 +296,66 @@ def simulated_binary_crossover(random, candidates, args):
     children solutions.
     
     """
-
     etac = args.setdefault('sbx_etac', 10)
-    lower_bound = args.setdefault('lower_bound', 0)
-    upper_bound = args.setdefault('upper_bound', 1)
+    bounder = args['_bounder']
+    bro = []
+    sis = []
+    for m, d, lb, ub in zip(mom, dad, bounder.lower_bound, bounder.upper_bound):
+        try:
+            if m > d:
+                m, d = d, m
+            beta = 1.0 + 2 * min(m - lb, ub - d) / float(d - m)
+            alpha = 2.0 - 1.0 / beta**(eta_c + 1.0)
+            u = random.random() 
+            if u <= (1.0 / alpha):
+                beta_q = (u * alpha)**(1.0 / float(eta_c + 1.0))
+            else:
+                beta_q = (1.0 / (2.0 - u * alpha))**(1.0 / float(eta_c + 1.0))
+            bro_val = 0.5 * ((m + d) - beta_q * (d - m))
+            bro_val = max(min(bro_val, ub), lb)        
+            sis_val = 0.5 * ((m + d) + beta_q * (d - m))
+            sis_val = max(min(sis_val, ub), lb)
+            if random.random() > 0.5:
+                bro_val, sis_val = sis_val, bro_val
+            bro.append(bro_val)
+            sis.append(sis_val)
+        except ZeroDivisionError:
+            sis.append(m)
+            bro.append(d)
+    return [bro, sis]
+
+
+@crossover
+def laplace_crossover(random, mom, dad, args):
+    a = args.setdefault('laplace_a', 1)
+    b = args.setdefault('laplace_b', 0)
+    bro = []
+    sis = []
+    for m, d in zip(mom, dad):
+        u = random.random()
+        if random.random() <= 0.5:
+            beta = a - b * math.log(u)
+        else:
+            beta = a + b * math.log(u)
+        bro.append(m + beta * math.abs(m - d))
+        sis.append(d + beta * math.abs(m - d))
+    return [bro, sis]
     
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
-        
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
-        
-    cand = list(candidates)
-    if len(cand) % 2 == 1:
-        cand = cand[:-1]
-    random.shuffle(cand)
-    moms = cand[::2]
-    dads = cand[1::2]
-        
-    children = []
-    for mom, dad in zip(moms, dads): 
-        bro = []
-        sis = []
-        for index, (m, d) in enumerate(zip(mom, dad)):
-            try:
-                lb, ub = lower_bound[index], upper_bound[index]
-                if m > d:
-                    m, d = d, m
-                beta = 1.0 + 2 * min(m - lb, ub - d) / float(d - m)
-                alpha = 2.0 - 1.0 / beta**(eta_c + 1.0)
-                u = random.random() 
-                if u <= (1.0 / alpha):
-                    beta_q = (u * alpha)**(1.0 / float(eta_c + 1.0))
-                else:
-                    beta_q = (1.0 / (2.0 - u * alpha))**(1.0 / float(eta_c + 1.0))
-                bro_val = 0.5 * ((m + d) - beta_q * (d - m))
-                bro_val = max(min(bro_val, ub), lb)        
-                sis_val = 0.5 * ((m + d) + beta_q * (d - m))
-                sis_val = max(min(sis_val, ub), lb)
-                if random.random() > 0.5:
-                    bro_val, sis_val = sis_val, bro_val
-                bro.append(bro_val)
-                sis.append(sis_val)
-            except ZeroDivisionError:
-                sis.append(m)
-                bro.append(d)
-        children.append(bro)
-        children.append(sis)
-    return children
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
