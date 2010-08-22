@@ -11,52 +11,40 @@ def main(do_plot=True, prng=None):
         prng = Random()
         prng.seed(time()) 
     
-    problem = benchmarks.Ackley(2)
+    problem = benchmarks.Binary(benchmarks.Schwefel(2), dimension_bits=30)
     
-    def generate_binary(random, args):
-        bits = args.get('num_bits', 8)
-        return [random.choice([0, 1]) for i in xrange(bits)]
-            
-    def evaluate_binary(candidates, args):
-        bits = args.get('num_bits', 8)
-        real_candidates = []
-        for cand in candidates:
-            real_values = []
-            for half, lb, ub in zip([cand[:bits//2], cand[bits//2:]], problem.bounder.lower_bound, problem.bounder.upper_bound):
-                num = 0
-                exp = len(half) - 1
-                for h in half:
-                    num += h * (2**exp)
-                    exp -= 1
-                num = num / float(2**(len(half)) - 1)
-                real_values.append(num * (ub - lb) + lb)
-            real_candidates.append(real_values)
-        return problem.evaluator(real_candidates, args)
-
     stat_file = open('ga_statistics.csv', 'w')
     ind_file = open('ga_individuals.csv', 'w')
 
-    ga = ec.GA(prng)
-    ga.observer = observers.file_observer
-    ga.terminator = terminators.evaluation_termination
-    final_pop = ga.evolve(generator=generate_binary,
-                          evaluator=evaluate_binary,
+    ea = ec.GA(prng)
+    ea.observer = observers.file_observer
+    ea.terminator = terminators.evaluation_termination
+    final_pop = ea.evolve(generator=problem.generator,
+                          evaluator=problem.evaluator,
                           pop_size=100,
                           maximize=problem.maximize,
+                          bounder=problem.bounder,
                           max_evaluations=30000, 
                           statistics_file=stat_file,
                           individuals_file=ind_file,
-                          num_elites=1,
-                          num_bits=20)
+                          num_elites=1)
     stat_file.close()
     ind_file.close()
-    best = max(final_pop)
-    print('GA Example (Ackley) Best Solution: \n%s' % str(best))
+    
         
     if do_plot:
+        best = max(final_pop)
+        print('%s Example (%s) Best Solution: \n%s' % (ea.__class__.__name__, problem.__class__.__name__, str(best)))
+        realbest = problem.binary_to_real(best.candidate)
+        realfit = best.fitness
+        print('Converted as --> %s : %f' % (str(realbest), realfit))
+        
         import itertools
         import pylab
         import mpl_toolkits.mplot3d.axes3d as axes3d
+        from ecspy import analysis
+        
+        # Create the points using the original Ackley function.
         num_points = 40
         points = []
         for lb, ub in zip(problem.bounder.lower_bound, problem.bounder.upper_bound):
@@ -67,18 +55,20 @@ def main(do_plot=True, prng=None):
         for p in points:
             x.append(p[0])
             y.append(p[1])
-        z = problem.evaluator([[a, b] for a, b in zip(x, y)], {})
+        z = problem.benchmark.evaluator([[a, b] for a, b in zip(x, y)], {})
+        
         fig = pylab.figure()
         ax = axes3d.Axes3D(fig)
         ax.scatter3D(x, y, z)
-        ax.scatter3D([best.candidate[0]], [best.candidate[1]], [best.fitness], color='r')
-        ax.scatter3D([problem.global_optimum[0]], [problem.global_optimum[1]], problem.evaluator([problem.global_optimum], {}), color='g')
+        ax.scatter3D([realbest[0]], [realbest[1]], [realfit], color='r')
+        realopt = problem.benchmark.global_optimum
+        ax.scatter3D([realopt[0]], [realopt[1]], problem.benchmark.evaluator([realopt], {}), color='g')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Fitness')
-        pylab.savefig('ga_example_ackley.pdf', format='pdf')
-        pylab.show()
-    return ga
+        pylab.savefig('%s Example (%s).pdf' % (ea.__class__.__name__, problem.__class__.__name__), format='pdf')
+        analysis.generation_plot('ga_statistics.csv', errorbars=False)
+    return ea
             
 if __name__ == '__main__':
     main()

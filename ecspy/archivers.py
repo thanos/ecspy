@@ -128,19 +128,27 @@ def adaptive_grid_archiver(random, population, archive, args):
                 width[i] /= 2.0
         return loc
  
-    def update_grid(archive, num_grid_divisions, global_smallest, global_largest, grid_population):
-        num_objectives = min([len(a.fitness) for a in archive])
-        smallest = [min([a.fitness[o] for a in archive]) for o in range(num_objectives)] 
-        largest = [max([a.fitness[o] for a in archive]) for o in range(num_objectives)]
+    def update_grid(individual, archive, num_grid_divisions, global_smallest, global_largest, grid_population):
+        if len(archive) == 0:
+            num_objectives = len(individual.fitness)
+            smallest = [individual.fitness[o] for o in range(num_objectives)]
+            largest = [individual.fitness[o] for o in range(num_objectives)]
+        else:
+            num_objectives = min(min([len(a.fitness) for a in archive]), len(individual.fitness))
+            smallest = [min(min([a.fitness[o] for a in archive]), individual.fitness[o]) for o in range(num_objectives)] 
+            largest = [max(max([a.fitness[o] for a in archive]), individual.fitness[o]) for o in range(num_objectives)]
         for i in range(num_objectives):
-            global_smallest[i] = smallest[i] - math.fabs(0.2 * smallest[i])
-            global_largest[i] = largest[i] + math.fabs(0.2 * largest[i])
+            global_smallest[i] = smallest[i] - abs(0.2 * smallest[i])
+            global_largest[i] = largest[i] + abs(0.2 * largest[i])
         for i in range(len(grid_population)):
             grid_population[i] = 0
         for a in archive:
             loc = get_grid_location(a.fitness, num_grid_divisions, global_smallest, global_largest)
             a.grid_location = loc
-            grid_population[a.grid_location] += 1
+            grid_population[loc] += 1
+        loc = get_grid_location(individual.fitness, num_grid_divisions, global_smallest, global_largest)
+        individual.grid_location = loc
+        grid_population[loc] += 1
 
     max_archive_size = args.setdefault('max_archive_size', len(population))
     num_grid_divisions = args.setdefault('num_grid_divisions', 1)
@@ -154,6 +162,8 @@ def adaptive_grid_archiver(random, population, archive, args):
      
     new_archive = archive
     for ind in population:
+        update_grid(ind, new_archive, num_grid_divisions, adaptive_grid_archiver.global_smallest, 
+                    adaptive_grid_archiver.global_largest, adaptive_grid_archiver.grid_population)
         should_be_added = True
         for a in new_archive:
             if ind == a or a > ind:
@@ -171,7 +181,6 @@ def adaptive_grid_archiver(random, population, archive, args):
                         new_archive[i] = ind
                         join = True
                     elif ind > a:
-                        #removal_set.add(a)
                         if not a in removal_set: 
                             removal_set.append(a)
                     # Otherwise, the individual is nondominated against this archive member.
@@ -200,7 +209,4 @@ def adaptive_grid_archiver(random, population, archive, args):
                             new_archive[replaced_index] = ind
                     else:
                         new_archive.append(ind)
-            update_grid(new_archive, num_grid_divisions, adaptive_grid_archiver.global_smallest, 
-                        adaptive_grid_archiver.global_largest, adaptive_grid_archiver.grid_population)
-
     return new_archive

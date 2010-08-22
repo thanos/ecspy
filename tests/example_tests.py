@@ -7,7 +7,7 @@ from examples import custom_ec_example
 from examples import dea_example
 from examples import eda_example
 from examples import es_example
-#from examples import ga_example
+from examples import ga_example
 from examples import niche_example
 from examples import nsga_example
 from examples import paes_example
@@ -15,7 +15,7 @@ from examples import pso_example
 from examples import sa_example
 
 prng = random.Random()
-prng.seed(1000) 
+prng.seed(12345) 
 
 class Custom_EC_Test(unittest.TestCase):
     def test(self):
@@ -33,33 +33,31 @@ class EDA_Test(unittest.TestCase):
     def test(self):
         eda = eda_example.main(do_plot=False, prng=prng)
         best = max(eda.population)
-        assert 80 < best.fitness < 82
+        assert 79 < best.fitness < 82
 
 class ES_Test(unittest.TestCase):
     def test(self):
         es = es_example.main(do_plot=False, prng=prng)
         best = max(es.population)
-        assert 17 < best.fitness < 18
+        assert best.fitness < 0.02
 
-'''
 class GA_Test(unittest.TestCase):
     def test(self):
         ga = ga_example.main(do_plot=False, prng=prng)
         best = max(ga.population)
-        assert best.fitness < 0.19
-'''        
+        assert best.fitness < 0.004
         
 class NSGA_Test(unittest.TestCase):
     def test(self):
         nsga = nsga_example.main(do_plot=False, prng=prng)
         fitnesses = [a.fitness for a in nsga.archive]
-        assert all([(-20 < f[0] < -14) and (-12 < f[1] < 0.01) for f in fitnesses])
+        assert all([(-21 < f[0] < -14) and (-13 < f[1] < 1) for f in fitnesses])
 
 class PAES_Test(unittest.TestCase):
     def test(self):
         paes = paes_example.main(do_plot=False, prng=prng)
         fitnesses = [a.fitness for a in paes.archive]
-        assert all([(-20 < f[0] < -14) and (-12 < f[1] < 0.01) for f in fitnesses])
+        assert all([(-21 < f[0] < -14) and (-13 < f[1] < 1) for f in fitnesses])
 
 class PSO_Test(unittest.TestCase):
     def test(self):

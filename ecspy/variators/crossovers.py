@@ -97,18 +97,15 @@ def n_point_crossover(random, mom, dad, args):
         num_cuts = min(len(mom)-1, num_crossover_points)
         cut_points = random.sample(range(1, len(mom)), num_cuts)
         cut_points.sort()
-        bro = []
-        sis = []
+        bro = copy.copy(dad)
+        sis = copy.copy(mom)
         normal = True
         for i, (m, d) in enumerate(zip(mom, dad)):
             if i in cut_points:
                 normal = not normal
-            if normal:
-                bro.append(d)
-                sis.append(m)
-            else:
-                bro.append(m)
-                sis.append(d)
+            if not normal:
+                bro[i] = m
+                sis[i] = d
         children.append(bro)
         children.append(sis)
     else:
@@ -145,15 +142,12 @@ def uniform_crossover(random, mom, dad, args):
     crossover_rate = args.setdefault('crossover_rate', 1.0)
     children = []
     if random.random() < crossover_rate:
-        bro = []
-        sis = []
-        for m, d in zip(mom, dad):
+        bro = copy.copy(dad)
+        sis = copy.copy(mom)
+        for i, (m, d) in enumerate(zip(mom, dad)):
             if random.random() < pux_bias:
-                bro.append(m)
-                sis.append(d)
-            else:
-                bro.append(d)
-                sis.append(m)
+                bro[i] = m
+                sis[i] = d
         children.append(bro)
         children.append(sis)
     else:
@@ -191,14 +185,14 @@ def blend_crossover(random, mom, dad, args):
     bounder = args['_ec'].bounder
     children = []
     if random.random() < crossover_rate:
-        bro = []
-        sis = []
-        for index, (m, d) in enumerate(zip(mom, dad)):
+        bro = copy.copy(dad)
+        sis = copy.copy(mom)
+        for i, (m, d) in enumerate(zip(mom, dad)):
             smallest = min(m, d)
             largest = max(m, d)
             delta = blx_alpha * (largest - smallest)
-            bro.append(smallest - delta + random.random() * (largest - smallest + 2 * delta))
-            sis.append(smallest - delta + random.random() * (largest - smallest + 2 * delta))
+            bro[i] = smallest - delta + random.random() * (largest - smallest + 2 * delta)
+            sis[i] = smallest - delta + random.random() * (largest - smallest + 2 * delta)
         bro = bounder(bro, args)
         sis = bounder(sis, args)
         children.append(bro)
@@ -251,17 +245,14 @@ def differential_crossover(random, candidates, args):
     children = []
     for mom, dad in zip(moms, dads):
         if random.random() < crossover_rate:
-            bro = []
-            sis = []
-            for m, d in zip(mom, dad):
-                if lookup[tuple(mom)] > lookup[tuple(dad)]:
-                    negpos = 1
-                    val = d
-                else:
-                    negpos = -1
-                    val = m
-                bro.append(val + differential_phi * random.random() * negpos * (m - d))
-                sis.append(val + differential_phi * random.random() * negpos * (m - d))
+            bro = copy.copy(dad)
+            sis = copy.copy(mom)
+            mom_is_better = lookup[tuple(mom)] > lookup[tuple(dad)]
+            for i, (m, d) in enumerate(zip(mom, dad)):
+                negpos = 1 if mom_is_better else -1
+                val = d if mom_is_better else m
+                bro[i] = val + differential_phi * random.random() * negpos * (m - d)
+                sis[i] = val + differential_phi * random.random() * negpos * (m - d)
             bro = bounder(bro, args)
             sis = bounder(sis, args)
             children.append(bro)
@@ -298,9 +289,9 @@ def simulated_binary_crossover(random, mom, dad, args):
     """
     etac = args.setdefault('sbx_etac', 10)
     bounder = args['_bounder']
-    bro = []
-    sis = []
-    for m, d, lb, ub in zip(mom, dad, bounder.lower_bound, bounder.upper_bound):
+    bro = copy.copy(dad)
+    sis = copy.copy(mom)
+    for i, (m, d, lb, ub) in enumerate(zip(mom, dad, bounder.lower_bound, bounder.upper_bound)):
         try:
             if m > d:
                 m, d = d, m
@@ -317,11 +308,12 @@ def simulated_binary_crossover(random, mom, dad, args):
             sis_val = max(min(sis_val, ub), lb)
             if random.random() > 0.5:
                 bro_val, sis_val = sis_val, bro_val
-            bro.append(bro_val)
-            sis.append(sis_val)
+            bro[i] = bro_val
+            sis[i] = sis_val
         except ZeroDivisionError:
-            sis.append(m)
-            bro.append(d)
+            # The offspring already have legitimate values for every element,
+            # so no need to take any special action here.
+            pass
     return [bro, sis]
 
 
@@ -329,29 +321,18 @@ def simulated_binary_crossover(random, mom, dad, args):
 def laplace_crossover(random, mom, dad, args):
     a = args.setdefault('laplace_a', 1)
     b = args.setdefault('laplace_b', 0)
-    bro = []
-    sis = []
-    for m, d in zip(mom, dad):
+    bro = copy.copy(dad)
+    sis = copy.copy(mom)
+    for i, (m, d) in enumerate(zip(mom, dad)):
         u = random.random()
         if random.random() <= 0.5:
             beta = a - b * math.log(u)
         else:
             beta = a + b * math.log(u)
-        bro.append(m + beta * math.abs(m - d))
-        sis.append(d + beta * math.abs(m - d))
+        bro[i] = m + beta * math.abs(m - d)
+        sis[i] = d + beta * math.abs(m - d)
     return [bro, sis]
     
-
-
-
-
-
-
-
-
-
-
-
 
 
 

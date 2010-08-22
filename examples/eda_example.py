@@ -12,20 +12,20 @@ def main(do_plot=True, prng=None):
         prng.seed(time()) 
     
     problem = benchmarks.Rastrigin(2)
-    eda = ec.EDA(prng)
-    eda.terminator = terminators.evaluation_termination
-    final_pop = eda.evolve(evaluator=problem.evaluator, 
-                           generator=problem.generator, 
-                           pop_size=1000, 
-                           bounder=problem.bounder,
-                           max_evaluations=30000,
-                           num_selected=500,
-                           num_offspring=1000,
-                           num_elites=1)
+    ea = ec.EDA(prng)
+    ea.terminator = terminators.evaluation_termination
+    final_pop = ea.evolve(evaluator=problem.evaluator, 
+                          generator=problem.generator, 
+                          pop_size=1000, 
+                          bounder=problem.bounder,
+                          max_evaluations=30000,
+                          num_selected=500,
+                          num_offspring=1000,
+                          num_elites=1)
         
     if do_plot:
-        best = max(final_pop)
-        print('EDA Example (Rastrigin) Best Solution: \n%s' % str(best))
+        best = max(final_pop) 
+        print('%s Example (%s) Best Solution: \n%s' % (ea.__class__.__name__, problem.__class__.__name__, str(best)))
         import itertools
         import pylab
         import mpl_toolkits.mplot3d.axes3d as axes3d
@@ -48,9 +48,9 @@ def main(do_plot=True, prng=None):
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Fitness')
-        pylab.savefig('eda_example_rastrigin.pdf', format='pdf')
+        pylab.savefig('%s Example (%s).pdf' % (ea.__class__.__name__, problem.__class__.__name__), format='pdf')
         pylab.show()
-    return eda
+    return ea
             
 if __name__ == '__main__':
     main()

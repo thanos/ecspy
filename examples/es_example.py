@@ -11,9 +11,9 @@ def main(do_plot=True, prng=None):
         prng.seed(time()) 
         
     problem = benchmarks.Rosenbrock(2)
-    es = ec.ES(prng)
-    es.terminator = [terminators.evaluation_termination, terminators.diversity_termination]
-    final_pop = es.evolve(generator=problem.generator, 
+    ea = ec.ES(prng)
+    ea.terminator = [terminators.evaluation_termination, terminators.diversity_termination]
+    final_pop = ea.evolve(generator=problem.generator, 
                           evaluator=problem.evaluator, 
                           pop_size=100, 
                           bounder=problem.bounder,
@@ -23,8 +23,8 @@ def main(do_plot=True, prng=None):
                           use_one_fifth_rule=True)
         
     if do_plot:
-        best = max(final_pop)
-        print('ES Example (Rosenbrock) Best Solution: \n%s' % str(best))
+        best = max(final_pop) 
+        print('%s Example (%s) Best Solution: \n%s' % (ea.__class__.__name__, problem.__class__.__name__, str(best)))
         import itertools
         import pylab
         import mpl_toolkits.mplot3d.axes3d as axes3d
@@ -47,9 +47,9 @@ def main(do_plot=True, prng=None):
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Fitness')
-        pylab.savefig('es_example_rosenbrock.pdf', format='pdf')
+        pylab.savefig('%s Example (%s).pdf' % (ea.__class__.__name__, problem.__class__.__name__), format='pdf')
         pylab.show()
-    return es
+    return ea
             
 if __name__ == '__main__':
     main()

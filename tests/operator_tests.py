@@ -30,7 +30,7 @@ def test_multiobjective_evaluator(candidates, args):
     return fitness
     
 prng = random.Random()
-prng.seed(11111)
+prng.seed(111111)
 test_candidates = [test_generator(prng, {}) for _ in range(12)]
 test_fitnesses = test_evaluator(test_candidates, {})
 test_multiobjective_fitnesses = test_multiobjective_evaluator(test_candidates, {})
@@ -63,19 +63,17 @@ class EvaluatorTests(unittest.TestCase):
     def test_parallel_evaluation_pp(self):
         class fake_ec(object):
             def __init__(self):
-                self.evaluator = test_evaluator
                 self.logger = logging.getLogger('ecspy.test')
         x = fake_ec()
-        fitnesses = evaluators.parallel_evaluation_pp(test_candidates, {'_ec':x})
+        fitnesses = evaluators.parallel_evaluation_pp(test_candidates, {'_ec':x, 'pp_evaluator':test_evaluator})
         assert fitnesses == test_fitnesses
         
     def test_parallel_evaluation_mp(self):
         class fake_ec(object):
             def __init__(self):
-                self.evaluator = test_evaluator
                 self.logger = logging.getLogger('ecspy.test')
         x = fake_ec()
-        fitnesses = evaluators.parallel_evaluation_mp(test_candidates, {'_ec':x})
+        fitnesses = evaluators.parallel_evaluation_mp(test_candidates, {'_ec':x, 'mp_evaluator':test_evaluator})
         assert fitnesses == test_fitnesses
         
 class MigratorTests(unittest.TestCase):
@@ -156,11 +154,11 @@ class SelectorTests(unittest.TestCase):
 
     def test_fitness_proportionate_selection(self):
         parents = selectors.fitness_proportionate_selection(prng, test_population, {})
-        assert len(parents) == 1 and max(parents) == max(test_population)
+        assert len(parents) == 1 and all([p in test_population for p in parents])
 
     def test_rank_selection(self):
         parents = selectors.rank_selection(prng, test_population, {})
-        assert len(parents) == 1 and max(parents) == max(test_population)
+        assert len(parents) == 1 and all([p in test_population for p in parents])
 
     def test_tournament_selection(self):
         parents = selectors.tournament_selection(prng, test_population, {'tourn_size':len(test_population)})

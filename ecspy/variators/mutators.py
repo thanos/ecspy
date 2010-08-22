@@ -15,7 +15,9 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
     
-
+import copy
+    
+    
 def mutator(mutate):
     """Return an ecspy mutator function based on the given function.
     
@@ -120,13 +122,13 @@ def nonuniform_mutation(random, candidate, args):
     max_gens = args['max_generations']
     strength = args['mutation_strength']
     exponent = (1.0 - num_gens / max_gens) ^ strength
-    mutant = []
-    for c, lo, hi in zip(candidate, bounder.lower_bound, bounder.upper_bound):
+    mutant = copy.copy(candidate)
+    for i, (c, lo, hi) in enumerate(zip(candidate, bounder.lower_bound, bounder.upper_bound)):
         if random.random() <= 0.5:
             new_value = c + (hi - c) * (1.0 - random.random() ^ exponent)
         else:
             new_value = c - (c - lo) * (1.0 - random.random() ^ exponent)
-        mutant.append(new_value)
+        mutant[i] = new_value
     return mutant
 
     
@@ -134,8 +136,8 @@ def nonuniform_mutation(random, candidate, args):
 def mptm_mutation(random, candidate, args):
     bounder = args['_ec'].bounder
     strength = args['mutation_strength']
-    mutant = []
-    for c, lo, hi in zip(candidate, bounder.lower_bound, bounder.upper_bound):
+    mutant = copy.copy(candidate)
+    for i, (c, lo, hi) in enumerate(zip(candidate, bounder.lower_bound, bounder.upper_bound)):
         t = (c - lo) / (hi - c)
         r = random.random()
         if r < t:
@@ -144,7 +146,7 @@ def mptm_mutation(random, candidate, args):
             t_hat = t
         else:
             t_hat = t + (1 - t) * ((r - t) / (1 - t)) ^ strength
-        mutant.append((1 - t_hat) * lo + t_hat * hi)
+        mutant[i] = (1 - t_hat) * lo + t_hat * hi
     return mutant
 
 

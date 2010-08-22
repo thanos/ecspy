@@ -15,6 +15,9 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import copy
+
+
 def default_variation(random, candidates, args):
     """Return the set of candidates without variation.
 
@@ -56,9 +59,9 @@ def estimation_of_distribution_variation(random, candidates, args):
     stdev = [sum([(x - m)**2 for x in g]) / float(len(g) - 1) for g, m in zip(genes, mean)]
     offspring = []
     for _ in range(num_offspring):
-        child = []
-        for m, s in zip(mean, stdev):
-            child.append(m + random.gauss(0, s))
+        child = copy.copy(cs_copy[0])
+        for i, (m, s) in enumerate(zip(mean, stdev)):
+            child[i] = m + random.gauss(0, s)
         child = bounder(child, args)
         offspring.append(child)
         

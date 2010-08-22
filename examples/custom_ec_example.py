@@ -15,23 +15,24 @@ def main(do_plot=True, prng=None):
         prng.seed(time()) 
     
     problem = benchmarks.Ackley(2)
-    evocomp = ec.EvolutionaryComputation(prng)
-    evocomp.selector = selectors.tournament_selection
-    evocomp.variator = [variators.uniform_crossover, variators.gaussian_mutation]
-    evocomp.replacer = replacers.steady_state_replacement
-    evocomp.terminator = terminators.generation_termination
-    final_pop = evocomp.evolve(generator=problem.generator,
-                               evaluator=problem.evaluator,
-                               pop_size=100, 
-                               bounder=problem.bounder,
-                               maximize=problem.maximize,
-                               tourn_size=7,
-                               num_selected=2, 
-                               max_generations=300,
-                               mutation_rate=0.2)
+    ea = ec.EvolutionaryComputation(prng)
+    ea.selector = selectors.tournament_selection
+    ea.variator = [variators.uniform_crossover, variators.gaussian_mutation]
+    ea.replacer = replacers.steady_state_replacement
+    ea.terminator = terminators.generation_termination
+    final_pop = ea.evolve(generator=problem.generator,
+                          evaluator=problem.evaluator,
+                          pop_size=100, 
+                          bounder=problem.bounder,
+                          maximize=problem.maximize,
+                          tourn_size=7,
+                          num_selected=2, 
+                          max_generations=300,
+                          mutation_rate=0.2)
+                          
     if do_plot:
         best = max(final_pop) 
-        print('Custom EC Example (Ackley) Best Solution: \n%s' % str(best))
+        print('%s Example (%s) Best Solution: \n%s' % (ea.__class__.__name__, problem.__class__.__name__, str(best)))
         import itertools
         import pylab
         import mpl_toolkits.mplot3d.axes3d as axes3d
@@ -54,9 +55,9 @@ def main(do_plot=True, prng=None):
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Fitness')
-        pylab.savefig('custom_ec_example_ackley.pdf', format='pdf')
+        pylab.savefig('%s Example (%s).pdf' % (ea.__class__.__name__, problem.__class__.__name__), format='pdf')
         pylab.show()
-    return evocomp
+    return ea
 
 if __name__ == '__main__':
     main()

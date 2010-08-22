@@ -440,6 +440,7 @@ def paes_replacement(random, population, parents, offspring, args):
         elif o in archive:
             survivors.append(p)
         elif o > p:
+            archive = archiver(random, [o], archive, args)
             survivors.append(o)
         elif o >= p:
             for a in archive:

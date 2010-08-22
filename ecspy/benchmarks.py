@@ -5,22 +5,72 @@ from ecspy import ec
 from ecspy import emo
 
 
-#---------------------------
-# Single-objective problems
-#---------------------------
-
-class Ackley(object):
-    def __init__(self, dimensions=2):
+class Benchmark(object):
+    def __init__(self, dimensions, objectives=1):
         self.dimensions = dimensions
-        self.bounder = ec.Bounder([-32.0] * self.dimensions, [32.0] * self.dimensions)
-        self.maximize = False
-        self.global_optimum = [0 for _ in range(self.dimensions)]
-    
+        self.objectives = objectives
+        self.bounder = None
+        self.maximize = True
+        
     def __str__(self):
-        return '%s(%d dimensions)' % (self.__class__.__name__, self.dimensions)
+        if self.objectives > 1:
+            return '%s (%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
+        else:
+            return '%s (%d dimensions)' % (self.__class__.__name__, self.dimensions)
         
     def __repr__(self):
         return '%s' % self.__class__.__name__
+    
+    def generator(self, random, args):
+        raise NotImplementedError
+        
+    def evaluator(self, candidates, args):
+        raise NotImplementedError
+        
+    def __call__(self, *args):
+        candidate = [a for a in args]
+        fit = self.evaluator([candidate], {})
+        return fit[0]
+
+class Binary(Benchmark):
+    def __init__(self, benchmark, dimension_bits):
+        Benchmark.__init__(self, benchmark.dimensions, benchmark.objectives)
+        self.benchmark = benchmark
+        self.dimension_bits = dimension_bits
+        self.bounder = self.benchmark.bounder
+        self.maximize = self.benchmark.maximize
+        self.__class__.__name__ = self.__class__.__name__ + ' ' + self.benchmark.__class__.__name__
+        
+    def binary_to_real(self, binary):
+        real = []
+        for d, lo, hi in zip(range(self.dimensions), self.bounder.lower_bound, self.bounder.upper_bound):
+            b = binary[d*self.dimension_bits:(d+1)*self.dimension_bits]
+            real_val = float(int(''.join([str(i) for i in b]), 2))
+            value = real_val / (2**(self.dimension_bits)-1) * (hi - lo) + lo
+            real.append(value)
+        return real
+    
+    def generator(self, random, args):
+        return [random.choice([0, 1]) for _ in range(self.dimensions * self.dimension_bits)]
+        
+    def evaluator(self, candidates, args):
+        binary_candidates = []
+        for c in candidates:
+            binary_candidates.append(self.binary_to_real(c))
+        return self.benchmark.evaluator(binary_candidates, args)
+
+        
+        
+#------------------------------------------------------
+#             Single-objective problems
+#------------------------------------------------------
+
+class Ackley(Benchmark):
+    def __init__(self, dimensions=2):
+        Benchmark.__init__(self, dimensions)
+        self.bounder = ec.Bounder([-32.0] * self.dimensions, [32.0] * self.dimensions)
+        self.maximize = False
+        self.global_optimum = [0 for _ in range(self.dimensions)]
     
     def generator(self, random, args):
         return [random.uniform(-32.0, 32.0) for _ in range(self.dimensions)]
@@ -31,20 +81,14 @@ class Ackley(object):
             fitness.append(-20 * math.exp(-0.2 * math.sqrt(1.0 / self.dimensions * sum([x**2 for x in c]))) - 
                            math.exp(1.0 / self.dimensions * sum([math.cos(2 * math.pi * x) for x in c])) + 20 + math.e)
         return fitness
-        
-class Griewank(object):
+
+class Griewank(Benchmark):
     def __init__(self, dimensions=2):
-        self.dimensions = dimensions
+        Benchmark.__init__(self, dimensions)
         self.bounder = ec.Bounder([-100.0] * self.dimensions, [100.0] * self.dimensions)
         self.maximize = False
         self.global_optimum = [0 for _ in range(self.dimensions)]
         
-    def __str__(self):
-        return '%s(%d dimensions)' % (self.__class__.__name__, self.dimensions)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
-    
     def generator(self, random, args):
         return [random.uniform(-100.0, 100.0) for _ in range(self.dimensions)]
         
@@ -55,19 +99,13 @@ class Griewank(object):
                            reduce(lambda x, y: x*y, [math.cos(x / math.sqrt(i+1)) for i, x in enumerate(c)]) + 1)
         return fitness
 
-class Rastrigin(object):
+class Rastrigin(Benchmark):
     def __init__(self, dimensions=2):
-        self.dimensions = dimensions
+        Benchmark.__init__(self, dimensions)
         self.bounder = ec.Bounder([-5.0] * self.dimensions, [5.0] * self.dimensions)
         self.maximize = False
         self.global_optimum = [0 for _ in range(self.dimensions)]
         
-    def __str__(self):
-        return '%s(%d dimensions)' % (self.__class__.__name__, self.dimensions)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
-    
     def generator(self, random, args):
         return [random.uniform(-5.0, 5.0) for _ in range(self.dimensions)]
         
@@ -77,18 +115,12 @@ class Rastrigin(object):
             fitness.append(sum([x**2 - 10 * math.cos(2 * math.pi * x) + 10 for x in c]))
         return fitness
 
-class Rosenbrock(object):
+class Rosenbrock(Benchmark):
     def __init__(self, dimensions=2):
-        self.dimensions = dimensions
+        Benchmark.__init__(self, dimensions)
         self.bounder = ec.Bounder([-100.0] * self.dimensions, [100.0] * self.dimensions)
         self.maximize = False
         self.global_optimum = [1 for _ in range(self.dimensions)]
-    
-    def __str__(self):
-        return '%s(%d dimensions)' % (self.__class__.__name__, self.dimensions)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def generator(self, random, args):
         return [random.uniform(-100.0, 100.0) for _ in range(self.dimensions)]
@@ -102,18 +134,12 @@ class Rosenbrock(object):
             fitness.append(total)
         return fitness
     
-class Schwefel(object):
+class Schwefel(Benchmark):
     def __init__(self, dimensions=2):
-        self.dimensions = dimensions
+        Benchmark.__init__(self, dimensions)
         self.bounder = ec.Bounder([-500.0] * self.dimensions, [500.0] * self.dimensions)
         self.maximize = False
-        self.global_optimum = [1 for _ in range(self.dimensions)]
-    
-    def __str__(self):
-        return '%s(%d dimensions)' % (self.__class__.__name__, self.dimensions)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
+        self.global_optimum = [420.9687 for _ in range(self.dimensions)]
     
     def generator(self, random, args):
         return [random.uniform(-500.0, 500.0) for _ in range(self.dimensions)]
@@ -124,18 +150,12 @@ class Schwefel(object):
             fitness.append(418.9829 * self.dimensions - sum([x * math.sin(math.sqrt(abs(x))) for x in c]))
         return fitness
     
-class Sphere(object):
+class Sphere(Benchmark):
     def __init__(self, dimensions=2):
-        self.dimensions = dimensions
+        Benchmark.__init__(self, dimensions)
         self.bounder = ec.Bounder([-100.0] * self.dimensions, [100.0] * self.dimensions)
         self.maximize = False
         self.global_optimum = [0 for _ in range(self.dimensions)]
-    
-    def __str__(self):
-        return '%s(%d dimensions)' % (self.__class__.__name__, self.dimensions)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def generator(self, random, args):
         return [random.uniform(-100.0, 100.0) for _ in range(self.dimensions)]
@@ -146,21 +166,15 @@ class Sphere(object):
             fitness.append(sum([x**2 for x in c]))
         return fitness
     
-class Weierstrass(object):
+class Weierstrass(Benchmark):
     def __init__(self, dimensions=2, a=0.5, b=3, kmax=20):
-        self.dimensions = dimensions
+        Benchmark.__init__(self, dimensions)
         self.bounder = ec.Bounder([-0.5] * self.dimensions, [0.5] * self.dimensions)
         self.maximize = False
         self.a = a
         self.b = b
         self.kmax = kmax
         self.global_optimum = None
-    
-    def __str__(self):
-        return '%s(%d dimensions)' % (self.__class__.__name__, self.dimensions)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def generator(self, random, args):
         return [random.uniform(-0.5, 0.5) for _ in range(self.dimensions)]
@@ -174,26 +188,16 @@ class Weierstrass(object):
 
 
         
-#---------------------------
-# Multi-objective problems
-#---------------------------
+#------------------------------------------------------
+#              Multi-objective problems
+#------------------------------------------------------
 
-class Kursawe(object):
+class Kursawe(Benchmark):
     def __init__(self, dimensions=2):
-        self.dimensions = dimensions
-        self.objectives = 2
+        Benchmark.__init__(self, dimensions, 2)
         self.bounder = ec.Bounder([-5.0] * self.dimensions, [5.0] * self.dimensions)
         self.maximize = False
 
-    def __str__(self):
-        return '%s(%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
-    
-    def global_optimum(self):
-        return None
-    
     def generator(self, random, args):
         return [random.uniform(-5.0, 5.0) for _ in range(self.dimensions)]
         
@@ -205,21 +209,14 @@ class Kursawe(object):
             fitness.append(emo.Pareto([f1, f2]))
         return fitness
 
-class DTLZ1(object):
+class DTLZ1(Benchmark):
     def __init__(self, dimensions=2, objectives=2):
+        Benchmark.__init__(self, dimensions, objectives)
         if dimensions < objectives:
             raise ValueError('dimensions (%d) must be greater than or equal to objectives (%d)' % (dimensions, objectives))
-        self.dimensions = dimensions
-        self.objectives = objectives
         self.bounder = ec.Bounder([0.0] * self.dimensions, [1.0] * self.dimensions)
         self.maximize = False
         
-    def __str__(self):
-        return '%s(%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
-    
     def global_optimum(self):
         x = [random.uniform(0, 1) for _ in range(self.objectives - 1)]
         x.extend([0 for _ in range(self.dimensions - self.objectives + 1)])
@@ -239,20 +236,13 @@ class DTLZ1(object):
             fitness.append(emo.Pareto(fit))
         return fitness
 
-class DTLZ2(object):
+class DTLZ2(Benchmark):
     def __init__(self, dimensions=2, objectives=2):
+        Benchmark.__init__(self, dimensions, objectives)
         if dimensions < objectives:
             raise ValueError('dimensions (%d) must be greater than or equal to objectives (%d)' % (dimensions, objectives))
-        self.dimensions = dimensions
-        self.objectives = objectives
         self.bounder = ec.Bounder([0.0] * self.dimensions, [1.0] * self.dimensions)
         self.maximize = False
-    
-    def __str__(self):
-        return '%s(%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def global_optimum(self):
         x = [random.uniform(0, 1) for _ in range(self.objectives - 1)]
@@ -276,20 +266,13 @@ class DTLZ2(object):
             fitness.append(emo.Pareto(fit))
         return fitness
 
-class DTLZ3(object):
+class DTLZ3(Benchmark):
     def __init__(self, dimensions=2, objectives=2):
+        Benchmark.__init__(self, dimensions, objectives)
         if dimensions < objectives:
             raise ValueError('dimensions (%d) must be greater than or equal to objectives (%d)' % (dimensions, objectives))
-        self.dimensions = dimensions
-        self.objectives = objectives
         self.bounder = ec.Bounder([0.0] * self.dimensions, [1.0] * self.dimensions)
         self.maximize = False
-    
-    def __str__(self):
-        return '%s(%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def global_optimum(self):
         x = [random.uniform(0, 1) for _ in range(self.objectives - 1)]
@@ -312,21 +295,14 @@ class DTLZ3(object):
             fitness.append(emo.Pareto(fit))
         return fitness
 
-class DTLZ4(object):
+class DTLZ4(Benchmark):
     def __init__(self, dimensions=2, objectives=2, alpha=100):
+        Benchmark.__init__(self, dimensions, objectives)
         if dimensions < objectives:
             raise ValueError('dimensions (%d) must be greater than or equal to objectives (%d)' % (dimensions, objectives))
-        self.dimensions = dimensions
-        self.objectives = objectives
         self.bounder = ec.Bounder([0.0] * self.dimensions, [1.0] * self.dimensions)
         self.maximize = False
         self.alpha = alpha
-    
-    def __str__(self):
-        return '%s(%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def global_optimum(self):
         x = [random.uniform(0, 1) for _ in range(self.objectives - 1)]
@@ -350,20 +326,13 @@ class DTLZ4(object):
             fitness.append(emo.Pareto(fit))
         return fitness
 
-class DTLZ5(object):
+class DTLZ5(Benchmark):
     def __init__(self, dimensions=2, objectives=2):
+        Benchmark.__init__(self, dimensions, objectives)
         if dimensions < objectives:
             raise ValueError('dimensions (%d) must be greater than or equal to objectives (%d)' % (dimensions, objectives))
-        self.dimensions = dimensions
-        self.objectives = objectives
         self.bounder = ec.Bounder([0.0] * self.dimensions, [1.0] * self.dimensions)
         self.maximize = False
-    
-    def __str__(self):
-        return '%s(%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def global_optimum(self):
         x = [random.uniform(0, 1) for _ in range(self.objectives - 1)]
@@ -391,20 +360,13 @@ class DTLZ5(object):
             fitness.append(emo.Pareto(fit))
         return fitness
 
-class DTLZ6(object):
+class DTLZ6(Benchmark):
     def __init__(self, dimensions=2, objectives=2):
+        Benchmark.__init__(self, dimensions, objectives)
         if dimensions < objectives:
             raise ValueError('dimensions (%d) must be greater than or equal to objectives (%d)' % (dimensions, objectives))
-        self.dimensions = dimensions
-        self.objectives = objectives
         self.bounder = ec.Bounder([0.0] * self.dimensions, [1.0] * self.dimensions)
         self.maximize = False
-    
-    def __str__(self):
-        return '%s(%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def global_optimum(self):
         x = [random.uniform(0, 1) for _ in range(self.objectives - 1)]
@@ -432,20 +394,13 @@ class DTLZ6(object):
             fitness.append(emo.Pareto(fit))
         return fitness
 
-class DTLZ7(object):
+class DTLZ7(Benchmark):
     def __init__(self, dimensions=2, objectives=2):
+        Benchmark.__init__(self, dimensions, objectives)
         if dimensions < objectives:
             raise ValueError('dimensions (%d) must be greater than or equal to objectives (%d)' % (dimensions, objectives))
-        self.dimensions = dimensions
-        self.objectives = objectives
         self.bounder = ec.Bounder([0.0] * self.dimensions, [1.0] * self.dimensions)
         self.maximize = False
-    
-    def __str__(self):
-        return '%s(%d dimensions, %d objectives)' % (self.__class__.__name__, self.dimensions, self.objectives)
-        
-    def __repr__(self):
-        return '%s' % self.__class__.__name__
     
     def global_optimum(self):
         x = [random.uniform(0, 1) for _ in range(self.objectives - 1)]
@@ -467,5 +422,8 @@ class DTLZ7(object):
             fitness.append(emo.Pareto(fit))
         return fitness
 
+
+
+    
 
 

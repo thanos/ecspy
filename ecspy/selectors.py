@@ -118,8 +118,7 @@ def fitness_proportionate_selection(random, population, args):
     
     # Set up the roulette wheel
     if pop_max_fit == pop_min_fit:
-        for index in range(len_pop):
-            psum[index] = (index + 1) / float(len_pop)
+        psum = [(index + 1) / float(len_pop) for index in range(len_pop)]
     elif (pop_max_fit > 0 and pop_min_fit >= 0) or (pop_max_fit <= 0 and pop_min_fit < 0):
         pop.sort(reverse=True)
         psum[0] = pop[0].fitness
@@ -135,15 +134,13 @@ def fitness_proportionate_selection(random, population, args):
         lower = 0
         upper = len_pop - 1
         while(upper >= lower):
-            i = lower + (upper - lower) // 2
-            if psum[i] > cutoff: 
-                upper = i - 1
+            mid = (lower + upper) // 2
+            if psum[mid] > cutoff: 
+                upper = mid - 1
             else: 
-                lower = i + 1
-        lower = min(len_pop-1, lower)
-        lower = max(0, lower)
+                lower = mid + 1
+        lower = max(0, min(len_pop-1, lower))
         selected.append(pop[lower])
-    
     return selected
 
 
@@ -161,13 +158,17 @@ def rank_selection(random, population, args):
     
     """
     num_selected = args.setdefault('num_selected', 1)
+
+    # Set up the roulette wheel
     pop = list(population)
     len_pop = len(pop)
     pop.sort()
-    psum = [i for i in range(len_pop)]
+    psum = range(len_pop)
     den = (len_pop * (len_pop + 1)) / 2.0
     for i in range(len_pop):
         psum[i] = (i + 1) / den
+    for i in range(1, len_pop):
+        psum[i] += psum[i-1]
         
     # Select the individuals
     selected = []
@@ -176,15 +177,13 @@ def rank_selection(random, population, args):
         lower = 0
         upper = len_pop - 1
         while(upper >= lower):
-            i = lower + (upper - lower) // 2
-            if psum[i] > cutoff: 
-                upper = i - 1
+            mid = (lower + upper) // 2
+            if psum[mid] > cutoff: 
+                upper = mid - 1
             else: 
-                lower = i + 1
-        lower = min(len_pop-1, lower)
-        lower = max(0, lower)
+                lower = mid + 1
+        lower = max(0, min(len_pop-1, lower))
         selected.append(pop[lower])
-
     return selected
 
 

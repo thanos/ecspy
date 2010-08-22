@@ -13,20 +13,20 @@ def main(do_plot=True, prng=None):
         prng.seed(time()) 
     
     problem = benchmarks.Sphere(2)
-    pso = swarm.PSO(prng)
-    pso.terminator = terminators.evaluation_termination
-    pso.topology = topologies.ring_topology
-    final_pop = pso.evolve(generator=problem.generator,
-                           evaluator=problem.evaluator, 
-                           pop_size=100,
-                           bounder=problem.bounder,
-                           maximize=problem.maximize,
-                           max_evaluations=30000, 
-                           neighborhood_size=5)
+    ea = swarm.PSO(prng)
+    ea.terminator = terminators.evaluation_termination
+    ea.topology = topologies.ring_topology
+    final_pop = ea.evolve(generator=problem.generator,
+                          evaluator=problem.evaluator, 
+                          pop_size=100,
+                          bounder=problem.bounder,
+                          maximize=problem.maximize,
+                          max_evaluations=30000, 
+                          neighborhood_size=5)
         
     if do_plot:
-        best = max(final_pop)
-        print('PSO Example (Sphere) Best Solution: \n%s' % str(best))
+        best = max(final_pop) 
+        print('%s Example (%s) Best Solution: \n%s' % (ea.__class__.__name__, problem.__class__.__name__, str(best)))
         import itertools
         import pylab
         import mpl_toolkits.mplot3d.axes3d as axes3d
@@ -49,9 +49,9 @@ def main(do_plot=True, prng=None):
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Fitness')
-        pylab.savefig('pso_example_sphere.pdf', format='pdf')
+        pylab.savefig('%s Example (%s).pdf' % (ea.__class__.__name__, problem.__class__.__name__), format='pdf')
         pylab.show()
-    return pso
+    return ea
 
 if __name__ == '__main__':
     main()

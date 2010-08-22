@@ -57,7 +57,8 @@ def generation_plot(filename, errorbars=True):
     
     data = [average, median, best, worst]
     colors = ['black', 'blue', 'green', 'red']
-    labels = ['average', 'median', 'best', 'worst']    
+    labels = ['average', 'median', 'best', 'worst']
+    figure = pylab.figure()
     if errorbars:
         pylab.errorbar(generation, average, stderr, color=colors[0], label=labels[0])
     else:

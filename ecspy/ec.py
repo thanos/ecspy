@@ -84,9 +84,9 @@ class Bounder(object):
                 iter(self.upper_bound)
             except TypeError:
                 self.upper_bound = [self.upper_bound] * len(candidate)
-            bounded_candidate = []
-            for c, lo, hi in zip(candidate, self.lower_bound, self.upper_bound):
-                bounded_candidate.append(max(min(c, hi), lo))
+            bounded_candidate = copy.copy(candidate)
+            for i, (c, lo, hi) in enumerate(zip(candidate, self.lower_bound, self.upper_bound)):
+                bounded_candidate[i] = max(min(c, hi), lo)
             return bounded_candidate
 
 
@@ -413,10 +413,10 @@ class GA(EvolutionaryComputation):
     """Evolutionary computation representing a canonical genetic algorithm.
     
     This class represents a genetic algorithm which uses, by 
-    default, fitness proportionate selection, n-point crossover,
-    bit-flip mutation, and generational replacement. In the case
-    of bit-flip mutation, it is expected that the candidate 
-    solution is an iterable object of binary values. 
+    default, rank selection, n-point crossover, bit-flip mutation, 
+    and generational replacement. In the case of bit-flip mutation, 
+    it is expected that the candidate solution is an iterable object 
+    of binary values. 
     
     Optional keyword arguments in ``evolve`` args parameter:
     
@@ -430,7 +430,7 @@ class GA(EvolutionaryComputation):
     """
     def __init__(self, random):
         EvolutionaryComputation.__init__(self, random)
-        self.selector = selectors.fitness_proportionate_selection
+        self.selector = selectors.rank_selection 
         self.variator = [variators.n_point_crossover, variators.bit_flip_mutation]
         self.replacer = replacers.generational_replacement
         
