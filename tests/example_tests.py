@@ -27,7 +27,7 @@ class DEA_Test(unittest.TestCase):
     def test(self):
         dea = dea_example.main(do_plot=False, prng=prng)
         best = max(dea.population)
-        assert best.fitness < 0.09
+        assert best.fitness < 0.3
 
 class EDA_Test(unittest.TestCase):
     def test(self):
@@ -51,13 +51,13 @@ class NSGA_Test(unittest.TestCase):
     def test(self):
         nsga = nsga_example.main(do_plot=False, prng=prng)
         fitnesses = [a.fitness for a in nsga.archive]
-        assert all([(-21 < f[0] < -14) and (-13 < f[1] < 1) for f in fitnesses])
+        assert all([(-21 < f[0] < -12) and (-12 < f[1] < 1) for f in fitnesses])
 
 class PAES_Test(unittest.TestCase):
     def test(self):
         paes = paes_example.main(do_plot=False, prng=prng)
         fitnesses = [a.fitness for a in paes.archive]
-        assert all([(-21 < f[0] < -14) and (-13 < f[1] < 1) for f in fitnesses])
+        assert all([(-21 < f[0] < -12) and (-12 < f[1] < 1) for f in fitnesses])
 
 class PSO_Test(unittest.TestCase):
     def test(self):

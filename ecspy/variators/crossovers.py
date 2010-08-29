@@ -269,7 +269,7 @@ def simulated_binary_crossover(random, mom, dad, args):
     
     This function performs simulated binary crosssover, following the 
     implementation in NSGA-II 
-    `(Deb, et. al, ICANNGA 1999) <http://vision.ucsd.edu/~sagarwal/icannga.pdf>`_.
+    `(Deb et al., ICANNGA 1999) <http://vision.ucsd.edu/~sagarwal/icannga.pdf>`_.
  
     .. Arguments:
        random -- the random number generator object

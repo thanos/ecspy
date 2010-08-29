@@ -9,6 +9,7 @@ from ecspy import selectors
 from ecspy import terminators
 from ecspy import variators
 from Tkinter import *
+import itertools
 #end_imports
 
 
@@ -20,9 +21,7 @@ def segments(p):
 
 def generate_polygon(random, args):
     size = args.get('num_vertices', 6)
-    lower = args.get('lower_bound', 0)
-    upper = args.get('upper_bound', 1)
-    return [(random.uniform(lower, upper), random.uniform(lower, upper)) for i in xrange(size)]
+    return [(random.uniform(-1, 1), random.uniform(-1, 1)) for i in xrange(size)]
 
 def evaluate_polygon(candidates, args):
     fitness = []
@@ -31,33 +30,28 @@ def evaluate_polygon(candidates, args):
         fitness.append(fit)
     return fitness
 
+#start_bounder    
+def bound_polygon(candidate, args):
+    for i, c in enumerate(candidate):
+        x = max(min(c[0], 1), -1)
+        y = max(min(c[1], 1), -1)
+        candidate[i] = (x, y)
+    return candidate
+bound_polygon.lower_bound = itertools.repeat(-1)
+bound_polygon.upper_bound = itertools.repeat(1)
+#end_bounder
+    
 def mutate_polygon(random, candidates, args):
     mut_rate = args.setdefault('mutation_rate', 0.1)
-    mut_range = args.setdefault('mutation_range', 1.0)
-    lower_bound = args.setdefault('lower_bound', -1)
-    upper_bound = args.setdefault('upper_bound', 1)
-        
-    try:
-        iter(lower_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        lower_bound = [lower_bound] * clen
-        
-    try:
-        iter(upper_bound)
-    except TypeError:
-        clen = max([len(x) for x in candidates])
-        upper_bound = [upper_bound] * clen
-        
+    bounder = args['_ec'].bounder
     cs_copy = list(candidates)
     for i, cs in enumerate(cs_copy):
-        for j, c in enumerate(cs):
+        for j, (c, lo, hi) in enumerate(zip(cs, bounder.lower_bound, bounder.upper_bound)):
             if random.random() < mut_rate:
-                x = c[0] + random.gauss(0, mut_range) * (upper_bound[j] - lower_bound[j])
-                x = max(min(x, upper_bound[j]), lower_bound[j])
-                y = c[1] + random.gauss(0, mut_range) * (upper_bound[j] - lower_bound[j])
-                y = max(min(y, upper_bound[j]), lower_bound[j])
+                x = c[0] + random.gauss(0, 1) * (hi - lo)
+                y = c[1] + random.gauss(0, 1) * (hi - lo)
                 cs_copy[i][j] = (x, y)
+        cs_copy[i] = bounder(cs_copy[i], args)
     return cs_copy
         
 def polygon_observer(population, num_generations, num_evaluations, args):
@@ -98,7 +92,7 @@ my_ec.selector = ec.selectors.tournament_selection
 my_ec.variator = [ec.variators.uniform_crossover, mutate_polygon]
 my_ec.replacer = ec.replacers.steady_state_replacement
 my_ec.observer = polygon_observer
-my_ec.terminator = [terminators.evaluation_termination, terminators.avg_fitness_termination]
+my_ec.terminator = [terminators.evaluation_termination, terminators.average_fitness_termination]
 window = Tk()
 window.title('Evolving Polygons')
 can = Canvas(window, bg='white', height=400, width=400)
@@ -106,15 +100,16 @@ can.pack()
 
 final_pop = my_ec.evolve(generator=generate_polygon,
                          evaluator=evaluate_polygon,
+                         pop_size=100,
+                         bounder=bound_polygon,
                          max_evaluations=5000,
                          num_selected=2,
                          mutation_rate=0.25,
-                         pop_size=100,
                          num_vertices=3,
-                         lower_bound=-1,
-                         upper_bound=1,
                          canvas=can)
-# Print the best individual, who will be at index 0.
+# Sort and print the best individual, who will be at index 0.
+final_pop.sort(reverse=True)
+print('Terminated due to %s.' % my_ec.termination_cause)
 print(final_pop[0])
 sleep(5)
 #end_main

@@ -10,9 +10,7 @@ from ecspy import terminators
 
 def generate_rastrigin(random, args):
     size = args.get('num_inputs', 10)
-    lower = args.get('lower_bound', 0)
-    upper = args.get('upper_bound', 1)
-    return [random.uniform(lower, upper) for i in xrange(size)]
+    return [random.uniform(-5.12, 5.12) for i in xrange(size)]
 
 def evaluate_rastrigin(candidates, args):
     fitness = []
@@ -28,13 +26,13 @@ es = ec.ES(rand)
 es.terminator = terminators.evaluation_termination
 final_pop = es.evolve(generator=generate_rastrigin,
                       evaluator=evaluate_rastrigin,
+                      pop_size=100,
                       maximize=False,
+                      bounder=ec.Bounder(-5.12, 5.12),
                       max_evaluations=20000,
                       mutation_rate=0.25,
-                      lower_bound=-5.12,
-                      upper_bound=5.12,
-                      pop_size=100,
                       num_inputs=3)
-# Print the best individual, who will be at index 0.
+# Sort and print the best individual, who will be at index 0.
+final_pop.sort(reverse=True)
 print(final_pop[0])
 #end_main

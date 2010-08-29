@@ -36,6 +36,8 @@ ECsPy consists of the following modules:
   
   * archivers.py -- defines useful archiving methods, particularly for EMO algorithms
   
+  * benchmarks.py -- defines several single- and multi-objective benchmark optimization problems
+  
   * ec.py -- provides the basic framework for an EvolutionaryComputation and specific ECs
   
   * emo.py -- provides the Pareto class for multiobjective optimization along with specific EMOs (e.g. NSGA-II)

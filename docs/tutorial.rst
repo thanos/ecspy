@@ -2,7 +2,7 @@
 Tutorial
 ********
 
-This chapter presents several optimization examples to which ECsPy can be applied. Each example presents a particular problem for which the chosen evolutionary computation is well-suited.
+This chapter presents two optimization examples to which ECsPy can be applied. Each example presents a particular problem for which the chosen evolutionary computation is well-suited.
 
 ======================
 The Rastrigin Function
@@ -33,9 +33,9 @@ The Generator
 
 First, we import all the necessary libraries. ``random`` and ``time`` are needed for the random number generation; ``math`` is needed for the evaluation function; and ``ecspy`` is, of course, needed for the evolutionary computation.    
 
-This function must take the random number generator object along with the keyword arguments. Notice that we can use the ``args`` variable to pass anything we like to our functions. There is nothing special about the ``num_inputs`` key. But, as we'll see, we can pass in that value as a keyword argument to the ``evolve`` method of our evolution strategy. In contrast, there is something a bit special about the ``lower_bound`` and ``upper_bound`` keys. Those keys are used by some of the evolutionary operators (e.g., Gaussian mutation) that are distributed with ECsPy. 
+This function must take the random number generator object along with the keyword arguments. Notice that we can use the ``args`` variable to pass anything we like to our functions. There is nothing special about the ``num_inputs`` key. But, as we'll see, we can pass in that value as a keyword argument to the ``evolve`` method of our evolution strategy. 
 
-This code is pretty straightforward. We're simply generating a list of ``num_inputs`` uniform random values between ``lower_bound`` and ``upper_bound``. If ``num_inputs`` has not been specified, then we will default to generating 10 values. Likewise the bounds would default to 0 and 1, respectively. 
+This code is pretty straightforward. We're simply generating a list of ``num_inputs`` uniform random values between -5.12 and 5.12. If ``num_inputs`` has not been specified, then we will default to generating 10 values. 
 
 And now we can tackle the evaluator...
 
@@ -66,17 +66,17 @@ Now that we have decided upon our generator and evaluator, we can create the EC.
 ::
 
 	$ python rastrigin.py
-	[1.000087637046601, 1.0001637250284432, 1.0001970127944333] : 1.45421738935e-05
+	[0.99946457038637193, 0.99975827495950553, 0.9989036275741775] : 0.000306941000222
 
 .. {{{end}}}
 
-As can be seen, we first create our random number generator object, seeding it with the current system time. Then we construct our ES, specifying a terminator (that stops after a given number of function evaluations). Finally, we call the ``evolve`` method of the ES. To this method, we pass the generator, evaluator, a flag to denote that we're minimizing in this problem (which defaults to ``maximize=True`` if unspecified), and a set of keyword arguments that will be needed by one or more of the functions involved. For instance, we pass ``num_inputs`` to be used by our generator. Likewise, ``max_evaluations`` will be used by our terminator.
+As can be seen, we first create our random number generator object, seeding it with the current system time. Then we construct our ES, specifying a terminator (that stops after a given number of function evaluations). Finally, we call the ``evolve`` method of the ES. To this method, we pass the generator, evaluator, the population size, a flag to denote that we're minimizing in this problem (which defaults to ``maximize=True`` if unspecified), a bounding function to use for candidate solutions, and a set of keyword arguments that will be needed by one or more of the functions involved. For instance, we pass ``num_inputs`` to be used by our generator. Likewise, ``max_evaluations`` will be used by our terminator.
 
-The script outputs the best individual in the final generation, which will always be located at index 0 because the population is sorted by fitness before it is returned. Since the random number generator was seeded with the current time, your particular output will be different when running this script from that presented here. 
+The script outputs the best individual in the final generation, which will be located at index 0 after the final population is sorted. Since the random number generator was seeded with the current time, your particular output will be different when running this script from that presented here. 
 
 .. rubric:: Footnotes
 
-.. [#] The evaluator was designed to evaluate all candidates, rather than a single candidate (with iteration happening inside the evolution engine), because this allows more complex evaluation functions that make use of the current set of individuals. Of course, such a function would also rely heavily on the choice of selector, as well.
+.. [#] The evaluator was designed to evaluate all candidates, rather than a single candidate (with iteration happening inside the evolutionary computation), because this allows more complex evaluation functions that make use of the current set of individuals. Of course, such a function would also rely heavily on the choice of selector, as well.
 
 .. [#] We can also certainly create real-coded genetic algorithms, among many other choices for our EC. However, for this discussion we are attempting to use the canonical versions to which most people would be accustomed.
 
@@ -100,7 +100,7 @@ The Generator
 
 Once again, we import the necessary libraries. In this case, we'll also need to tailor elements of the EC, as well as provide graphical output.
 
-After the libraries have been imported, we define our generator function. It looks for keyword arguments ``num_vertices``, ``lower_bound``, and ``upper_bound``, and it creates a list of ``num_vertices`` ordered pairs (tuples) where each coordinate is in the range ``[lower_bound, upper_bound]``.
+After the libraries have been imported, we define our generator function. It looks for the keyword argument ``num_vertices``, and it creates a list of ``num_vertices`` ordered pairs (tuples) where each coordinate is in the range [-1, 1].
 
 """""""""""""
 The Evaluator
@@ -114,8 +114,19 @@ The Evaluator
 
 .. literalinclude:: polyarea.py
     :pyobject: evaluate_polygon
+    :end-before: #start_bounder
 
 In order to evaluate the polygon, we need to calculate its area. The ``segments`` and ``area`` functions do this for us. Therefore, the ``evaluate_polygon`` function simply needs to assign the fitness to be the value returned as the area.
+
+"""""""""""
+The Bounder
+"""""""""""
+
+.. literalinclude:: polyarea.py
+    :start-after: #start_bounder
+    :end-before: #end_bounder
+    
+Because our representation is a bit non-standard (a list of tuples), we need to create a bounding function that the EC can use to bound potential candidate solutions. Here, the bounding function is simple enough. It just make sure that each element of each tuple lies in the range [-1, 1]. The ``lower_bound`` and ``upper_bound`` attributes are added to the function so that the ``mutate_polygon`` function can make use of them without being hard-coded. While this is not strictly necessary, it does mimic the behavior of the ``Bounder`` callable class provided by ECsPy.
 
 """"""""""""
 The Observer

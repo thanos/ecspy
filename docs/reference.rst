@@ -8,7 +8,31 @@ This chapter provides a complete reference to all of the functionality included 
 Evolutionary Computation
 ========================
 
-.. automodule:: ecspy.ec
+.. autoclass:: ecspy.ec.EvolutionExit
+   :members:
+   
+.. autoclass:: ecspy.ec.Bounder
+   :members:
+   
+.. autoclass:: ecspy.ec.Individual
+   :members:
+   
+.. autoclass:: ecspy.ec.EvolutionaryComputation
+   :members:
+   
+.. autoclass:: ecspy.ec.DEA
+   :members:
+   
+.. autoclass:: ecspy.ec.EDA
+   :members:
+   
+.. autoclass:: ecspy.ec.ES
+   :members:
+   
+.. autoclass:: ecspy.ec.GA
+   :members:
+   
+.. autoclass:: ecspy.ec.SA
    :members:
    
 ---------
@@ -125,6 +149,66 @@ Analysis
 ========
 
 .. automodule:: ecspy.analysis
+   :members:
+   
+==================
+Benchmark Problems
+==================
+
+.. autoclass:: ecspy.benchmarks.Benchmark
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.Binary
+   :members:
+   
+---------------------------
+Single-Objective Benchmarks
+---------------------------
+
+.. autoclass:: ecspy.benchmarks.Ackley
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.Griewank
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.Rastrigin
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.Rosenbrock
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.Schwefel
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.Sphere
+   :members:
+   
+--------------------------
+Multi-Objective Benchmarks
+--------------------------
+
+.. autoclass:: ecspy.benchmarks.Kursawe
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.DTLZ1
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.DTLZ2
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.DTLZ3
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.DTLZ4
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.DTLZ5
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.DTLZ6
+   :members:
+   
+.. autoclass:: ecspy.benchmarks.DTLZ7
    :members:
    
 =====================
