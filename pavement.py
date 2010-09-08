@@ -30,7 +30,7 @@ README = path('README.txt').text()
 # associated with sub-packages.
 PACKAGE_DATA = paver.setuputils.find_package_data(PROJECT, 
                                                   package=PROJECT,
-                                                  only_in_packages=False,
+                                                  only_in_packages=False
                                                   )
 
 options(
@@ -60,7 +60,7 @@ options(
           'Topic :: Scientific/Engineering :: Artificial Intelligence'
           ],
         
-        packages = [PROJECT],
+        packages = [PROJECT, '%s.contrib' % PROJECT, '%s.variators' % PROJECT],
         package_data=PACKAGE_DATA,
     ),
     
