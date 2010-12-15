@@ -188,8 +188,8 @@ def plus_replacement(random, population, parents, offspring, args):
     
     """
     use_one_fifth_rule = args.setdefault('use_one_fifth_rule', False)
-    pool = list(parents)
-    pool.extend(list(offspring))
+    pool = list(offspring)
+    pool.extend(list(parents))
     pool.sort(reverse=True)
     survivors = pool[:len(population)]
     if use_one_fifth_rule:
