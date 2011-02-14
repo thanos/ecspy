@@ -6,7 +6,7 @@ symbolic regression of a 6th order polynominal using cartesian genetic programmi
 '''
 __author__ = 'Henrik Rudstrom'
 from ecspy.variators.crossovers import n_point_crossover
-from ecspy.contrib.cartesian_genetic_programming import CGPPhenotype, CartesianGraphEncoding
+from ecspy.contrib.cgp import CGPPhenotype, CGPEncoding
 
 
 import ecspy
@@ -47,9 +47,10 @@ def get_fitness_function(target_function, constants):
     sixth order polynomial.
     --Miller
     '''
+    sample_points = list([random.random()*2-1 for _ in xrange(50)])
     def fitness(candidates, args):
         fitness = []
-        sample_points = [random.random()*2-1 for _ in xrange(50)]
+         #sample_points = list([random.random()*2-1 for _ in xrange(50)])
         for cand in candidates:
             fit = 0.0
             func = CGPPhenotype(encoding, cand)
@@ -113,7 +114,7 @@ def generate_initial_population(generator, n, sel, fitness_function):
             
 if __name__ == '__main__':
     constants = [1.]
-    encoding = CartesianGraphEncoding(10, 2, 10, [add, sub, mul, div], 1)
+    encoding = CGPEncoding(10, 2, 10, [add, sub, mul, div], 1)
 
     target = lambda x: x ** 6 - 2 * x ** 4 + x ** 2
     fitness_function = get_fitness_function(target, constants)
@@ -125,12 +126,12 @@ if __name__ == '__main__':
 
     prng = Random()
     prng.seed(time())    
-    ga = ec.GA(prng)
+    ga = ec.ES(prng)
 
     ga.observer = [screen_observer(encoding)]
     ga.terminator = terminators.evaluation_termination
-    ga.variator = [n_point_crossover, mutator]
-    ga.selector = tournament_selection
+    ga.variator = [mutator]
+    #ga.selector = tournament_selection
     start = time()
     print "setup", seeds
 
@@ -138,14 +139,11 @@ if __name__ == '__main__':
     final_pop = ga.evolve(seeds = seeds,
                           evaluator=fitness_function,
                           generator=generator,
-                          max_evaluations=80000,
-                          num_elites=1, 
-                          pop_size=4,
-                          mean=0.0, stdev=0.1,
+                          max_evaluations=80000, 
+                          pop_size=5,
                           mutation_rate=0.2,
-                          crossover_rate=1,
-                          tourn_size=4,
-                          maximize=False)
+                          maximize=False,
+                          use_one_fifth_rule=True)
     stop = time()
 
     print('***********************************')

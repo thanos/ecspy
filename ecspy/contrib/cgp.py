@@ -16,7 +16,7 @@ from ecspy.variators.mutators import mutator
 import networkx, random, math, unittest, time
 from itertools import izip_longest, dropwhile
 
-class CartesianGraphEncoding:
+class CGPEncoding:
     '''
        Defines a one single row cgp genome encoding.
     '''
@@ -249,7 +249,7 @@ def draw_graph(graph, scale = 20):
 
 class CGPTest(unittest.TestCase):
     def test_input_output(self):
-        enc = CartesianGraphEncoding(2, 1, 1, [], 2)
+        enc = CGPEncoding(2, 1, 1, [], 2)
         gen = [[0,0],[0,0], [2, 2], [2,2], [2,3]]
         input = [5,2]
         func = CGPPhenotype(enc, gen)
@@ -259,7 +259,7 @@ class CGPTest(unittest.TestCase):
         assert res[2] == input[1]
         
     def test_no_outputs(self):
-        enc = CartesianGraphEncoding(2, 1, 1, [], 2)
+        enc = CGPEncoding(2, 1, 1, [], 2)
         gen = [[0,0],[0,0]]
         input = [5,2]
         func = CGPPhenotype(enc, gen)  
@@ -270,7 +270,7 @@ class CGPTest(unittest.TestCase):
         assert res[1] == input[1], "res"+res[1]
 
     def test_too_few_outputs(self):
-        enc = CartesianGraphEncoding(2, 1, 1, [], 2)
+        enc = CGPEncoding(2, 1, 1, [], 2)
         gen = [[0,0],[0,0], [2,2]]
         input = [5,2]
         func = CGPPhenotype(enc, gen)    
@@ -287,7 +287,7 @@ class CGPTest(unittest.TestCase):
         def sub(a,b):
             return a - b
         
-        enc = CartesianGraphEncoding(2, 2, 1, [add, sub], 1)
+        enc = CGPEncoding(2, 2, 1, [add, sub], 1)
         gen1 = [[0,0,0],[0,0,0], [3,2,1], [3,2,2], [4, 2, 1], [2,1,0]]
         func = CGPPhenotype(enc, gen1)    
         input = [1,10]
