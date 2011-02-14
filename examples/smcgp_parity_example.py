@@ -157,12 +157,18 @@ def screen_observer(enc):
         print('Generation Evaluation Worst      Best       Median     Average    Std Dev   ')
         print('---------- ---------- ---------- ---------- ---------- ---------- ----------')
         print('{0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10}\n'.format(num_generations, num_evaluations, worst_fit, best_fit, med_fit, avg_fit, std_fit))
-        print('Current Population:')
+        print('Current Population: (id,fitness,todo,2 bit solution)')
         print('----------------------------------------------------------------------------')
         for i, c in enumerate(population):
             #f = CGPPhenotype(enc, c.candidate)
             #exp = f([Symbol('x'), RealNumber(1.0)])
-            print i, c.fitness, SMCGPPhenotype(enc, c.candidate) 
+            pass
+        for i, c in enumerate(population):
+            #f = CGPPhenotype(enc, c.candidate)
+            #exp = f([Symbol('x'), RealNumber(1.0)])
+            phe = SMCGPPhenotype(enc, c.candidate)
+            #print i, c.fitness, phe.todo_list, phe
+            print i, c.fitness, [p.__name__ for p in phe.todo_list], phe.get_modified()
             
     return screen_observer        
 

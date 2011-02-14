@@ -64,8 +64,10 @@ class InputPointer:
 
 def bind_modification(enc, gene, index):
     '''bind modification functions with their arguments'''
+    mod = enc.get_mod_function(gene.function)
     def f(cand):
-        return enc.get_mod_function(gene.function)(enc, gene, cand, index)
+        return mod(enc, gene, cand, index)
+    f.__name__ = mod.__name__
     return f
 
 class SMCGPPhenotype:
