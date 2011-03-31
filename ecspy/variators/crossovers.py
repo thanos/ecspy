@@ -15,39 +15,35 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import math
-import copy
-
-
 def crossover(cross):
     """Return an ecspy crossover function based on the given function.
-    
+
     This function generator takes a function that operates on only
     two parent candidates to produce an iterable list of offspring
-    (typically two). The generator handles the pairing of selected 
+    (typically two). The generator handles the pairing of selected
     parents and collecting of all offspring.
 
-    The generated function chooses every odd candidate as a 'mom' and 
+    The generated function chooses every odd candidate as a 'mom' and
     every even as a 'dad' (discounting the last candidate if there is
-    and odd number). For each mom-dad pair, offspring are produced via 
-    the `cross` function. 
-    
+    and odd number). For each mom-dad pair, offspring are produced via
+    the `cross` function.
+
     The given function ``cross`` must have the following signature::
-    
+
         offspring = cross(random, mom, dad, args)
-    
-    This function is most commonly used as a function decorator with 
+
+    This function is most commonly used as a function decorator with
     the following usage::
-    
+
         @crossover
         def cross(random, mom, dad, args):
             # Implementation of paired crossing
-    
+
     The generated function also contains an attribute named
     ``single_crossover`` which holds the original crossover function.
     In this way, the original single-candidate function can be
     retrieved if necessary.
-    
+
     """
     def ecspy_crossover(random, candidates, args):
         cand = list(candidates)
@@ -62,13 +58,15 @@ def crossover(cross):
             for o in offspring:
                 children.append(o)
         return children
-    ecspy_crossover.single_crossover = cross
+    cross.__globals__['single_'+cross.func_name] = cross
     ecspy_crossover.__name__ = cross.__name__
     ecspy_crossover.__dict__ = cross.__dict__
     ecspy_crossover.__doc__ = cross.__doc__
     return ecspy_crossover
 
-    
+
+import math, copy, functools
+
 @crossover
 def n_point_crossover(random, mom, dad, args):
     """Return the offspring of n-point crossover on the candidates.
@@ -113,7 +111,7 @@ def n_point_crossover(random, mom, dad, args):
         children.append(dad)
     return children
 
-    
+
 @crossover
 def uniform_crossover(random, mom, dad, args):
     """Return the offspring of uniform crossover on the candidates.
@@ -155,7 +153,7 @@ def uniform_crossover(random, mom, dad, args):
         children.append(dad)
     return children
 
-    
+
 @crossover
 def blend_crossover(random, mom, dad, args):
     """Return the offspring of blend crossover on the candidates.
