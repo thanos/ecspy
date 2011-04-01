@@ -47,10 +47,10 @@ def mutator(mutate):
         for i, cs in enumerate(mutants):
             mutants[i] = mutate(random, cs, args)
         return mutants
-    ecspy_mutator.single_mutation = mutate
     ecspy_mutator.__name__ = mutate.__name__
     ecspy_mutator.__dict__ = mutate.__dict__
     ecspy_mutator.__doc__ = mutate.__doc__
+    ecspy_mutator.single_mutation = mutate
     return ecspy_mutator
     
 

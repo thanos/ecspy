@@ -98,6 +98,9 @@ class Pareto(object):
         
     def __ge__(self, other):
         return other < self or not self < other
+        
+    def __eq__(self, other):
+        return self.values == other.values
     
     def __str__(self):
         return str(self.values)

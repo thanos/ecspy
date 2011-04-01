@@ -47,7 +47,7 @@ The Evaluator
     :pyobject: evaluate_rastrigin
     :end-before: #start_main
 
-This function takes an iterable object containing the candidates along with the keyword arguments. The function should perform the evaluation of each of the candidates and return an iterable object containing each fitness value in the same order as the candidates [#]_. The Rastrigin problem is one of minimization, so we'll need to tell the evolution strategy that we are minimizing (by using ``maximize=True`` in the call to ``evolve``).
+This function takes an iterable object containing the candidates along with the keyword arguments. The function should perform the evaluation of each of the candidates and return an iterable object containing each fitness value in the same order as the candidates [#]_. The Rastrigin problem is one of minimization, so we'll need to tell the evolution strategy that we are minimizing (by using ``maximize=False`` in the call to ``evolve``).
 
 """"""""""""""""""""""""""""
 The Evolutionary Computation

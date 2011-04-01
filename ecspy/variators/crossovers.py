@@ -15,6 +15,10 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import math
+import copy
+
+
 def crossover(cross):
     """Return an ecspy crossover function based on the given function.
 
@@ -58,14 +62,12 @@ def crossover(cross):
             for o in offspring:
                 children.append(o)
         return children
-    cross.__globals__['single_'+cross.func_name] = cross
     ecspy_crossover.__name__ = cross.__name__
     ecspy_crossover.__dict__ = cross.__dict__
     ecspy_crossover.__doc__ = cross.__doc__
+    ecspy_crossover.single_crossover = cross
     return ecspy_crossover
 
-
-import math, copy, functools
 
 @crossover
 def n_point_crossover(random, mom, dad, args):
