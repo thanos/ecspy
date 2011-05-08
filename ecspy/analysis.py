@@ -25,7 +25,13 @@ def generation_plot(filename, errorbars=True):
     """Plot the results of the EC using generation statistics.
     
     This function creates a plot of the generation fitness statistics 
-    (best, worst, median, and average).
+    (best, worst, median, and average). 
+
+    .. figure:: http://mcis.jsu.edu/faculty/agarrett/generation_plot.png
+        :alt: Example generation plot
+        :align: center
+        
+        An example image saved from the generation_plot function (without error bars).
     
     Arguments:
     

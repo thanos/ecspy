@@ -51,12 +51,12 @@ def evaluator(evaluate):
     """
     def ecspy_evaluator(candidates, args):
         fitness = []
-        for c in candidates:
+        for candidate in candidates:
             fitness.append(evaluate(candidate, args))
         return fitness
+    ecspy_evaluator.__dict__ = evaluate.__dict__
     ecspy_evaluator.single_evaluation = evaluate
     ecspy_evaluator.__name__ = evaluate.__name__
-    ecspy_evaluator.__dict__ = evaluate.__dict__
     ecspy_evaluator.__doc__ = evaluate.__doc__
     return ecspy_evaluator
     
