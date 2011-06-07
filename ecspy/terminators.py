@@ -223,14 +223,19 @@ def user_termination(population, num_generations, num_evaluations, args):
     
     """
     def getch():
-        bims = sys.builtin_module_names
-        if 'msvcrt' in bims:
-            import msvcrt
+        unix = ('darwin', 'linux2')
+        if sys.platform not in unix:
+            try:
+                import msvcrt
+            except ImportError:
+                print 'user_termination cannot import required module...\n are you running DOS or something?'
+                return -1
             if msvcrt.kbhit():
                 return msvcrt.getch()
             else:
                 return -1
-        elif 'curses' in bims:
+
+        elif sys.platform in unix:
             def _getch(stdscr):
                 stdscr.nodelay(1)
                 ch = stdscr.getch()
@@ -238,9 +243,7 @@ def user_termination(population, num_generations, num_evaluations, args):
                 return ch
             import curses
             return curses.wrapper(_getch)
-        else:
-            raise NotImplementedError
-            
+    
     num_secs = args.get('termination_response_timeout', 5)
     clear_buffer = args.get('clear_termination_buffer', True)
     if clear_buffer:
