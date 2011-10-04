@@ -43,6 +43,24 @@ class Bounder(object):
     ``upper_bound`` argument is ``None``, the Bounder leaves 
     the candidate unchanged (which is the default behavior).
     
+    A bounding function is necessary to ensure that all 
+    evolutionary operators respect the legal bounds for 
+    candidates. If the user is using only custom operators
+    (which would be aware of the problem constraints), then 
+    those can obviously be tailored to enforce the bounds
+    on the candidates themselves. But the built-in operators
+    make only minimal assumptions about the candidate solutions.
+    Therefore, they must rely on an external bounding function
+    that can be user-specified (so as to contain problem-specific
+    information). As a historical note, ECsPy was originally 
+    designed to require the maximum and minimum values for all
+    components of the candidate solution to be passed to the
+    ``evolve`` method. However, this was replaced by the bounding
+    function approach because it made fewer assumptions about
+    the structure of a candidate (e.g., that candidates were 
+    going to be lists) and because it allowed the user the
+    flexibility to provide more elaborate boundings if needed.
+    
     In general, a user-specified bounding function must accept
     two arguments: the candidate to be bounded and the keyword
     argument dictionary. Typically, the signature of such a 
@@ -284,7 +302,8 @@ class EvolutionaryComputation(object):
         This function creates a population and then runs it through a series
         of evolutionary epochs until the terminator is satisfied. The general
         outline of an epoch is selection, variation, evaluation, replacement,
-        migration, archival, and observation. The function returns the individuals
+        migration, archival, and observation. The function returns a list of
+        elements of type ``Individual`` representing the individuals contained
         in the final population.
         
         Arguments:
