@@ -194,6 +194,7 @@ def parallel_evaluation_mp(candidates, args):
     try:
         pool = multiprocessing.Pool(processes=nprocs)
         results = [pool.apply_async(evaluator, ([c], {})) for c in candidates]
+        pool.close()
         return [r.get()[0] for r in results]
     except (OSError, RuntimeError) as e:
         logger.error('failed parallel fitness evaluation using multiprocessing')
