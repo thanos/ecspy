@@ -2,7 +2,7 @@
 Tutorial
 ********
 
-This chapter presents two optimization examples to which ECsPy can be applied. Each example presents a particular problem for which the chosen evolutionary computation is well-suited.
+This chapter presents three optimization examples to which ECsPy can be applied. Each example presents a particular problem for which the chosen evolutionary computation is well-suited.
 
 ======================
 The Rastrigin Function
@@ -66,7 +66,7 @@ Now that we have decided upon our generator and evaluator, we can create the EC.
 ::
 
 	$ python rastrigin.py
-	[0.99993700069595504, 1.0015942945038594, 1.0004548077656621] : 0.000546088644107
+	[0.99997826058690698, 0.99987287134873248, 0.99819840966856499] : 0.00064721997137
 
 .. {{{end}}}
 
@@ -157,6 +157,82 @@ This EC uses tournament selection, uniform crossover, our custom mutation operat
 
 
 
+==============
+Lunar Explorer
+==============
 
+In this example [#]_, we will evolve the configuration for a satellite designed to travel around the Moon and return to Earth. The satellite is defined by five parameters: its orbital height, mass, boost velocity (both x and y components), and initial y (vertical from Earth) velocity.
 
+"""""""""""""
+The Generator
+"""""""""""""
+
+.. literalinclude:: moonshot.py
+    :start-after: #start_imports
+    :end-before: #end_imports
+    
+.. literalinclude:: moonshot.py
+    :pyobject: satellite_generator
+
+After the libraries have been imported, we define our generator function. It simply pulls the bounder values for each of the five parameters of the satellite and randomly chooses a value between.
+
+"""""""""""""
+The Evaluator
+"""""""""""""
+
+.. literalinclude:: moonshot.py
+    :pyobject: pairwise
+
+This function breaks a one-dimensional list into a set of overlapping pairs. This is necessary because the trajectory of the satellite is a set of points, and the total distance traveled is calculated by summing the pairwise distances.
+    
+.. literalinclude:: moonshot.py
+    :pyobject: distance_between
+
+This function calculates the Euclidean distance between points.
+    
+.. literalinclude:: moonshot.py
+    :pyobject: gravitational_force
+
+This function calculates the gravitational force between the two given bodies.  
+    
+.. literalinclude:: moonshot.py
+    :pyobject: force_on_satellite
+    
+This function calculates the force on the satellite from both the Earth and the Moon.
+
+.. literalinclude:: moonshot.py
+    :pyobject: acceleration_of_satellite
+
+This function calculates the acceleration of the satellite due to the forces acting upon it.
+    
+.. literalinclude:: moonshot.py
+    :pyobject: moonshot
+
+This function does the majority of the work for the evaluation. It accepts the parameters that are being evolved, and it simulates the trajectory of a satellite as it moves around the Moon and back to the Earth. The fitness of the trajectory is as follows:
+
+fitness = minimum distance from moon + 1% of total distance traveled + Moon crash penalty - Earth landing reward
+
+The penalty/reward is 100000, and the fitness is designed to be minimized.
+
+.. literalinclude:: moonshot.py
+    :pyobject: moonshot_evaluator
+
+The evaluator simply calls the `moonshot` function.
+    
+""""""""""""""""""""""""""""
+The Evolutionary Computation
+""""""""""""""""""""""""""""
+
+.. literalinclude:: moonshot.py
+    :start-after: #start_main
+    :end-before: #end_main
+
+The results, if plotted, will look similar to the figure below. Here, the color denotes the passage of time, from red to blue.
+
+.. image:: moonshot.jpg
+   :width: 600
+   :alt: Sample Results
+   :align: center
+    
+.. [#] This example was suggested and implemented by Mike Vella (vellamike@gmail.com), a contributor to ECsPy.
 
