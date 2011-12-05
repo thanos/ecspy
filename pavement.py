@@ -88,6 +88,10 @@ options(
         endspec='}}}',
         endoutput='{{{end}}}',
     ),
+    
+    minilib=Bunch(
+        extra_files=['doctools']
+    ),
 )
 
 def run_script(input_file, script_name, interpreter='python'):
