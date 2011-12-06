@@ -17,7 +17,7 @@ except:
 
 
 PROJECT = 'ecspy'
-VERSION = '0.7'
+VERSION = '1.0'
 
 # The sphinx templates expect the VERSION in the shell environment
 os.environ['VERSION'] = VERSION
@@ -50,13 +50,13 @@ options(
                   'nsga', 'paes'),
 
         classifiers=[
-          'Development Status :: 4 - Beta',
+          'Development Status :: 5 - Production/Stable',
           'Environment :: Console',
           'Intended Audience :: Developers',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: GNU General Public License (GPL)',
           'Operating System :: OS Independent',
-          'Programming Language :: Python :: 2.6',
+          'Programming Language :: Python :: 2',
           'Topic :: Scientific/Engineering :: Artificial Intelligence'
           ],
         

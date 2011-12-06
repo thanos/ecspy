@@ -20,6 +20,6 @@
 
 __all__ = ['analysis', 'archivers', 'benchmarks', 'contrib', 'ec', 'emo', 'evaluators', 'migrators', 
            'observers', 'replacers', 'selectors', 'swarm', 'terminators', 'topologies', 'variators']
-__version__ = '0.7'
+__version__ = '1.0'
 __author__ = 'Aaron Garrett <aaron.lee.garrett@gmail.com>'
 __url__ = 'http://ecspy.googlecode.com'
