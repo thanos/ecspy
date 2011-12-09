@@ -161,7 +161,7 @@ This EC uses tournament selection, uniform crossover, our custom mutation operat
 Lunar Explorer
 ==============
 
-In this example [#]_, we will evolve the configuration for a satellite designed to travel around the Moon and return to Earth. The satellite is defined by five parameters: its orbital height, mass, boost velocity (both x and y components), and initial y (vertical from Earth) velocity.
+In this example [#]_, we will evolve the configuration for a space probe designed to travel around the Moon and return to Earth. The space probe is defined by five parameters: its orbital height, mass, boost velocity (both x and y components), and initial y (vertical from Earth) velocity. The physical problem which we are here using optimization to solve is known as "Gravity Assist" or "Gravity Slingshot" and is used by spacecraft to alter the direction and speed of spacecraft, reducing the need for propellant. It was first propsed by Yuri Kondratyuk and first used by the Soviet space probe Luna 3 in 1959 to take the first pictures of the never-before seen far side of the moon. The computational power available to the designers of the Luna 3 was much smaller than what is available today. The optimization of the space craft's trajectory was therefore a very difficult task. The evaluator presented here makes some simplifying assumptions, but demonstrates the general principle of using evolutionary computation to solve an engineering or scientific task.
 
 """""""""""""
 The Generator
