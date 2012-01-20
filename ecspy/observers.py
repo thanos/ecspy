@@ -1,7 +1,7 @@
 """
     This module provides pre-defined observers for evolutionary computations.
     
-    All terminator functions have the following arguments:
+    All observer functions have the following arguments:
     
     - *population* -- the population of Individuals
     - *num_generations* -- the number of elapsed generations
