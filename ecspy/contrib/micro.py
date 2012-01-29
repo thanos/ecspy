@@ -6,7 +6,7 @@ class MicroEC(ec.EvolutionaryComputation):
     def __init__(self, random):
         ec.EvolutionaryComputation.__init__(self, random)
         
-    def evolve(self, generator, evaluator, pop_size=10, seeds=[], maximize=True, bounder=ec.bounder(), **args):
+    def evolve(self, generator, evaluator, pop_size=10, seeds=[], maximize=True, bounder=ec.Bounder(), **args):
         self._kwargs = args
         self._kwargs['_ec'] = self
         self.termination_cause = None
@@ -27,6 +27,7 @@ class MicroEC(ec.EvolutionaryComputation):
             microec.replacer = self.replacer
             microec.terminator = terminators.diversity_termination
             result = microec.evolve(generator=generator, evaluator=evaluator, pop_size=pop_size, seeds=microseeds, maximize=maximize, **args)
+            result.sort(reverse=True)
             microseeds = [result[0].candidate]
             self.population = list(result)
             self.num_evaluations += microec.num_evaluations
@@ -82,7 +83,7 @@ if __name__ == '__main__':
     micro.archiver = archivers.best_archiver
     micro.observer = observers.screen_observer
     micro.terminator = terminators.evaluation_termination
-    final_pop = micro.evolve(rastrigin_generator, rastrigin_evaluator, pop_size=10, maximize=False, bounder=ec.bounder(-5.12, 5.12),
+    final_pop = micro.evolve(rastrigin_generator, rastrigin_evaluator, pop_size=10, maximize=False, bounder=ec.Bounder(-5.12, 5.12),
                              max_evaluations=3000, num_selected=2, stdev=0.1)
                              
     print('Actual evaluations: %d' % micro.num_evaluations)
