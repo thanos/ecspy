@@ -189,11 +189,19 @@ def parallel_evaluation_mp(candidates, args):
         nprocs = args['mp_num_cpus']
     except KeyError:
         nprocs = multiprocessing.cpu_count()
-    
+    mp_args = {}
+    for key in args:
+        try:
+            pickle.dumps(args[key])
+            mp_args[key] = args[key]
+        except TypeError, pickle.PickleError:
+            logger.debug('in mp_evaluator: unable to pickle args parameter %s' % key)
+            pass
+            
     start = time.time()
     try:
         pool = multiprocessing.Pool(processes=nprocs)
-        results = [pool.apply_async(evaluator, ([c], {})) for c in candidates]
+        results = [pool.apply_async(evaluator, ([c], mp_args)) for c in candidates]
         pool.close()
         return [r.get()[0] for r in results]
     except (OSError, RuntimeError) as e:
