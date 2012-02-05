@@ -6,3 +6,4 @@ COMMAND /C make latex
 cd _build\latex
 pdflatex ecspy.tex
 cd ..\..\..
+

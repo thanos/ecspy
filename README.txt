@@ -12,10 +12,9 @@ who don't need much customization.
 Requirements
 ============
 
-  * Requires at least Python 2.6.
-  * Numpy is required if the screen or file observers are used.
-  * Matplotlib is required if the line plot observer is used.
-  * Parallel Python (pp) is required if parallel evaluation is used.
+  * Requires at least Python 2.6 (not compatible with Python 3+).
+  * Numpy and Matplotlib are required if the line plot observer is used.
+  * Parallel Python (pp) is required if parallel_evaluation_pp is used.
 
 
 
@@ -44,7 +43,7 @@ ECsPy consists of the following modules:
   
   * evaluators.py -- defines useful evaluation schemes, such as parallel evaluation
   
-  * migrators.py -- defines a basic default migration which does nothing
+  * migrators.py -- defines a few built-in migrators, including migration via network and migration among concurrent processes
 
   * observers.py -- defines a few built-in observers, including screen, file, and plotting observers
   

@@ -1,4 +1,4 @@
-import psyco; psyco.full()
+#import psyco; psyco.full()
 import unittest, sys, os, random
 pth = os.path.split( os.path.split( os.path.abspath(__file__) )[0] )[0] 
 sys.path.append( pth )

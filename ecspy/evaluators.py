@@ -24,6 +24,7 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import pickle
 
 def evaluator(evaluate):
     """Return an ecspy evaluator function based on the given function.
@@ -119,7 +120,7 @@ def parallel_evaluation_pp(candidates, args):
         job_server = args['_pp_job_server']
     except KeyError:
         pp_servers = args.get('pp_servers', ("*",))
-        job_server = pp.Server(ppservers=pp_servers)
+        job_server = pp.Server(ppservers=pp_servers, secret="ecspy")
         args['_pp_job_server'] = job_server
     pp_depends = args.setdefault('pp_dependencies', ())
     pp_modules = args.setdefault('pp_modules', ())
@@ -194,7 +195,7 @@ def parallel_evaluation_mp(candidates, args):
         try:
             pickle.dumps(args[key])
             mp_args[key] = args[key]
-        except TypeError, pickle.PickleError:
+        except (TypeError, pickle.PickleError, pickle.PicklingError):
             logger.debug('in mp_evaluator: unable to pickle args parameter %s' % key)
             pass
             

@@ -17,9 +17,24 @@
        along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import analysis
+import archivers
+import benchmarks
+import contrib
+import ec
+import emo
+import evaluators
+import migrators
+import observers
+import replacers
+import selectors
+import swarm
+import terminators
+import topologies
+import variators
 
 __all__ = ['analysis', 'archivers', 'benchmarks', 'contrib', 'ec', 'emo', 'evaluators', 'migrators', 
            'observers', 'replacers', 'selectors', 'swarm', 'terminators', 'topologies', 'variators']
-__version__ = '1.0'
+__version__ = '1.1'
 __author__ = 'Aaron Garrett <aaron.lee.garrett@gmail.com>'
 __url__ = 'http://ecspy.googlecode.com'

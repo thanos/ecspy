@@ -1,3 +1,5 @@
+#!/usr/bin/python2.6
+
 # Standard library
 import os
 import sys
@@ -17,7 +19,7 @@ except:
 
 
 PROJECT = 'ecspy'
-VERSION = '1.0'
+VERSION = '1.1'
 
 # The sphinx templates expect the VERSION in the shell environment
 os.environ['VERSION'] = VERSION
@@ -42,7 +44,7 @@ options(
         author='Aaron Garrett',
         author_email='aaron.lee.garrett@gmail.com',
         url='http://%s.googlecode.com' % PROJECT,
-        download_url = 'http://%s.googlecode.com/files/%s-%s.zip' % (PROJECT, PROJECT, VERSION),
+        download_url = 'http://%s.googlecode.com/files/%s-%s.tar.gz' % (PROJECT, PROJECT, VERSION),
         license='GPLv3+',
         platforms=('Any'),
         keywords=('python', 'optimization', 'evolutionary', 'computation', 'genetic algorithm', 

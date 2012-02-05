@@ -48,16 +48,20 @@ def screen_observer(population, num_generations, num_evaluations, args):
        args -- a dictionary of keyword arguments
     
     """
-    import numpy
-    
+
     population = list(population)
     population.sort(reverse=True)
     worst_fit = population[-1].fitness
     best_fit = population[0].fitness
-    med_fit = numpy.median([p.fitness for p in population])
-    avg_fit = numpy.mean([p.fitness for p in population])
-    std_fit = numpy.std([p.fitness for p in population], ddof=1)
 
+    plen = len(population)
+    if plen % 2 == 1:
+        med_fit = population[(plen - 1) / 2].fitness
+    else:
+        med_fit = float(population[plen / 2 - 1].fitness + population[plen / 2].fitness) / 2
+    avg_fit = sum([p.fitness for p in population]) / float(plen)
+    std_fit = math.sqrt(sum([(p.fitness - avg_fit)**2 for p in population]) / float(plen - 1))
+    
     print('Generation Evaluation Worst      Best       Median     Average    Std Dev   ')
     print('---------- ---------- ---------- ---------- ---------- ---------- ----------')
     print('{0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10}\n'.format(num_generations, num_evaluations, worst_fit, best_fit, med_fit, avg_fit, std_fit))
@@ -92,9 +96,6 @@ def file_observer(population, num_generations, num_evaluations, args):
     - *individuals_file* -- a file object (default: see text) 
     
     """
-    # Import the necessary libraries here. Otherwise, they would have to be
-    # installed even if this function is not called.
-    import numpy
     
     try:
         statistics_file = args['statistics_file']
@@ -109,9 +110,15 @@ def file_observer(population, num_generations, num_evaluations, args):
     population.sort(reverse=True)
     worst_fit = population[-1].fitness
     best_fit = population[0].fitness
-    med_fit = numpy.median([p.fitness for p in population])
-    avg_fit = numpy.mean([p.fitness for p in population])
-    std_fit = numpy.std([p.fitness for p in population], ddof=1)
+
+    plen = len(population)
+    if plen % 2 == 1:
+        med_fit = population[(plen - 1) / 2].fitness
+    else:
+        med_fit = float(population[plen / 2 - 1].fitness + population[plen / 2].fitness) / 2
+    avg_fit = sum([p.fitness for p in population]) / float(plen)
+    std_fit = math.sqrt(sum([(p.fitness - avg_fit)**2 for p in population]) / float(plen - 1))
+    
     statistics_file.write('{0}, {1}, {2}, {3}, {4}, {5}, {6}\n'.format(num_generations, len(population), worst_fit, best_fit, med_fit, avg_fit, std_fit))
     for i, p in enumerate(population):
         individuals_file.write('{0}, {1}, {2}, {3}\n'.format(num_generations, i, p.fitness, str(p.candidate)))
