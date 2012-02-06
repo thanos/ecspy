@@ -1,7 +1,6 @@
 #!/bin/sh
 
 paver sdist upload
-paver bdist_egg upload
 
 cd docs
 make latex
