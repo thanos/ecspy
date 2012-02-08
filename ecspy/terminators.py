@@ -170,8 +170,8 @@ def time_termination(population, num_generations, num_evaluations, args):
     
     Optional keyword arguments in args:
     
-    *start_time* -- the time from which to start measuring (default None)
-    *max_time* -- the maximum time that should elapse (default None)
+    - *start_time* -- the time from which to start measuring (default None)
+    - *max_time* -- the maximum time that should elapse (default None)
     
     """
     start_time = args.setdefault('start_time', None)

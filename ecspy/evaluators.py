@@ -103,18 +103,13 @@ def parallel_evaluation_pp(candidates, args):
     documentation for Parallel Python.
     
     """
-    try:
-        import pp
-    except ImportError:
-        print '''Parallel Python is not installed...\n
-        The parallel_evaluation_pp function requires Parallel Python.\n'''
-        raise
+    import pp
     logger = args['_ec'].logger
     
     try:
         evaluator = args['pp_evaluator']
     except KeyError:
-        logger.error('\'mp_evaluator\' is not in the keyword arguments list')
+        logger.error('parallel_evaluation_pp requires \'pp_evaluator\' be defined in the keyword arguments list')
         raise 
     try:
         job_server = args['_pp_job_server']
@@ -173,18 +168,13 @@ def parallel_evaluation_mp(candidates, args):
     
     """
     import time
-    try:
-        import multiprocessing
-    except ImportError:
-        print '''multiprocessing is not installed...\n
-        ecspy has been designed to work with Python 2.6, which has multiprocessing as a standard library\n'''
-        raise
+    import multiprocessing
     logger = args['_ec'].logger
     
     try:
         evaluator = args['mp_evaluator']
     except KeyError:
-        logger.error('\'mp_evaluator\' is not in the keyword arguments list')
+        logger.error('parallel_evaluation_mp requires \'mp_evaluator\' be defined in the keyword arguments list')
         raise 
     try:
         nprocs = args['mp_num_cpus']
@@ -196,9 +186,9 @@ def parallel_evaluation_mp(candidates, args):
             pickle.dumps(args[key])
             mp_args[key] = args[key]
         except (TypeError, pickle.PickleError, pickle.PicklingError):
-            logger.debug('in mp_evaluator: unable to pickle args parameter %s' % key)
+            logger.debug('unable to pickle args parameter %s in parallel_evaluation_mp' % key)
             pass
-            
+          
     start = time.time()
     try:
         pool = multiprocessing.Pool(processes=nprocs)
@@ -206,9 +196,9 @@ def parallel_evaluation_mp(candidates, args):
         pool.close()
         return [r.get()[0] for r in results]
     except (OSError, RuntimeError) as e:
-        logger.error('failed parallel fitness evaluation using multiprocessing')
+        logger.error('failed parallel_evaluation_mp')
         raise
     else:
         end = time.time()
-        logger.debug('completed parallel evaluation in %f seconds' % (end - start))
+        logger.debug('completed parallel_evaluation_mp in %f seconds' % (end - start))
         

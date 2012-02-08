@@ -64,7 +64,7 @@ def screen_observer(population, num_generations, num_evaluations, args):
     
     print('Generation Evaluation Worst      Best       Median     Average    Std Dev   ')
     print('---------- ---------- ---------- ---------- ---------- ---------- ----------')
-    print('{0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10}\n'.format(num_generations, num_evaluations, worst_fit, best_fit, med_fit, avg_fit, std_fit))
+    print('{0:10} {1:10} {2:10.5} {3:10.5} {4:10.5} {5:10.5} {6:10.5}\n'.format(num_generations, num_evaluations, worst_fit, best_fit, med_fit, avg_fit, std_fit))
     print('Current Population:')
     for ind in population:
         print(str(ind))
