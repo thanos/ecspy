@@ -1,4 +1,3 @@
-
 import unittest
 import random
 import logging
@@ -20,6 +19,8 @@ def test_multiobjective_evaluator(candidates, args):
     for c in candidates:
         fitness.append(ecspy.emo.Pareto([sum(c), sum(c)]))
     return fitness
+    
+
     
 prng = random.Random()
 prng.seed(111111)
@@ -72,6 +73,23 @@ class MigratorTests(unittest.TestCase):
     def test_default_migration(self):
         migrants = ecspy.migrators.default_migration(prng, test_population, {})
         assert migrants == test_population
+    '''
+    def test_multiprocessing_migration(self):
+        class fake_ec(object):
+            def __init__(self):
+                self.evaluator = test_evaluator
+                self.num_evaluations = 0
+        x = fake_ec()
+        mm = ecspy.migrators.MultiprocessingMigrator(2)
+        mig = ecspy.ec.Individual([1, 1, 1, 1, 1, 1])
+        mig.fitness = 0
+        mm.migrants.put(mig)
+        new_pop = mm(prng, test_population, {'_ec': x, 'evaluate_migrant': True})
+        mm.migrants.join_thread()
+        assert mig.candidate in [p.candidate for p in new_pop]
+        assert mm.migrants.qsize() == 1
+        assert x.num_evaluations == 1
+    '''    
         
 class ReplacerTests(unittest.TestCase):
     def test_default_replacement(self):

@@ -337,7 +337,7 @@ def simulated_annealing_replacement(random, population, parents, offspring, args
     for p, o in zip(parents, offspring):
         if o >= p:
             new_pop.append(o)
-        elif random.random() < math.exp(-abs(p.fitness - o.fitness) / float(temp)):
+        elif temp > 0 and random.random() < math.exp(-abs(p.fitness - o.fitness) / float(temp)):
             new_pop.append(o)
         else:
             new_pop.append(p)

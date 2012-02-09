@@ -10,12 +10,7 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import Circle
 from random import Random
 from time import time
-from ecspy import ec
-from ecspy import terminators
-from ecspy import observers
-from ecspy import selectors
-from ecspy import replacers
-from ecspy import variators
+import ecspy
 #end_imports
 
 # All units are in SI unless stated otherwise.
@@ -158,7 +153,6 @@ def moonshot(orbital_height, satellite_mass, boost_velocity, initial_y_velocity,
         plt.axis("equal")
         plt.grid("on")
         projdir = os.path.dirname(os.getcwd())
-        print(projdir)
         name = "%s/%s.pdf" % (projdir, str(fitness))
         plt.savefig(name, format="pdf")
         plt.clf()
@@ -200,30 +194,30 @@ rand.seed(int(time()))
 constraints=((6e6,      10.0,       3e3,    -10000.0,   4000), 
              (8e6,      40.0,       9e3,     10000.0,   6000))
 
-algorithm = ec.EvolutionaryComputation(rand)
-algorithm.terminator = terminators.evaluation_termination
-algorithm.observer = [observers.file_observer, custom_observer]
-algorithm.selector = selectors.tournament_selection
-algorithm.replacer = replacers.generational_replacement
-algorithm.variator = [variators.blend_crossover, variators.gaussian_mutation]
+algorithm = ecspy.ec.EvolutionaryComputation(rand)
+algorithm.terminator = ecspy.terminators.evaluation_termination
+algorithm.observer = [ecspy.observers.file_observer, custom_observer]
+algorithm.selector = ecspy.selectors.tournament_selection
+algorithm.replacer = ecspy.replacers.generational_replacement
+algorithm.variator = [ecspy.variators.blend_crossover, ecspy.variators.gaussian_mutation]
 projdir = os.path.dirname(os.getcwd())
 
-stat_file_name = "%s/data/ec_statistics.csv" % projdir
-ind_file_name = "%s/data/ec_individuals.csv" % projdir
+stat_file_name = "%s/moonshot_ec_statistics.csv" % projdir
+ind_file_name = "%s/moonshot_ec_individuals.csv" % projdir
 stat_file = open(stat_file_name, 'w')
 ind_file = open(ind_file_name, 'w')
 final_pop = algorithm.evolve(generator=satellite_generator,
-                      evaluator=moonshot_evaluator,
-                      pop_size=100,
-                      maximize=False,
-                      bounder=ec.Bounder(constraints[0], constraints[1]),
-                      num_selected=100,
-                      tourn_size=2,
-                      num_elites=1,
-                      mutation_rate=0.3,
-                      max_evaluations=200,
-                      statistics_file=stat_file,
-                      individuals_file=ind_file)
+                             evaluator=moonshot_evaluator,
+                             pop_size=100,
+                             maximize=False,
+                             bounder=ecspy.ec.Bounder(constraints[0], constraints[1]),
+                             num_selected=100,
+                             tourn_size=2,
+                             num_elites=1,
+                             mutation_rate=0.3,
+                             max_evaluations=600,
+                             statistics_file=stat_file,
+                             individuals_file=ind_file)
 
 stat_file.close()
 ind_file.close()

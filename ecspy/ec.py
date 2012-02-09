@@ -112,7 +112,22 @@ class Individual(object):
     """Represents an individual in an evolutionary computation.
     
     An individual is defined by its candidate solution and the
-    fitness (or value) of that candidate solution.
+    fitness (or value) of that candidate solution. Individuals
+    can be compared with one another by using <, <=, >, and >=.
+    In all cases, such comparisons are made using the individuals'
+    fitness values. The ``maximize`` attribute is respected in all
+    cases, so it is better to think of, for example, < (less-than)
+    to really mean "worse than" and > (greater-than) to mean
+    "better than". For instance, if individuals a and b have fitness
+    values 2 and 4, respectively, and if ``maximize`` were ``True``,
+    then a < b would be true. If ``maximize`` were ``False``, then 
+    a < b would be false (because a is "better than" b in terms of
+    the fitness evaluation, since we're minimizing).
+    
+    Note that ``Individual`` objects are almost always created by
+    the EC, rather than the user. The ``evolve`` method of the
+    EC also has a ``maximize`` argument, whose value is passed
+    directly to all created individuals.
     
     Public Attributes:
     
@@ -162,31 +177,17 @@ class Individual(object):
     def __ge__(self, other):
         return other < self or not self < other
         
-    def __lshift__(self, other):
-        return self < other
-    
-    def __rshift__(self, other):
-        return other < self
-        
-    def __ilshift__(self, other):
-        raise TypeError("unsupported operand type(s) for <<=: 'Individual' and 'Individual'")
-    
-    def __irshift__(self, other):
-        raise TypeError("unsupported operand type(s) for >>=: 'Individual' and 'Individual'")
-        
-    def __eq__(self, other):
-        return self.candidate == other.candidate
-        
-    def __ne__(self, other):
-        return self.candidate != other.candidate
-
 
 class EvolutionExit(Exception):
     """An exception that may be raised and caught to end the evolution.
     
     This is an empty exception class that can be raised by the user
     at any point in the code and caught outside of the ``evolve``
-    method. 
+    method. Be aware that ending the evolution in such a way will
+    almost certainly produce an erroneous population (e.g., not all 
+    individuals will have been reevaluated, etc.). However, this approach
+    can be viable if solutions have been archived such that the current
+    population is not of critical importance.
     
     """
     pass
@@ -214,7 +215,7 @@ class EvolutionaryComputation(object):
     until after the ``evolve`` method executes:
     
     - *termination_cause* -- the name of the function causing 
-      ``evolve`` to terminate
+      ``evolve`` to terminate, in the event that multiple terminators are used
     - *generator* -- the generator function passed to ``evolve``
     - *evaluator* -- the evaluator function passed to ``evolve``
     - *bounder* -- the bounding function passed to ``evolve``
@@ -273,20 +274,25 @@ class EvolutionaryComputation(object):
         self.num_evaluations = 0
         self.num_generations = 0
         self.logger = logging.getLogger('ecspy.ec')
+        try:
+            self.logger.addHandler(logging.NullHandler())
+        except AttributeError:
+            # If Python < 2.7, then NullHandler doesn't exist.
+            pass
         self._random = random
         self._kwargs = dict()
         
     def _should_terminate(self, pop, ng, ne):
         terminate = False
         fname = ''
-        try:
+        if isinstance(self.terminator, (list, tuple)):
             for clause in self.terminator:
                 self.logger.debug('termination test using %s at generation %d and evaluation %d' % (clause.__name__, ng, ne))
                 terminate = terminate or clause(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
                 if terminate:
                     fname = clause.__name__
                     break
-        except TypeError:
+        else:
             self.logger.debug('termination test using %s at generation %d and evaluation %d' % (self.terminator.__name__, ng, ne))
             terminate = self.terminator(population=pop, num_generations=ng, num_evaluations=ne, args=self._kwargs)
             fname = self.terminator.__name__

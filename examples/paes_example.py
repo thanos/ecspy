@@ -1,19 +1,15 @@
 from random import Random
 from time import time
-from ecspy import ec
-from ecspy import emo
-from ecspy import terminators
-from ecspy import benchmarks
-
+import ecspy
 
 def main(do_plot=True, prng=None):
     if prng is None:
         prng = Random()
         prng.seed(time()) 
         
-    problem = benchmarks.Kursawe(3)
-    ea = emo.PAES(prng)
-    ea.terminator = terminators.evaluation_termination
+    problem = ecspy.benchmarks.Kursawe(3)
+    ea = ecspy.emo.PAES(prng)
+    ea.terminator = ecspy.terminators.evaluation_termination
     final_pop = ea.evolve(generator=problem.generator, 
                           evaluator=problem.evaluator, 
                           bounder=problem.bounder,

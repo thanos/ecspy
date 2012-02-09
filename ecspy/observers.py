@@ -33,13 +33,13 @@ def default_observer(population, num_generations, num_evaluations, args):
     pass
     
     
-def screen_observer(population, num_generations, num_evaluations, args):
-    """Print the output of the EC to the screen.
+def stats_observer(population, num_generations, num_evaluations, args):
+    """Print the statistics of the EC to the screen.
     
-    This function displays the results of the evolutionary computation
+    This function displays the statistics of the evolutionary computation
     to the screen. The output includes the generation number, the current
-    number of evaluations, the average fitness, the maximum fitness, and 
-    the full population.
+    number of evaluations, the maximum fitness, the minimum fitness, 
+    the average fitness, and the standard deviation.
     
     .. Arguments:
        population -- the population of Individuals
@@ -65,11 +65,30 @@ def screen_observer(population, num_generations, num_evaluations, args):
     print('Generation Evaluation Worst      Best       Median     Average    Std Dev   ')
     print('---------- ---------- ---------- ---------- ---------- ---------- ----------')
     print('{0:10} {1:10} {2:10.5} {3:10.5} {4:10.5} {5:10.5} {6:10.5}\n'.format(num_generations, num_evaluations, worst_fit, best_fit, med_fit, avg_fit, std_fit))
+
+
+def population_observer(population, num_generations, num_evaluations, args):
+    """Print the current population of the EC to the screen.
+    
+    This function displays the current population of the evolutionary 
+    computation to the screen in fitness-sorted order. 
+    
+    .. Arguments:
+       population -- the population of Individuals
+       num_generations -- the number of elapsed generations
+       num_evaluations -- the number of candidate solution evaluations
+       args -- a dictionary of keyword arguments
+    
+    """
+    
+    population = list(population)
+    population.sort(reverse=True)
+    print('----------------------------------------------------------------------------')
     print('Current Population:')
     for ind in population:
         print(str(ind))
     print('----------------------------------------------------------------------------')
-
+    
     
 def file_observer(population, num_generations, num_evaluations, args):
     """Print the output of the EC to a file.

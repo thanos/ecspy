@@ -1,20 +1,16 @@
 from random import Random
 from time import time
-from ecspy import emo
-from ecspy import variators
-from ecspy import terminators
-from ecspy import benchmarks
-
+import ecspy
    
 def main(do_plot=True, prng=None):
     if prng is None:
         prng = Random()
         prng.seed(time()) 
 
-    problem = benchmarks.Kursawe(3)
-    ea = emo.NSGA2(prng)
-    ea.variator = [variators.blend_crossover, variators.gaussian_mutation]
-    ea.terminator = terminators.generation_termination
+    problem = ecspy.benchmarks.Kursawe(3)
+    ea = ecspy.emo.NSGA2(prng)
+    ea.variator = [ecspy.variators.blend_crossover, ecspy.variators.gaussian_mutation]
+    ea.terminator = ecspy.terminators.generation_termination
     final_pop = ea.evolve(generator=problem.generator, 
                           evaluator=problem.evaluator, 
                           pop_size=100,

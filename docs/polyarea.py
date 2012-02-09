@@ -2,12 +2,7 @@
 from random import Random
 from time import time
 from time import sleep
-from ecspy import ec
-from ecspy import observers
-from ecspy import replacers
-from ecspy import selectors
-from ecspy import terminators
-from ecspy import variators
+import ecspy
 from Tkinter import *
 import itertools
 #end_imports
@@ -87,12 +82,12 @@ def polygon_observer(population, num_generations, num_evaluations, args):
 #start_main
 rand = Random()
 rand.seed(int(time()))
-my_ec = ec.EvolutionaryComputation(rand)
-my_ec.selector = ec.selectors.tournament_selection
-my_ec.variator = [ec.variators.uniform_crossover, mutate_polygon]
-my_ec.replacer = ec.replacers.steady_state_replacement
+my_ec = ecspy.ec.EvolutionaryComputation(rand)
+my_ec.selector = ecspy.selectors.tournament_selection
+my_ec.variator = [ecspy.variators.uniform_crossover, mutate_polygon]
+my_ec.replacer = ecspy.replacers.steady_state_replacement
 my_ec.observer = polygon_observer
-my_ec.terminator = [terminators.evaluation_termination, terminators.average_fitness_termination]
+my_ec.terminator = [ecspy.terminators.evaluation_termination, ecspy.terminators.average_fitness_termination]
 window = Tk()
 window.title('Evolving Polygons')
 can = Canvas(window, bg='white', height=400, width=400)

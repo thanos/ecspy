@@ -71,7 +71,7 @@ if __name__ == '__main__':
     prng = random.Random()
     prng.seed(time.time())
     es = ec.ES(prng)
-    #es.observer = observers.screen_observer
+    #es.observer = observers.stats_observer
     es.terminator = terminators.evaluation_termination
     final_pop = es.evolve(rastrigin_generator, rastrigin_evaluator, pop_size=20, maximize=False, 
                           max_evaluations=5000, lower_bound=-5.12, upper_bound=5.12)

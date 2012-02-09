@@ -81,7 +81,7 @@ if __name__ == '__main__':
     micro.replacer = replacers.steady_state_replacement
     micro.variator = [variators.uniform_crossover, variators.gaussian_mutation]
     micro.archiver = archivers.best_archiver
-    micro.observer = observers.screen_observer
+    micro.observer = observers.stats_observer
     micro.terminator = terminators.evaluation_termination
     final_pop = micro.evolve(rastrigin_generator, rastrigin_evaluator, pop_size=10, maximize=False, bounder=ec.Bounder(-5.12, 5.12),
                              max_evaluations=3000, num_selected=2, stdev=0.1)

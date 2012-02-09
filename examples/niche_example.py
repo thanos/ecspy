@@ -2,13 +2,7 @@ import random
 import time
 import math
 import itertools
-from ecspy import ec
-from ecspy import selectors
-from ecspy import terminators
-from ecspy import variators
-from ecspy import replacers
-from ecspy import observers
-
+import ecspy
 
 def my_distance(x, y):
     return sum([abs(a - b) for a, b in zip(x, y)])
@@ -16,7 +10,6 @@ def my_distance(x, y):
 def generate(random, args):
     return [random.uniform(0, 26)]
     
-
 def evaluate(candidates, args):
     fitness = []
     for cand in candidates:
@@ -24,19 +17,18 @@ def evaluate(candidates, args):
         fitness.append(fit)
     return fitness
 
-
 def main(do_plot=True, prng=None):
     if prng is None:
         prng = random.Random()
         prng.seed(time.time()) 
     
-    ea = ec.EvolutionaryComputation(prng)
-    ea.selector = selectors.tournament_selection
-    ea.replacer = replacers.crowding_replacement
-    ea.variator = variators.gaussian_mutation
-    ea.terminator = terminators.evaluation_termination
+    ea = ecspy.ec.EvolutionaryComputation(prng)
+    ea.selector = ecspy.selectors.tournament_selection
+    ea.replacer = ecspy.replacers.crowding_replacement
+    ea.variator = ecspy.variators.gaussian_mutation
+    ea.terminator = ecspy.terminators.evaluation_termination
 
-    final_pop = ea.evolve(generate, evaluate, pop_size=20, bounder=ec.Bounder(0, 26),
+    final_pop = ea.evolve(generate, evaluate, pop_size=20, bounder=ecspy.ec.Bounder(0, 26),
                           max_evaluations=5000,
                           num_selected=20,
                           mutation_rate=1.0,
