@@ -33,13 +33,13 @@ def default_observer(population, num_generations, num_evaluations, args):
     pass
     
     
-def stats_observer(population, num_generations, num_evaluations, args):
-    """Print the statistics of the EC to the screen.
+def screen_observer(population, num_generations, num_evaluations, args):
+    """Print the output of the EC to the screen.
     
-    This function displays the statistics of the evolutionary computation
+    This function displays the results of the evolutionary computation
     to the screen. The output includes the generation number, the current
-    number of evaluations, the maximum fitness, the minimum fitness, 
-    the average fitness, and the standard deviation.
+    number of evaluations, the average fitness, the maximum fitness, and 
+    the full population.
     
     .. Arguments:
        population -- the population of Individuals
@@ -48,47 +48,24 @@ def stats_observer(population, num_generations, num_evaluations, args):
        args -- a dictionary of keyword arguments
     
     """
-
+    import numpy 
+    
     population = list(population)
     population.sort(reverse=True)
     worst_fit = population[-1].fitness
     best_fit = population[0].fitness
+    med_fit = numpy.median([p.fitness for p in population])
+    avg_fit = numpy.mean([p.fitness for p in population])
+    std_fit = numpy.std([p.fitness for p in population], ddof=1)
 
-    plen = len(population)
-    if plen % 2 == 1:
-        med_fit = population[(plen - 1) / 2].fitness
-    else:
-        med_fit = float(population[plen / 2 - 1].fitness + population[plen / 2].fitness) / 2
-    avg_fit = sum([p.fitness for p in population]) / float(plen)
-    std_fit = math.sqrt(sum([(p.fitness - avg_fit)**2 for p in population]) / float(plen - 1))
-    
     print('Generation Evaluation Worst      Best       Median     Average    Std Dev   ')
     print('---------- ---------- ---------- ---------- ---------- ---------- ----------')
-    print('{0:10} {1:10} {2:10.5} {3:10.5} {4:10.5} {5:10.5} {6:10.5}\n'.format(num_generations, num_evaluations, worst_fit, best_fit, med_fit, avg_fit, std_fit))
-
-
-def population_observer(population, num_generations, num_evaluations, args):
-    """Print the current population of the EC to the screen.
-    
-    This function displays the current population of the evolutionary 
-    computation to the screen in fitness-sorted order. 
-    
-    .. Arguments:
-       population -- the population of Individuals
-       num_generations -- the number of elapsed generations
-       num_evaluations -- the number of candidate solution evaluations
-       args -- a dictionary of keyword arguments
-    
-    """
-    
-    population = list(population)
-    population.sort(reverse=True)
-    print('----------------------------------------------------------------------------')
+    print('{0:10} {1:10} {2:10} {3:10} {4:10} {5:10} {6:10}\n'.format(num_generations, num_evaluations, worst_fit, best_fit, med_fit, avg_fit, std_fit))
     print('Current Population:')
     for ind in population:
         print(str(ind))
     print('----------------------------------------------------------------------------')
-    
+
     
 def file_observer(population, num_generations, num_evaluations, args):
     """Print the output of the EC to a file.
@@ -115,6 +92,9 @@ def file_observer(population, num_generations, num_evaluations, args):
     - *individuals_file* -- a file object (default: see text) 
     
     """
+    # Import the necessary libraries here. Otherwise, they would have to be
+    # installed even if this function is not called.
+    import numpy
     
     try:
         statistics_file = args['statistics_file']
@@ -129,15 +109,9 @@ def file_observer(population, num_generations, num_evaluations, args):
     population.sort(reverse=True)
     worst_fit = population[-1].fitness
     best_fit = population[0].fitness
-
-    plen = len(population)
-    if plen % 2 == 1:
-        med_fit = population[(plen - 1) / 2].fitness
-    else:
-        med_fit = float(population[plen / 2 - 1].fitness + population[plen / 2].fitness) / 2
-    avg_fit = sum([p.fitness for p in population]) / float(plen)
-    std_fit = math.sqrt(sum([(p.fitness - avg_fit)**2 for p in population]) / float(plen - 1))
-    
+    med_fit = numpy.median([p.fitness for p in population])
+    avg_fit = numpy.mean([p.fitness for p in population])
+    std_fit = numpy.std([p.fitness for p in population], ddof=1)
     statistics_file.write('{0}, {1}, {2}, {3}, {4}, {5}, {6}\n'.format(num_generations, len(population), worst_fit, best_fit, med_fit, avg_fit, std_fit))
     for i, p in enumerate(population):
         individuals_file.write('{0}, {1}, {2}, {3}\n'.format(num_generations, i, p.fitness, str(p.candidate)))
