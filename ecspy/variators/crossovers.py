@@ -287,8 +287,8 @@ def simulated_binary_crossover(random, mom, dad, args):
     children solutions.
     
     """
-    etac = args.setdefault('sbx_etac', 10)
-    bounder = args['_bounder']
+    eta_c = args.setdefault('sbx_etac', 10)
+    bounder = args['_ec'].bounder
     bro = copy.copy(dad)
     sis = copy.copy(mom)
     for i, (m, d, lb, ub) in enumerate(zip(mom, dad, bounder.lower_bound, bounder.upper_bound)):
